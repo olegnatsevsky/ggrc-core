@@ -15,11 +15,11 @@ from integration.ggrc import TestCase
 from integration.ggrc.models import factories
 
 
-class TestMixinAutoStatusChangeable(TestCase):
-  """Test case for AutoStatusChangeable mixin"""
+class TestMixinAutoStatusChangeableBase(TestCase):
+  """Base Test case for AutoStatusChangeable mixin"""
 
   def setUp(self):
-    super(TestMixinAutoStatusChangeable, self).setUp()
+    super(TestMixinAutoStatusChangeableBase, self).setUp()
     self.client.get("/login")
     self.api_helper = api_helper.Api()
     self.api = Api()
@@ -168,6 +168,12 @@ class TestMixinAutoStatusChangeable(TestCase):
     self.assertEqual(assessment.status, models.Assessment.FINAL_STATE)
     return assessment
 
+
+@ddt.ddt
+class TestFirstClassAttributes(TestMixinAutoStatusChangeableBase):
+  """Test case for AutoStatusChangeable first class attributes handlers"""
+  # pylint: disable=invalid-name
+
   @ddt.data(models.Assessment.DONE_STATE,
             models.Assessment.FINAL_STATE,
             models.Assessment.PROGRESS_STATE,
@@ -183,37 +189,37 @@ class TestMixinAutoStatusChangeable(TestCase):
 
     # Act
     self.api_helper.modify_object(assessment, {
-      'label': 'Followup'
+        'label': 'Followup'
     })
     assessment = self.refresh_object(assessment)
     # Assert
     self.assertEqual(from_status, assessment.status)
 
   @ddt.data(
-    ('title', 'new title', models.Assessment.DONE_STATE,),
-    ('title', 'new title', models.Assessment.FINAL_STATE),
-    ('test_plan', 'test_plan v2', models.Assessment.DONE_STATE),
-    ('test_plan', 'test_plan v2', models.Assessment.FINAL_STATE),
-    ('notes', 'new note', models.Assessment.DONE_STATE),
-    ('notes', 'new note', models.Assessment.FINAL_STATE),
-    ('description', 'some description', models.Assessment.DONE_STATE),
-    ('description', 'some description', models.Assessment.FINAL_STATE),
-    ('slug', 'some code', models.Assessment.DONE_STATE),
-    ('slug', 'some code', models.Assessment.FINAL_STATE),
-    ('start_date', '2020-01-01', models.Assessment.DONE_STATE),
-    ('start_date', '2020-01-01', models.Assessment.FINAL_STATE),
-    ('design', 'Effective', models.Assessment.DONE_STATE),
-    ('design', 'Effective', models.Assessment.FINAL_STATE),
-    ('operationally', 'Effective', models.Assessment.DONE_STATE),
-    ('operationally', 'Effective', models.Assessment.FINAL_STATE),
-    ('assessment_type', 'Risk', models.Assessment.DONE_STATE),
-    ('assessment_type', 'Risk', models.Assessment.FINAL_STATE),
+      ('title', 'new title', models.Assessment.DONE_STATE,),
+      ('title', 'new title', models.Assessment.FINAL_STATE),
+      ('test_plan', 'test_plan v2', models.Assessment.DONE_STATE),
+      ('test_plan', 'test_plan v2', models.Assessment.FINAL_STATE),
+      ('notes', 'new note', models.Assessment.DONE_STATE),
+      ('notes', 'new note', models.Assessment.FINAL_STATE),
+      ('description', 'some description', models.Assessment.DONE_STATE),
+      ('description', 'some description', models.Assessment.FINAL_STATE),
+      ('slug', 'some code', models.Assessment.DONE_STATE),
+      ('slug', 'some code', models.Assessment.FINAL_STATE),
+      ('start_date', '2020-01-01', models.Assessment.DONE_STATE),
+      ('start_date', '2020-01-01', models.Assessment.FINAL_STATE),
+      ('design', 'Effective', models.Assessment.DONE_STATE),
+      ('design', 'Effective', models.Assessment.FINAL_STATE),
+      ('operationally', 'Effective', models.Assessment.DONE_STATE),
+      ('operationally', 'Effective', models.Assessment.FINAL_STATE),
+      ('assessment_type', 'Risk', models.Assessment.DONE_STATE),
+      ('assessment_type', 'Risk', models.Assessment.FINAL_STATE),
   )
   @ddt.unpack
   def test_update_field_change_status(self, field_name, new_value,
                                       from_status):
     """When assessment in status '{2}' and field '{0}' updated ->
-	status should be changed to 'In Progress'"""
+    status should be changed to 'In Progress'"""
     # Arrange
     with factories.single_commit():
       assessment = factories.AssessmentFactory(status=from_status)
@@ -221,48 +227,53 @@ class TestMixinAutoStatusChangeable(TestCase):
 
     # Act
     self.api_helper.modify_object(assessment, {
-      field_name: new_value
+        field_name: new_value
     })
     assessment = self.refresh_object(assessment)
     # Assert
     self.assertEqual(expected_status, assessment.status)
 
   @ddt.data(
-    ('title', 'new title', models.Assessment.START_STATE),
-    ('title', 'new title', models.Assessment.REWORK_NEEDED),
-    ('test_plan', 'test_plan v2', models.Assessment.START_STATE),
-    ('test_plan', 'test_plan v2', models.Assessment.REWORK_NEEDED),
-    ('notes', 'new note', models.Assessment.START_STATE),
-    ('notes', 'new note', models.Assessment.REWORK_NEEDED),
-    ('description', 'some description', models.Assessment.START_STATE),
-    ('description', 'some description', models.Assessment.REWORK_NEEDED),
-    ('slug', 'some code', models.Assessment.START_STATE),
-    ('slug', 'some code', models.Assessment.REWORK_NEEDED),
-    ('start_date', '2020-01-01', models.Assessment.START_STATE),
-    ('start_date', '2020-01-01', models.Assessment.REWORK_NEEDED),
-    ('design', 'Effective', models.Assessment.START_STATE),
-    ('design', 'Effective', models.Assessment.REWORK_NEEDED),
-    ('operationally', 'Effective', models.Assessment.START_STATE),
-    ('operationally', 'Effective', models.Assessment.REWORK_NEEDED),
-    ('assessment_type', 'Risk', models.Assessment.START_STATE),
-    ('assessment_type', 'Risk', models.Assessment.REWORK_NEEDED),
+      ('title', 'new title', models.Assessment.START_STATE),
+      ('title', 'new title', models.Assessment.REWORK_NEEDED),
+      ('test_plan', 'test_plan v2', models.Assessment.START_STATE),
+      ('test_plan', 'test_plan v2', models.Assessment.REWORK_NEEDED),
+      ('notes', 'new note', models.Assessment.START_STATE),
+      ('notes', 'new note', models.Assessment.REWORK_NEEDED),
+      ('description', 'some description', models.Assessment.START_STATE),
+      ('description', 'some description', models.Assessment.REWORK_NEEDED),
+      ('slug', 'some code', models.Assessment.START_STATE),
+      ('slug', 'some code', models.Assessment.REWORK_NEEDED),
+      ('start_date', '2020-01-01', models.Assessment.START_STATE),
+      ('start_date', '2020-01-01', models.Assessment.REWORK_NEEDED),
+      ('design', 'Effective', models.Assessment.START_STATE),
+      ('design', 'Effective', models.Assessment.REWORK_NEEDED),
+      ('operationally', 'Effective', models.Assessment.START_STATE),
+      ('operationally', 'Effective', models.Assessment.REWORK_NEEDED),
+      ('assessment_type', 'Risk', models.Assessment.START_STATE),
+      ('assessment_type', 'Risk', models.Assessment.REWORK_NEEDED),
   )
   @ddt.unpack
   def test_update_field_not_change_status(self, field_name, new_value,
                                           from_status):
     """When assessment in status '{2}' and field '{0}' updated ->
-    status should NOT be changed"""
-
+     status should NOT be changed"""
     # Arrange
     with factories.single_commit():
       assessment = factories.AssessmentFactory(status=from_status)
     # Act
     self.api_helper.modify_object(assessment, {
-      field_name: new_value
+        field_name: new_value
     })
     assessment = self.refresh_object(assessment)
     # Assert
     self.assertEqual(from_status, assessment.status)
+
+
+@ddt.ddt
+class TestSnapshots(TestMixinAutoStatusChangeableBase):
+  """Test case for AutoStatusChangeable mapping/unmapping snapshots handlers"""
+  # pylint: disable=invalid-name
 
   @ddt.data(
       (models.Assessment.DONE_STATE, models.Assessment.PROGRESS_STATE),
@@ -465,6 +476,12 @@ class TestMixinAutoStatusChangeable(TestCase):
     self.assertStatus(response, 200)
     self.assertEqual(expected_status, assessment.status)
 
+
+@ddt.ddt
+class TestDocuments(TestMixinAutoStatusChangeableBase):
+  """Test case for AutoStatusChangeable documents handlers"""
+  # pylint: disable=invalid-name
+
   @ddt.data(
       ('REFERENCE_URL', models.Assessment.DONE_STATE,
        models.Assessment.PROGRESS_STATE),
@@ -620,6 +637,13 @@ class TestMixinAutoStatusChangeable(TestCase):
     # # Assert
     self.assert200(response)
     self.assertEqual(expected_status, assessment.status)
+
+
+@ddt.ddt
+class TestOther(TestMixinAutoStatusChangeableBase):
+  """Test case for AutoStatusChangeable. Comment, custom access role,
+   map/unmap issue, assignees Handlers"""
+  # pylint: disable=invalid-name
 
   @ddt.data(
     (models.Assessment.DONE_STATE, models.Assessment.DONE_STATE),
@@ -866,20 +890,20 @@ class TestMixinAutoStatusChangeable(TestCase):
 
     # define a Custom Attribute of type Person...
     _, ca_def = self.objgen.generate_custom_attribute(
-      definition_type="assessment",
-      attribute_type="Map:Person",
-      title="best employee")
+        definition_type="assessment",
+        attribute_type="Map:Person",
+        title="best employee")
 
     # create assessment with a Person Custom Attribute set, make sure the
     # state is set to final
     assessment = self.create_simple_assessment()
 
     custom_attribute_values = [{
-      "custom_attribute_id": ca_def.id,
-      "attribute_value": "Person:" + str(person_id),
+        "custom_attribute_id": ca_def.id,
+        "attribute_value": "Person:" + str(person_id),
     }]
     self.api_helper.modify_object(assessment, {
-      "custom_attribute_values": custom_attribute_values
+        "custom_attribute_values": custom_attribute_values
     })
 
     assessment = self.change_status(assessment, assessment.FINAL_STATE)
@@ -887,11 +911,11 @@ class TestMixinAutoStatusChangeable(TestCase):
 
     # now change the Person CA and check what happens with the status
     custom_attribute_values = [{
-      "custom_attribute_id": ca_def.id,
-      "attribute_value": "Person:" + str(another_person.id),  # make a change
+        "custom_attribute_id": ca_def.id,
+        "attribute_value": "Person:" + str(another_person.id),  # make a change
     }]
     self.api_helper.modify_object(assessment, {
-      "custom_attribute_values": custom_attribute_values
+        "custom_attribute_values": custom_attribute_values
     })
 
     assessment = self.refresh_object(assessment)
@@ -902,104 +926,12 @@ class TestMixinAutoStatusChangeable(TestCase):
     assessment = self.refresh_object(assessment)
 
     custom_attribute_values = [{
-      "custom_attribute_id": ca_def.id,
-      "attribute_value": "Person:" + str(person_id),  # make a change
+        "custom_attribute_id": ca_def.id,
+        "attribute_value": "Person:" + str(person_id),  # make a change
     }]
     self.api_helper.modify_object(assessment, {
-      "custom_attribute_values": custom_attribute_values
+        "custom_attribute_values": custom_attribute_values
     })
 
     assessment = self.refresh_object(assessment)
     self.assertEqual(assessment.status, models.Assessment.PROGRESS_STATE)
-
-  @ddt.data(models.Assessment.DONE_STATE,
-            models.Assessment.FINAL_STATE,
-            models.Assessment.PROGRESS_STATE,
-            models.Assessment.REWORK_NEEDED
-            )
-  def test_global_ca_admin_add_not_change_status(self, from_status):
-    """Adding of 'global custom attribute' should not change status"""
-    # Arrange
-    with factories.single_commit():
-      assessment = factories.AssessmentFactory(status=from_status)
-
-    # Act
-    with factories.single_commit():
-      factories.CustomAttributeDefinitionFactory(definition_type='assessment',
-                                                 attribute_type='Rich Text',
-                                                 title='rich_test_gca',
-                                                 multi_choice_options=''
-                                                 )
-    assessment = self.refresh_object(assessment)
-    # Assert
-    self.assertEqual(from_status, assessment.status)
-
-  @ddt.data(
-    (models.Assessment.DONE_STATE, models.Assessment.PROGRESS_STATE),
-    (models.Assessment.FINAL_STATE, models.Assessment.PROGRESS_STATE),
-    (models.Assessment.START_STATE, models.Assessment.START_STATE),
-    (models.Assessment.REWORK_NEEDED, models.Assessment.REWORK_NEEDED),
-  )
-  @ddt.unpack
-  def test_global_ca_update_change_status(self, from_status, expected_status):
-    """When assessment in status '{0}' and 'global custom attribute' updated ->
-    status should be changed to '{1}'"""
-
-    # Arrange
-    with factories.single_commit():
-      ca_factory = factories.CustomAttributeDefinitionFactory
-      gca = ca_factory(definition_type='assessment',
-                       title='rich_test_gca',
-                       attribute_type='Rich Text',
-                       multi_choice_options=''
-                       )
-      assessment = factories.AssessmentFactory(status=from_status)
-
-    # Act
-    self.api_helper.modify_object(assessment, {
-      'custom_attribute_values': [{
-        'custom_attribute_id': gca.id,
-        'attribute_value': 'new value',
-      }]
-    })
-    assessment = self.refresh_object(assessment)
-
-    # Assert
-    self.assertEqual(expected_status, assessment.status)
-
-  @ddt.data(
-    (models.Assessment.DONE_STATE, models.Assessment.PROGRESS_STATE),
-    (models.Assessment.FINAL_STATE, models.Assessment.PROGRESS_STATE),
-    (models.Assessment.START_STATE, models.Assessment.PROGRESS_STATE),
-    (models.Assessment.REWORK_NEEDED, models.Assessment.REWORK_NEEDED),
-  )
-  @ddt.unpack
-  def test_local_ca_update_change_status(self, from_status, expected_status):
-    """When assessment in status '{0}' and 'local custom attribute' updated ->
-    status should be changed to '{1}'"""
-
-    # Arrange
-    with factories.single_commit():
-      audit = factories.AuditFactory()
-      assessment = factories.AssessmentFactory(audit=audit, status=from_status)
-      factories.RelationshipFactory(source=audit, destination=assessment)
-
-      cad = factories.CustomAttributeDefinitionFactory(
-        definition_id=assessment.id,
-        definition_type='assessment',
-        attribute_type='Rich Text',
-        title='rich_test_gca',
-        multi_choice_options='',
-      )
-
-    # Act
-    self.api_helper.modify_object(assessment, {
-      'custom_attribute_values': [{
-        'custom_attribute_id': cad.id,
-        'attribute_value': 'new value',
-      }]
-    })
-    assessment = self.refresh_object(assessment)
-
-    # Assert
-    self.assertEqual(expected_status, assessment.status)
