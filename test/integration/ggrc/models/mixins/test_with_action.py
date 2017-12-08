@@ -560,20 +560,6 @@ class TestCommentWithActionMixin(TestCase):
     relationship = all_models.Relationship.query.get(rel_id)
     self.assertIsNone(relationship)
 
-  def test_status_unchanged(self):
-    """Test auto status isn't change after add comment action"""
-    assessment = factories.AssessmentFactory()
-    comment = factories.CommentFactory()
-    response = self.api.put(assessment, {"actions": {"add_related": [
-        {
-            "id": comment.id,
-            "type": "Comment",
-        }
-    ]}})
-    self.assert200(response)
-    self.assertEqual(response.json["assessment"]["status"],
-                     all_models.Assessment.START_STATE)
-
 
 def _create_snapshot():
   """Create snapshot for test"""
@@ -652,19 +638,6 @@ class TestSnapshotWithActionMixin(TestCase, WithQueryApi):
     self.assert200(response)
     snapshot = all_models.Relationship.query.get(rel_id)
     self.assertIsNone(snapshot)
-
-  def test_status_change_snapshot(self):
-    """Test auto status change after add snapshot action"""
-    assessment, snapshot = _create_snapshot()
-    response = self.api.put(assessment, {"actions": {"add_related": [
-        {
-            "id": snapshot.id,
-            "type": "Snapshot",
-        }
-    ]}})
-    self.assert200(response)
-    self.assertEqual(response.json["assessment"]["status"],
-                     all_models.Assessment.PROGRESS_STATE)
 
 
 class TestMultiplyActions(TestCase, WithQueryApi):
