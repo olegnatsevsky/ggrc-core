@@ -20,8 +20,14 @@ from ggrc.services import signals
 class AutoStatusChangeable(object):
   """A mixin for automatic status changes.
 
-  Enables automatic transitioning of objects on any edit in cases when an
-  object is in one of the DONE states, or in the START state.
+  Enables automatic transitioning of objects based on mapping.
+
+  FIRST_CLASS_EDIT_MAPPING for tracking of edits of object attributes listed in
+    the TRACKED_ATTRIBUTES
+  RELATED_OBJ_STATUS_MAPPING for tracking changes in related objects
+    (Document, Snapshot, Comment)
+  CUSTOM_ATTRS_STATUS_MAPPING for tracking changes in the custom attributes
+    local and global.
   """
 
   __lazy_init__ = True
@@ -43,6 +49,35 @@ class AutoStatusChangeable(object):
           'operationally',
           'assessment_type'
       }
+  }
+
+  RELATED_OBJ_STATUS_MAPPING = {
+      'Document': {
+          'key': lambda x: x.document_type,
+          'mappings': {
+              document.Document.REFERENCE_URL: {Statusable.DONE_STATE,
+                                                Statusable.FINAL_STATE},
+              document.Document.ATTACHMENT: {Statusable.DONE_STATE,
+                                             Statusable.FINAL_STATE,
+                                             Statusable.START_STATE},
+              document.Document.URL: {Statusable.DONE_STATE,
+                                      Statusable.FINAL_STATE,
+                                      Statusable.START_STATE},
+          },
+      },
+      'Snapshot': {
+          'key': lambda _: 'ALL',
+          'mappings': {
+              'ALL': {Statusable.DONE_STATE,
+                      Statusable.FINAL_STATE},
+          },
+      },
+      'Comment': {
+          'key': lambda _: 'ALL',
+          'mappings': {
+              'ALL': {Statusable.START_STATE},
+          },
+      },
   }
 
   CUSTOM_ATTRS_STATUS_MAPPING = {
@@ -91,19 +126,21 @@ class AutoStatusChangeable(object):
     return attr.history.has_changes()
 
   @classmethod
-  def _get_object_from_relationship(cls, model, rel):
-    """Get instance of an model object from relationship.
+  def _get_target_related(cls, model, rel):
+    """Get target, related instances of an model object.
+
+    Autostatuschangeable is target, other side of relation -> related.
 
     Args:
       model: (db.Model class) Class whose instance we want to retrieve from
         relationship.
       rel: (Relationship) Instance of relationship object.
     Returns:
-      An instance of class model.
+      tuple of (source, related)
     """
     if rel.source.type == model.__name__:
-      return rel.source
-    return rel.destination
+      return rel.source, rel.destination
+    return rel.destination, rel.source
 
   @classmethod
   def init(cls, model):
@@ -240,29 +277,30 @@ class AutoStatusChangeable(object):
     def handle_relationship(sender, obj=None, src=None, service=None):
       """Handle creation of relationships that can change object status.
 
-      Adding or removing assignable persons (Assignees, Creators, Verifiers,
-      etc.) moves object back to PROGRESS_STATE.
-
-      Adding evidence moves object back to to PROGRESS_STATE.
-
+      For instance adding or removing Documents, Mapping/Unmapping snapshots,
+      adding/removing comments moves object back to PROGRESS_STATE.
       See blinker library documentation for other parameters (all necessary).
 
       Args:
-        obj: (db.Model instance) Object on which we will perform manipulation.
+        sender: class that sends event
+        obj (db.model): Object on which we will perform manipulation.
+        src: The original PUT JSON dictionary.
+        service: The instance of Resource handling the PUT request.
       """
-      # pylint: disable=unused-argument,unused-variable
+      # pylint: disable=unused-argument,unused-variable,protected-access
 
-      endpoints = {obj.source.type, obj.destination.type}
-      if model.__name__ in endpoints:
-        target_object = cls._get_object_from_relationship(model, obj)
-
-        handlers = {
-            "Document": cls.handle_first_class_edit,
-            "Snapshot": cls.handle_first_class_edit,
-        }
-        for name, handler in handlers.iteritems():
-          if name in endpoints:
-            handler(model, target_object, method=service.request.method)
+      endpoints = [obj.source.type, obj.destination.type]
+      if model.__name__ not in endpoints:
+        return
+      target_object, related_object = cls._get_target_related(model, obj)
+      related_settings = \
+          cls.RELATED_OBJ_STATUS_MAPPING.get(related_object.type)
+      if not related_settings:
+        return
+      key = related_settings['key'](related_object)
+      monitor_states = related_settings['mappings'][key]
+      if target_object.status in monitor_states:
+        target_object._need_status_reset = True
 
 
 # pylint: disable=fixme
