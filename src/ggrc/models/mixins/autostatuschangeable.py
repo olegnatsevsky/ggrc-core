@@ -255,22 +255,6 @@ class AutoStatusChangeable(object):
       cls.handle_first_class_edit(obj)
       cls.handle_custom_attribute_edit(obj)
 
-    @signals.Signals.custom_attribute_changed.connect_via(model)
-    def handle_custom_attribute_save(sender, obj=None, src=None, service=None):
-      """Handles custom attribute save operation
-
-      Handles INSERT or UPDATE(ish, because custom attributes are hackish)
-      operations performed on custom attributes.
-
-      See blinker library documentation for other parameters (all necessary).
-
-      Args:
-        obj: (db.Model instance) Object on which we will perform manipulation.
-      """
-      # pylint: disable=unused-argument,unused-variable
-
-      cls.handle_first_class_edit(model, obj)
-
     @signals.Restful.model_posted.connect_via(relationship.Relationship)
     @signals.Restful.model_put.connect_via(relationship.Relationship)
     @signals.Restful.model_deleted.connect_via(relationship.Relationship)
