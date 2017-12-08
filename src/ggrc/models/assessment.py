@@ -193,16 +193,6 @@ class Assessment(Roleable, statusable.Statusable, AuditRelationship,
     out_json["folder"] = self.folder
     return out_json
 
-  _tracked_attrs = {
-      'description',
-      'design',
-      'notes',
-      'operationally',
-      'test_plan',
-      'title',
-      'start_date',
-  }
-
   _aliases = {
       "owners": None,
       "assessment_template": {
