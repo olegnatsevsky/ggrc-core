@@ -302,6 +302,34 @@ class AutoStatusChangeable(object):
       if target_object.status in monitor_states:
         target_object._need_status_reset = True
 
+    @signals.Restful.model_put.connect_via(document.Document)
+    @signals.Restful.model_deleted.connect_via(document.Document)
+    def handle_document_relationship(sender, obj=None, src=None, service=None):
+      """Handle PUT and DELETE of Document that can change object status.
+
+        See blinker library documentation for other parameters (all necessary).
+
+      Args:
+        sender: class that sends event
+        obj (db.model): Object on which we will perform manipulation.
+        src: The original PUT JSON dictionary.
+        service: The instance of Resource handling the PUT request.
+      """
+      # pylint: disable=unused-argument,unused-variable
+
+      # this needs to be imported here (and not on the top of the file) due to
+      # a circular dependencies
+      from ggrc.models.relationship_helper import get_ids_related_to_of_type
+
+      changeable_ids = get_ids_related_to_of_type(obj, model.__name__)
+      auto_changeables = model.query.filter(model.id.in_(changeable_ids))
+
+      related_settings = cls.RELATED_OBJ_STATUS_MAPPING.get(obj.type)
+      key = related_settings['key'](obj)
+      for auto_changeable in auto_changeables:
+        if auto_changeable.status in related_settings['mappings'][key]:
+          auto_changeable.status = auto_changeable.PROGRESS_STATE
+
 
 # pylint: disable=fixme
 # TODO: find a way to listen for updates only for classes that use
