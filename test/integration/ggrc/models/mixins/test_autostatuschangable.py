@@ -93,9 +93,6 @@ class TestMixinAutoStatusChangeable(TestAssessmentBase):
 
     assessment = self.refresh_object(assessment)
 
-    self.assertEqual(assessment.status,
-                     models.Assessment.PROGRESS_STATE)
-
     assessment = self.change_status(assessment, assessment.DONE_STATE)
 
     self.assertEqual(assessment.title.endswith("modified, change #1"),
@@ -317,9 +314,6 @@ class TestMixinAutoStatusChangeable(TestAssessmentBase):
     })
 
     assessment = self.refresh_object(assessment)
-
-    self.assertEqual(assessment.status,
-                     models.Assessment.PROGRESS_STATE)
 
     assessment = self.change_status(assessment, assessment.FINAL_STATE)
 
