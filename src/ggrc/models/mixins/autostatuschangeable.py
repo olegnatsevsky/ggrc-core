@@ -9,10 +9,12 @@ from sqlalchemy import event
 from sqlalchemy import inspect
 from sqlalchemy.orm.session import Session
 
-from ggrc import db
+from ggrc.models import document
 from ggrc.models import relationship
+
+from ggrc.models.mixins import CustomAttributable
+from ggrc.models.mixins.statusable import Statusable
 from ggrc.services import signals
-from ggrc.models.mixins import statusable
 
 
 class AutoStatusChangeable(object):
@@ -23,10 +25,34 @@ class AutoStatusChangeable(object):
   """
 
   __lazy_init__ = True
-  _tracked_attrs = set()
 
-  FIRST_CLASS_EDIT = ({statusable.Statusable.START_STATE} |
-                      statusable.Statusable.DONE_STATES)
+  FIRST_CLASS_EDIT_MAPPING = {
+      'MONITOR_STATES': {
+          Statusable.DONE_STATE,
+          Statusable.FINAL_STATE
+      },
+      'TRACKED_ATTRIBUTES': {
+          'title',
+          'test_plan',
+          'notes',
+          'description',
+          'slug',
+          'start_date',
+          'end_date',
+          'design',
+          'operationally',
+          'assessment_type'
+      }
+  }
+
+  CUSTOM_ATTRS_STATUS_MAPPING = {
+      'GCA': {Statusable.DONE_STATE, Statusable.FINAL_STATE},
+      'LCA': {Statusable.DONE_STATE,
+              Statusable.FINAL_STATE,
+              Statusable.START_STATE},
+  }
+
+  _need_status_reset = False
 
   @staticmethod
   def _date_has_changes(attr):
@@ -88,36 +114,51 @@ class AutoStatusChangeable(object):
     """
     cls.set_handlers(model)
 
-  @staticmethod
-  def change_to_progress_state(model, obj):
-    """Switches state on object to the PROGRESS_STATE
-
-    Args:
-      model: (db.Model class) Class from which to read PROGRESS_STATE value.
-      obj: (db.Model instance) object on which to perform status transition
-        operation.
-    """
-    obj.status = model.PROGRESS_STATE
-    db.session.add(obj)
-
   @classmethod
-  def handle_first_class_edit(cls, model, obj, method=None):
+  def handle_first_class_edit(cls, obj):
     """Handles first class edit.
 
     Performs check whether object received first class edit (ordinary edit)
-    that should transition object to PROGRESS_STATE from either: START_STATE
-    or one of END_STATES and sets obj._need_status_reset to True if the state
-    transition is needed.
+    that should transition object to PROGRESS_STATE,
+    sets obj._need_status_reset to True if the state transition is needed.
 
     Args:
-      model: (db.Model class) Class from which to read FIRST_CLASS_EDIT
-        property.
       obj: (db.Model instance) Object on which to perform operations.
-      method: (string) HTTP method used that triggered signal.
     """
-    del method  # Unused
+    # pylint: disable=protected-access
+    mapping = obj.FIRST_CLASS_EDIT_MAPPING
+    has_attr_changes = any(cls._has_changes(obj, attr)
+                           for attr in mapping['TRACKED_ATTRIBUTES'])
+    if obj.status in mapping['MONITOR_STATES'] and has_attr_changes:
+      obj._need_status_reset = True
 
-    if obj.status in model.FIRST_CLASS_EDIT:
+  @classmethod
+  def handle_custom_attribute_edit(cls, obj):
+    """Handle custom attributes.
+
+    Detects changes in Global and Local custom attributes and apply rules
+    from the CUSTOM_ATTRS_STATUS_MAPPING
+
+    Args:
+      obj (db.Model): Object on which we will perform manipulation.
+    """
+    # pylint: disable=unused-argument,protected-access
+    if not isinstance(obj, CustomAttributable):
+      return
+    monitor_states = []
+    local_ca = []
+    global_ca = []
+    for value in obj.custom_attribute_values:
+      if value.custom_attribute.definition_id:
+        local_ca.append(value)
+      else:
+        global_ca.append(value)
+
+    if obj.has_custom_attr_changes(global_ca):
+      monitor_states.extend(obj.CUSTOM_ATTRS_STATUS_MAPPING['GCA'])
+    if obj.has_custom_attr_changes(local_ca):
+      monitor_states.extend(obj.CUSTOM_ATTRS_STATUS_MAPPING['LCA'])
+    if obj.status in monitor_states:
       obj._need_status_reset = True
 
   @classmethod
@@ -126,49 +167,28 @@ class AutoStatusChangeable(object):
 
     Is registered to listen for 'before_flush' events on a later stage.
     """
-    del flush_context, instances  # Unused
 
+    # pylint: disable=unused-argument,protected-access
     for obj in session.identity_map.values():
-      if (isinstance(obj, AutoStatusChangeable) and
-              getattr(obj, '_need_status_reset', False)):
-        cls.change_to_progress_state(type(obj), obj)
-        delattr(obj, '_need_status_reset')
+      if isinstance(obj, AutoStatusChangeable) and obj._need_status_reset:
+        obj.status = obj.PROGRESS_STATE
+        obj._need_status_reset = False
 
   @staticmethod
-  def _has_custom_attr_changes(obj):
-    """Check if an object had any of its custom attribute values changed.
-
-    Initially setting a custom attribute's value to false, i.e. when
-    there was no old value deleted, is *not* considered a change.
-
-    If given None or if the object does not have any custom attributes, False
-    is returned.
+  def has_custom_attr_changes(custom_attributes):
+    """Check if custom attribute was changed based on history
 
     Args:
-      obj: (db.Model instance) An object to check.
+      custom_attributes : list of custom attributes
 
     Returns:
-      True or False depending whether any of the object's custom attribute
-      values have been modified.
+      bool:  True if custom any attribute was changed else False
     """
-    if not getattr(obj, "custom_attribute_values", None):
-      return False  # also exits if obj itself is None
-
-    histories = (
-        inspect(value).attrs.get(attr_name).history
-        for value in obj.custom_attribute_values
-        for attr_name in ("attribute_value", "attribute_object_id")
+    return any(
+        inspect(value).attrs.get(attr_name).history.has_changes()
+        for value in custom_attributes
+        for attr_name in ('attribute_value', 'attribute_object_id')
     )
-
-    for attr_history in histories:
-      added, _, deleted = attr_history
-      if attr_history.has_changes() and (any(added) or deleted):
-        has_ca_changes = True
-        break
-    else:
-      has_ca_changes = False
-
-    return has_ca_changes
 
   @classmethod  # noqa: C901  # ignore flake8 method too complex warning
   def set_handlers(cls, model):
@@ -177,39 +197,26 @@ class AutoStatusChangeable(object):
     Args:
       model: Class on which handlers will be set up.
     """
+
     @signals.Restful.model_put.connect_via(model)
     def handle_object_put(sender, obj=None, src=None, service=None):
       """Handles object PUT operation
 
       Handles edit operation submitted to object.
-
       See blinker library documentation for other parameters (all necessary).
 
       Args:
-        obj: (db.Model instance) Object on which we will perform manipulation.
+        sender: class that sends event
+        obj (db.model): Object on which we will perform manipulation.
+        src: The original PUT JSON dictionary.
+        service: The instance of Resource handling the PUT request.
+
       """
-      # pylint: disable=unused-argument,unused-variable,protected-access
-
-      # this needs to be imported here (and not on the top of the file) due to
-      # a circular dependency between Assessment and AutoStatusChangeable
-      from ggrc.models.assessment import Assessment
-
-      has_attr_changes = any(
-          cls._has_changes(obj, attr)
-          for attr in model._tracked_attrs
-      )
-
-      # At the time of writing (2016-09-29) only Assessment objects use a new
-      # Custom Attribute API, thus detecting CA changes for other object types
-      # does not work correctly. For the latter, we simply assume there were no
-      # CA changes, effectively disabling that check.
-      if sender is Assessment:
-        has_ca_changes = cls._has_custom_attr_changes(obj)
-      else:
-        has_ca_changes = False
-
-      if (has_attr_changes or has_ca_changes) and model.FIRST_CLASS_EDIT:
-        cls.handle_first_class_edit(model, obj)
+      # pylint: disable=unused-variable,unused-argument
+      if not isinstance(obj, AutoStatusChangeable):
+        return
+      cls.handle_first_class_edit(obj)
+      cls.handle_custom_attribute_edit(obj)
 
     @signals.Signals.custom_attribute_changed.connect_via(model)
     def handle_custom_attribute_save(sender, obj=None, src=None, service=None):
