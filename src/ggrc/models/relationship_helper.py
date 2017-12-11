@@ -3,7 +3,7 @@
 
 """Helper for getting related objects."""
 
-from sqlalchemy import and_, case, or_
+from sqlalchemy import and_
 from sqlalchemy import sql
 
 from ggrc import db

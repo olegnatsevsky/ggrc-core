@@ -877,15 +877,14 @@ class TestOther(TestMixinAutoStatusChangeableBase):
           procedure_description="Assessment Template Test Plan"
       )
       custom_attribute_definition = {
-        "definition_type": "assessment_template",
-        "definition_id": template.id,
-        "title": "test checkbox",
-        "attribute_type": "Checkbox",
-        "multi_choice_options": "test checkbox label",
-        "mandatory": True,
+          "definition_type": "assessment_template",
+          "definition_id": template.id,
+          "title": "test checkbox",
+          "attribute_type": "Checkbox",
+          "multi_choice_options": "test checkbox label",
+          "mandatory": True,
       }
-      factories.CustomAttributeDefinitionFactory(
-        **custom_attribute_definition)
+      factories.CustomAttributeDefinitionFactory(**custom_attribute_definition)
 
     response = self.assessment_post(template)
 
