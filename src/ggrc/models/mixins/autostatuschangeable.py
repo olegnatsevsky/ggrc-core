@@ -275,12 +275,11 @@ class AutoStatusChangeable(object):
       if model.__name__ not in endpoints:
         return
       target_object, related_object = cls._get_target_related(model, obj)
-      related_settings = \
-          cls.RELATED_OBJ_STATUS_MAPPING.get(related_object.type)
-      if not related_settings:
+      related_mapping = cls.RELATED_OBJ_STATUS_MAPPING.get(related_object.type)
+      if not related_mapping:
         return
-      key = related_settings['key'](related_object)
-      monitor_states = related_settings['mappings'].get(key, set())
+      key = related_mapping['key'](related_object)
+      monitor_states = related_mapping['mappings'].get(key, set())
       if target_object.status in monitor_states:
         target_object._need_status_reset = True
 
