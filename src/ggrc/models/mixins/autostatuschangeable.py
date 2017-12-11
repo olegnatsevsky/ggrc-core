@@ -179,7 +179,7 @@ class AutoStatusChangeable(object):
     Args:
       obj (db.Model): Object on which we will perform manipulation.
     """
-    # pylint: disable=unused-argument,protected-access
+    # pylint: disable=protected-access
     if not isinstance(obj, CustomAttributable):
       return
     monitor_states = []
@@ -221,11 +221,11 @@ class AutoStatusChangeable(object):
     Returns:
       bool:  True if custom any attribute was changed else False
     """
-    return any(
-        inspect(value).attrs.get(attr_name).history.has_changes()
-        for value in custom_attributes
-        for attr_name in ('attribute_value', 'attribute_object_id')
-    )
+    for value in custom_attributes:
+      for attr_name in ('attribute_value', 'attribute_object_id'):
+        if inspect(value).attrs.get(attr_name).history.has_changes():
+          return True
+    return False
 
   @classmethod  # noqa: C901  # ignore flake8 method too complex warning
   def set_handlers(cls, model):
@@ -250,8 +250,6 @@ class AutoStatusChangeable(object):
 
       """
       # pylint: disable=unused-variable,unused-argument
-      if not isinstance(obj, AutoStatusChangeable):
-        return
       cls.handle_first_class_edit(obj)
       cls.handle_custom_attribute_edit(obj)
 
