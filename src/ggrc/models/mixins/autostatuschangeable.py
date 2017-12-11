@@ -280,7 +280,7 @@ class AutoStatusChangeable(object):
       if not related_settings:
         return
       key = related_settings['key'](related_object)
-      monitor_states = related_settings['mappings'][key]
+      monitor_states = related_settings['mappings'].get(key, set())
       if target_object.status in monitor_states:
         target_object._need_status_reset = True
 
@@ -301,8 +301,9 @@ class AutoStatusChangeable(object):
       auto_changeables = obj.related_objects(_types={model.__name__})
       related_settings = cls.RELATED_OBJ_STATUS_MAPPING.get(obj.type)
       key = related_settings['key'](obj)
+      monitor_states = related_settings['mappings'].get(key, set())
       for auto_changeable in auto_changeables:
-        if auto_changeable.status in related_settings['mappings'][key]:
+        if auto_changeable.status in monitor_states:
           auto_changeable.status = auto_changeable.PROGRESS_STATE
 
 

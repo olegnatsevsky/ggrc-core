@@ -207,7 +207,7 @@ class TestFirstClassAttributes(TestMixinAutoStatusChangeableBase):
   @ddt.unpack
   def test_update_field_change_status(self, field_name, new_value,
                                       from_status):
-    """Move Assessment from '{2}' to 'In Progress'  when field '{0}' updated"""
+    """Move Assessment from '{2}' to 'In Progress' when field '{0}' updated"""
     assessment = factories.AssessmentFactory(status=from_status)
     expected_status = models.Assessment.PROGRESS_STATE
 
