@@ -300,14 +300,7 @@ class AutoStatusChangeable(object):
         service: The instance of Resource handling the PUT request.
       """
       # pylint: disable=unused-argument,unused-variable
-
-      # this needs to be imported here (and not on the top of the file) due to
-      # a circular dependencies
-      from ggrc.models.relationship_helper import get_ids_related_to_of_type
-
-      changeable_ids = get_ids_related_to_of_type(obj, model.__name__)
-      auto_changeables = model.query.filter(model.id.in_(changeable_ids))
-
+      auto_changeables = obj.related_objects(_types={model.__name__})
       related_settings = cls.RELATED_OBJ_STATUS_MAPPING.get(obj.type)
       key = related_settings['key'](obj)
       for auto_changeable in auto_changeables:

@@ -312,36 +312,3 @@ def get_ids_related_to(object_type, related_type, related_ids=None):
         object_type, related_type, related_ids))
 
   return _array_union(queries)
-
-
-def get_ids_related_to_of_type(obj, destination_type):
-  """Fetch id's of related object given type.
-
-  Args:
-    obj (db.Model): instance of object to search related object
-    destination_type: class of the related object
-
-  Returns:
-    query object with list of the id's
-  """
-  return db.session.query(
-      case(
-          [(
-              Relationship.source_type == obj.type,
-              Relationship.destination_id
-          )],
-          else_=Relationship.source_id)
-  ).filter(
-      or_(
-          and_(
-            Relationship.source_id == obj.id,
-            Relationship.source_type == obj.type,
-            Relationship.destination_type == destination_type,
-          ),
-          and_(
-            Relationship.destination_id == obj.id,
-            Relationship.destination_type == obj.type,
-            Relationship.source_type == destination_type,
-          )
-      )
-  )
