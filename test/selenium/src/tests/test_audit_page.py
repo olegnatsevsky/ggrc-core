@@ -138,10 +138,7 @@ class TestAuditPage(base.Test):
     expected_asmt = expected_asmt.repr_ui()
     # 'expected_asmt': custom_attributes (None) *factory
     self.general_equal_assert(
-        expected_asmt, actual_asmt, "custom_attributes", "status")
-    self.xfail_equal_assert(
-        expected_asmt, actual_asmt,
-        "Issue in app GGRC-3033, GGRC-3082", "status")
+        expected_asmt, actual_asmt, "custom_attributes")
 
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(

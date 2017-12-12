@@ -52,7 +52,8 @@ class TestAssessmentsWorkflow(base.Test):
     # 'expected_asmt': updated_at (outdated)
     expected_asmt = expected_asmt.update_attrs(
         updated_at=self.info_service.get_obj(obj=expected_asmt).updated_at,
-        comments=expected_asmt_comments).repr_ui()
+        comments=expected_asmt_comments,
+        status=AssessmentStates.IN_PROGRESS).repr_ui()
     actual_asmt = asmts_ui_service.get_obj_from_info_page(obj=expected_asmt)
     self.general_equal_assert(expected_asmt, actual_asmt, "comments")
     self.xfail_equal_assert(
@@ -118,11 +119,11 @@ class TestAssessmentsWorkflow(base.Test):
        "expected_verified"),
       [(("new_assessment_rest", {"status": AssessmentStates.NOT_STARTED}),
         "edit_obj_via_edit_modal_from_info_page",
-        AssessmentStates.IN_PROGRESS, False),
+        AssessmentStates.NOT_STARTED, False),
        (("new_assessment_rest", {"status": AssessmentStates.NOT_STARTED,
                                  "verifier": [roles.DEFAULT_USER]}),
         "edit_obj_via_edit_modal_from_info_page",
-        AssessmentStates.IN_PROGRESS, False),
+        AssessmentStates.NOT_STARTED, False),
        (("new_assessment_rest", {"status": AssessmentStates.IN_PROGRESS}),
         "edit_obj_via_edit_modal_from_info_page",
         AssessmentStates.IN_PROGRESS, False),
@@ -159,12 +160,12 @@ class TestAssessmentsWorkflow(base.Test):
                                  "verifier": [roles.DEFAULT_USER]}),
         "reject_assessment",
         AssessmentStates.REWORK_NEEDED, False)],
-      ids=["Edit asmt w'o verifier 'Not Started' - 'In Progress'",
-           "Edit asmt w' verifier 'Not Started' - 'In Progress'",
-           "Edit asmt w'o verifier 'In Progress' - 'In Progress'",
-           "Edit asmt w' verifier 'In Progress' - 'In Progress'",
-           "Edit asmt w'o verifier 'Completed' - 'In Progress'",
-           "Edit asmt w' verifier 'Completed' - 'In Progress'",
+      ids=["Edit asmt's title w'o verifier 'Not Started' - 'Not Started'",
+           "Edit asmt's title w' verifier 'Not Started' - 'Not Started'",
+           "Edit asmt's title w'o verifier 'In Progress' - 'In Progress'",
+           "Edit asmt's title w' verifier 'In Progress' - 'In Progress'",
+           "Edit asmt's title w'o verifier 'Completed' - 'In Progress'",
+           "Edit asmt's title w' verifier 'Completed' - 'In Progress'",
            "Complete asmt w'o verifier 'Not Started' - 'Completed'",
            "Complete asmt w' verifier 'Not Started' - 'In Review'",
            "Complete asmt w'o verifier 'In Progress' - 'Completed'",
@@ -234,8 +235,7 @@ class TestAssessmentsWorkflow(base.Test):
     # 'expected_asmt': updated_at (outdated)
     # 'actual_asmts': created_at, updated_at, custom_attributes (None)
     expected_asmt = entity.Entity.extract_objs_wo_excluded_attrs(
-        [expected_asmt.update_attrs(
-            status=AssessmentStates.IN_PROGRESS).repr_ui()],
+        [expected_asmt.repr_ui()],
         *Representation.tree_view_attrs_to_exclude)[0]
     expected_results = [{"filter": filter_expr,
                          "objs": [expected_asmt]}
@@ -283,8 +283,7 @@ class TestAssessmentsWorkflow(base.Test):
     - 'dynamic_relationships'.
     """
     expected_asmt = (new_assessment_rest.update_attrs(
-        objects_under_assessment=[dynamic_objects],
-        status=AssessmentStates.IN_PROGRESS))
+        objects_under_assessment=[dynamic_objects]))
     expected_titles = [dynamic_objects.title]
     asmts_ui_service = webui_service.AssessmentsService(selenium)
     actual_titles = (

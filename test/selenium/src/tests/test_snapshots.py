@@ -597,7 +597,7 @@ class TestSnapshots(base.Test):
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(
       "dynamic_objects, expected_state",
-      [("new_assessment_rest", element.BaseStates.IN_PROGRESS),
+      [("new_assessment_rest", element.AssessmentStates.NOT_STARTED),
        pytest.mark.xfail(reason="Issue GGRC-1407", strict=True)(
           ("new_issue_rest", element.IssueStates.DRAFT))],
       indirect=["dynamic_objects"])
