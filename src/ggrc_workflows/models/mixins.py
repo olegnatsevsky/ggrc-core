@@ -106,6 +106,18 @@ class CycleTaskStatusValidatedMixin(CycleTaskGroupRelatedStatusValidatedMixin):
       "status": {
           "display_name": "State",
           "mandatory": False,
-          "description": "Options are: \n{} ".format('\n'.join(VALID_STATES)),
+          "description": (
+              u"Options are: \n{states} \n"
+              u"1) Make sure that `Actual Verified Date` isn't set, "
+              u"if cycle task state is <'Assigned' / 'In Progress' / "
+              u"'Declined' / 'Deprecated' / 'Finished'>. "
+              u"Type double dash '--' into `Actual Verified Date` "
+              u"cell to remove it. \n"
+              u"2) Make sure that `Actual Finish Date` isn't set, "
+              u"if cycle task state is <'Assigned' / 'In Progress' / "
+              u"'Declined' / 'Deprecated'>. Type double dash '--' into "
+              u"`Actual Finish Date` cell to "
+              u"remove it.".format(states='\n'.join(VALID_STATES))
+          ),
       },
   }

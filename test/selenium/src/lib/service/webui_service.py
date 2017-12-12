@@ -480,8 +480,8 @@ class AssessmentsService(BaseWebUiService):
     add comments according to 'comment_objs' descriptions, return
     'CommentsPanel' class after adding of comments.
     """
-    comments_descriptions = [comment_obj.description for comment_obj in
-                             comment_objs]
+    comments_descriptions = tuple(
+        comment_obj.description for comment_obj in comment_objs)
     obj_info_panel = self.open_info_panel_of_obj_by_title(src_obj, obj)
     return obj_info_panel.comments_panel.add_comments(comments_descriptions)
 

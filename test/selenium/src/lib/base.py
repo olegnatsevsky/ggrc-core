@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common import keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote import webelement
+from selenium.common import exceptions
 
 from lib import constants, exception, mixin
 from lib.constants import messages, objects, url
@@ -826,11 +827,19 @@ class CommentsPanel(Element):
 
   def add_comments(self, *comments):
     """Add text comments to input field."""
-    for comment in comments:
+    count_of_comments = len(self.scopes)
+    for comment in list(*comments):
       self.input_txt.enter_text(comment)
       self.add_btn.click()
       selenium_utils.get_when_invisible(
           self._driver, constants.locator.Common.SPINNER_CSS)
+      count_of_comments += 1
+      try:
+        selenium_utils.wait_until_condition(
+            self._driver, lambda items: len(self.scopes) == count_of_comments)
+      except exceptions.TimeoutException as err:
+        raise (messages.ExceptionsMessages.err_comments_count.format(
+            count_of_comments, len(self.scopes)) + err)
     return self
 
 

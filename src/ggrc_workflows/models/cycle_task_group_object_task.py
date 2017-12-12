@@ -167,8 +167,22 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
   _aliases = {
       "title": "Summary",
       "description": "Task Details",
-      "finished_date": "Actual Finish Date",
-      "verified_date": "Actual Verified Date",
+      "finished_date": {
+          "display_name": "Actual Finish Date",
+          "description": ("Make sure that 'Actual Finish Date' isn't set, "
+                          "if cycle task state is <'Assigned' / "
+                          "'In Progress' / 'Declined' / 'Deprecated'>. "
+                          "Type double dash '--' into "
+                          "'Actual Finish Date' cell to remove it.")
+      },
+      "verified_date": {
+          "display_name": "Actual Verified Date",
+          "description": ("Make sure that 'Actual Verified Date' isn't set, "
+                          "if cycle task state is <'Assigned' / "
+                          "'In Progress' / 'Declined' / 'Deprecated' / "
+                          "'Finished'>. Type double dash '--' into "
+                          "'Actual Verified Date' cell to remove it.")
+      },
       "cycle": {
           "display_name": "Cycle",
           "filter_by": "_filter_by_cycle",

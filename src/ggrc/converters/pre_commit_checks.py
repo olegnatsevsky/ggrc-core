@@ -29,6 +29,12 @@ def check_tasks(row_converter):
     )
 
 
+DENY_FINISHED_DATES_STATUSES_STR = ("<'Assigned' / 'In Progress' / "
+                                    "'Declined' / 'Deprecated'>")
+DENY_VERIFIED_DATES_STATUSES_STR = ("<'Assigned' / 'In Progress' / "
+                                    "'Declined' / 'Deprecated' / 'Finished'>")
+
+
 def check_cycle_tasks(row_converter):  # noqa
   """Checker for CycleTaskGroupObjectTask model objects.
 
@@ -47,7 +53,7 @@ def check_cycle_tasks(row_converter):  # noqa
     row_converter.add_error(
         errors.INVALID_START_END_DATES,
         start_date="Start Date",
-        end_date="End Date",
+        end_date="Due Date",
     )
   if (obj.finished_date and obj.verified_date and
           obj.finished_date > obj.verified_date):
@@ -56,33 +62,25 @@ def check_cycle_tasks(row_converter):  # noqa
         start_date="Actual Finish Date",
         end_date="Actual Verified Date",
     )
-  if obj.cycle.is_current:
-    if obj.status not in ('Finished', 'Verified'):
-      if obj.finished_date:
-        row_converter.add_error(
-            errors.INVALID_STATUS_DATE_CORRELATION,
-            date="Actual Finish Date",
-            status="not Finished",
-        )
-      if obj.verified_date:
-        row_converter.add_error(
-            errors.INVALID_STATUS_DATE_CORRELATION,
-            date="Actual Verified Date",
-            status="not Verified",
-        )
-    elif obj.status == 'Finished' and obj.verified_date:
+  if obj.status not in (obj.FINISHED, obj.VERIFIED):
+    if obj.finished_date:
+      row_converter.add_error(
+          errors.INVALID_STATUS_DATE_CORRELATION,
+          date="Actual Finish Date",
+          deny_states=DENY_FINISHED_DATES_STATUSES_STR,
+      )
+    if obj.verified_date:
       row_converter.add_error(
           errors.INVALID_STATUS_DATE_CORRELATION,
           date="Actual Verified Date",
-          status="not Verified",
+          deny_states=DENY_VERIFIED_DATES_STATUSES_STR,
       )
-  else:
-    if obj.verified_date:
-      if not obj.finished_date:
-        row_converter.add_error(
-            errors.MISSING_VALUE_ERROR,
-            column_name="Actual Finish Date",
-        )
+  if obj.status == obj.FINISHED and obj.verified_date:
+    row_converter.add_error(
+        errors.INVALID_STATUS_DATE_CORRELATION,
+        date="Actual Verified Date",
+        deny_states=DENY_VERIFIED_DATES_STATUSES_STR,
+    )
 
 
 def check_workflows(row_converter):

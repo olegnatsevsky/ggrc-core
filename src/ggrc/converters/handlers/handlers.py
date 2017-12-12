@@ -326,6 +326,31 @@ class DateColumnHandler(ColumnHandler):
       )
 
 
+class NullableDateColumnHandler(DateColumnHandler):
+  """Nullable date column handler."""
+
+  DEFAULT_EMPTY_VALUE = "--"
+  EMPTY_VALUE_LIST = ["--", "---"]
+
+  def parse_item(self):
+    """Datetime column can be nullable."""
+    value = self.raw_value.strip()
+    if value not in self.EMPTY_VALUE_LIST:
+      return super(NullableDateColumnHandler, self).parse_item()
+    if self.mandatory:
+      self.add_error(
+          errors.MISSING_COLUMN,
+          s="",
+          column_names=self.display_name)
+    else:
+      self.set_empty = True
+
+  def get_value(self):
+    if getattr(self.row_converter.obj, self.key):
+      return super(NullableDateColumnHandler, self).get_value()
+    return self.DEFAULT_EMPTY_VALUE
+
+
 class EmailColumnHandler(ColumnHandler):
 
   def parse_item(self):

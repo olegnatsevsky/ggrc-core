@@ -600,7 +600,7 @@ import {
           loadHref = !$this.data().noHrefLoad;
 
           modalId = 'ajax-modal-' +
-            href.replace(/[\/\?=&#%]/g, '-').replace(/^-/, '');
+            href.replace(/[\/\?=&#%!]/g, '-').replace(/^-/, '');
           target = $this.attr('data-target') || $('#' + modalId);
 
           $target = $(target);
