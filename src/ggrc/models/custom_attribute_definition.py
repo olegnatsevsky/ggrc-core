@@ -166,6 +166,11 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
   @validates("attribute_type")
   def validate_attribute_type(self, _, value):
     """Check that provided attribute_type is allowed."""
+
+    if not self.definition_id and value == "Map:Person":
+      raise ValidationError("Invalid attribute_type: 'Map:Person' "
+                            "is not allowed for Global Custom Attributes")
+
     if value not in self.VALID_TYPES.values():
       raise ValidationError("Invalid attribute_type: got {v}, "
                             "expected one of {l}"
