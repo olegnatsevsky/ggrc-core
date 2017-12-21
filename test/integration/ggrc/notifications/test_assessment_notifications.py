@@ -79,13 +79,13 @@ class TestAssessmentNotification(TestCase):
         custom_attribute=self.cad1,
         attributable=self.assessment
     )
-    self.cad3 = factories.CustomAttributeDefinitionFactory(
+    self.cad2 = factories.CustomAttributeDefinitionFactory(
         definition_type="assessment",
         attribute_type="Checkbox",
-        title="ca3",
+        title="ca2",
     )
     factories.CustomAttributeValueFactory(
-        custom_attribute=self.cad3,
+        custom_attribute=self.cad2,
         attributable=self.assessment
     )
 
@@ -126,7 +126,7 @@ class TestAssessmentNotification(TestCase):
   def test_checkbox_attr_change(self):
     """Test notification when person attribute value is changed"""
     custom_attribute_values = [{
-        "custom_attribute_id": self.cad3.id,
+        "custom_attribute_id": self.cad2.id,
         "attribute_value": "1",
     }]
     response = self.api.put(self.assessment, {
@@ -138,7 +138,7 @@ class TestAssessmentNotification(TestCase):
     updated = notif_data["user@example.com"]["assessment_updated"]
     self.assertEqual(len(notifs), 1)
     self.assertEqual(
-        updated[self.assessment.id]["updated_fields"], ["CA3"])
+        updated[self.assessment.id]["updated_fields"], ["CA2"])
 
   def test_access_conrol_list(self):
     """Test notification when access conrol list is changed"""
