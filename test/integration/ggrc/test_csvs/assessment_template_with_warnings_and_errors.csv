@@ -14,8 +14,7 @@ Assessment Template,Code,Audit,Title,Object under assessment,Use control assessm
 mandatory Text, Some Other text name
 Rich text, custom description
 Mandatory Date, date of birth
-Checkbox, dashie?
-peRson, santa clause",,,,,,
+Checkbox, dashie?",,,,,,
 ,T-2,Audit,Template 2,Control,,Some test plan,Audit Captain,"user3@a.com
 user1@a.com",,,,,,,
 ,T-3,Audit,Template 2,Market,,Market test plan,principal assignees,primary contacts,"Dropdown, my dropdown, value 1, value 2, value 3
