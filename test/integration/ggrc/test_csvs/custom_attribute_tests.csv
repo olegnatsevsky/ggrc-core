@@ -1,28 +1,28 @@
 Object type,"Must be unique.  Can be left empty for autogeneration.  If updating or deleting, code is required",Mandatory field,,,,,,,,,,,,,,
-Product,code*,title*,description ,admin,normal text,man text,normal rt,man rt,normal date,man date,normal ch,Man CH,Normal Select,Man Select,normal person,man person
-,prod0,product 0,everything okay,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/7/2015,9/15/2015,no,yes,b,e,user@example.com,user@example.com
-,prod1,product 1,no optional checbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/8/2015,9/16/2015,,yes,b,e,user@example.com,user@example.com
-,prod2,product 2,no mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/8/2015,9/16/2015,yes,no,a,f,user@example.com,user@example.com
-,prod3,product 3,missing mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/9/2015,9/17/2015,no,,a,g,user@example.com,user@example.com
-,prod4,product 4,no optional select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/10/2015,9/18/2015,no,yes,,e,user@example.com,user@example.com
-,prod5,product 5,invalid optional select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/11/2015,9/19/2015,no,yes,XOY,e,user@example.com,user@example.com
-,prod6,product 6,no mandatory select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/12/2015,9/20/2015,no,yes,a,,user@example.com,user@example.com
-,prod7,product 7,wrong mandatory select ,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/13/2015,9/21/2015,no,yes,a,AOUE,user@example.com,user@example.com
-,prod8,product 8,invalid data in optional chexbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/14/2015,9/22/2015,nooo,yes,a,e,user@example.com,user@example.com
-,prod9,product 9,invalid data in mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/15/2015,9/23/2015,no,yesuoeauo,a,e,user@example.com,user@example.com
-,prod10,product 10,missing normal date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,,9/24/2015,no,yes,a,e,user1@ggrc.com,user@example.com
-,prod11,product 11,wrong normal date value,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,55/17/2015,9/25/2015,no,yes,a,e,user1@ggrc.com,user@example.com
-,prod12,product 12,missing mandatory date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/18/2015,,no,yes,a,e,user1@ggrc.com,user@example.com
-,prod13,product 13,wrong value in mandatory date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/19/2015,hello world,yes,yes,a,e,user1@ggrc.com,user@example.com
-,prod14,product 14,no normal rt,user@example.com,some text,other text,,other <br> rich text,5/20/2015,9/28/2015,no,yes,c,f,,user@example.com
-,prod15,product 15,no mandatory rt,user@example.com,some text,other text,some <br> rich <br> text,,5/21/2015,9/29/2015,no,Yes,c,f,,user@example.com
-,prod16,product 16,no normal text,user@example.com,,other text,some <br> rich <br> text,other <br> rich text,5/22/2015,9/30/2015,Yes,yes,c,f,user1@ggrc.com,user@example.com
-,prod17,product 17,no mandatory text,user@example.com,some text,,some <br> rich <br> text,other <br> rich text,5/23/2015,10/1/2015,no,yes,c,f,user1@ggrc.com,user@example.com
-,prod18,product 18,no owner,,some text,other text,some <br> rich <br> text,other <br> rich text,5/24/2015,10/2/2015,yes,yes,c,f,user1@ggrc.com,
-,prod19,product 19,bad/no owner,kr@en.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/25/2015,10/3/2015,no,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod20,product 20,1,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/26/2015,10/4/2015,no,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod21,product 21,2,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/27/2015,10/5/2015,Yes,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod22,product 22,3,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/28/2015,10/6/2015,Yes,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod23,product 23,no owner,,some text,other text,some <br> rich <br> text,other <br> rich text,5/29/2015,10/7/2015,yes,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod24,product 24,no existing owner,user@exameuple.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/30/2015,10/8/2015,no,yes,c,f,user1@ggrc.com,user1@ggrc.com
-,prod25,,no title,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/31/2015,10/9/2015,no,yes,c,f,user1@ggrc.com,user1@ggrc.com
+Product,code*,title*,description ,admin,normal text,man text,normal rt,man rt,normal date,man date,normal ch,Man CH,Normal Select,Man Select
+,prod0,product 0,everything okay,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/7/2015,9/15/2015,no,yes,b,e
+,prod1,product 1,no optional checbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/8/2015,9/16/2015,,yes,b,e
+,prod2,product 2,no mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/8/2015,9/16/2015,yes,no,a,f
+,prod3,product 3,missing mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/9/2015,9/17/2015,no,,a,g
+,prod4,product 4,no optional select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/10/2015,9/18/2015,no,yes,,e,
+,prod5,product 5,invalid optional select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/11/2015,9/19/2015,no,yes,XOY,e
+,prod6,product 6,no mandatory select,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/12/2015,9/20/2015,no,yes,a,,
+,prod7,product 7,wrong mandatory select ,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/13/2015,9/21/2015,no,yes,a,AOUE,
+,prod8,product 8,invalid data in optional chexbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/14/2015,9/22/2015,nooo,yes,a,e
+,prod9,product 9,invalid data in mandatory checkbox,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/15/2015,9/23/2015,no,yesuoeauo,a,e
+,prod10,product 10,missing normal date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,,9/24/2015,no,yes,a,e
+,prod11,product 11,wrong normal date value,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,55/17/2015,9/25/2015,no,yes,a,e
+,prod12,product 12,missing mandatory date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/18/2015,,no,yes,a,e
+,prod13,product 13,wrong value in mandatory date,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/19/2015,hello world,yes,yes,a,e
+,prod14,product 14,no normal rt,user@example.com,some text,other text,,other <br> rich text,5/20/2015,9/28/2015,no,yes,c,f
+,prod15,product 15,no mandatory rt,user@example.com,some text,other text,some <br> rich <br> text,,5/21/2015,9/29/2015,no,Yes,c,f
+,prod16,product 16,no normal text,user@example.com,,other text,some <br> rich <br> text,other <br> rich text,5/22/2015,9/30/2015,Yes,yes,c,f
+,prod17,product 17,no mandatory text,user@example.com,some text,,some <br> rich <br> text,other <br> rich text,5/23/2015,10/1/2015,no,yes,c,f
+,prod18,product 18,no owner,,some text,other text,some <br> rich <br> text,other <br> rich text,5/24/2015,10/2/2015,yes,yes,c,f
+,prod19,product 19,bad/no owner,kr@en.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/25/2015,10/3/2015,no,yes,c,f
+,prod20,product 20,1,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/26/2015,10/4/2015,no,yes,c,f
+,prod21,product 21,2,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/27/2015,10/5/2015,Yes,yes,c,f
+,prod22,product 22,3,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/28/2015,10/6/2015,Yes,yes,c,f
+,prod23,product 23,no owner,,some text,other text,some <br> rich <br> text,other <br> rich text,5/29/2015,10/7/2015,yes,yes,c,f
+,prod24,product 24,no existing owner,user@exameuple.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/30/2015,10/8/2015,no,yes,c,f
+,prod25,,no title,user@example.com,some text,other text,some <br> rich <br> text,other <br> rich text,5/31/2015,10/9/2015,no,yes,c,f
