@@ -52,12 +52,6 @@ describe('helpers.getCustomAttrValue', () => {
     },
     {
       definition_type: 'control',
-      title: 'Persons',
-      attribute_type: 'Map:Person',
-      id: 8,
-    },
-    {
-      definition_type: 'control',
       title: 'Date',
       attribute_type: 'Date',
       id: 9,
@@ -308,91 +302,6 @@ describe('helpers.getCustomAttrValue', () => {
       actual = helper(attr, fakeInstance, fakeOptions);
 
       expect(actual).toEqual('');
-    });
-  });
-
-  describe('for CA of Map:Person type', () => {
-    const attr = {};
-
-    it('returns empty string when CAD wasn\'t found', () => {
-      setCustomAttrItem(null, 3, 'Map:Person');
-
-      actual = helper(attr, fakeInstance, fakeOptions);
-
-      expect(actual).toEqual('');
-    });
-
-    describe('when object was provided in attribute', () => {
-      const expected = 'expected persons';
-      const addItemResult = 'added item';
-      const actualObject = {};
-
-      beforeEach(() => {
-        setCustomAttrItem(undefined, 8, 'Map:Person');
-        customAttrItem.attr('attribute_object', {
-          reify: () => {},
-        });
-        spyOn(customAttrItem.attr('attribute_object'), 'reify')
-          .and.returnValue(actualObject);
-
-        attr.attr_name = 'Persons';
-        fakeOptions = {
-          contexts: {
-            add: jasmine.createSpy('add').and.returnValue(addItemResult),
-          },
-          fn: jasmine.createSpy('fn').and.returnValue(expected),
-        };
-
-        actual = helper(attr, fakeInstance, fakeOptions);
-      });
-
-      it('returns expected result', () => {
-        expect(actual).toEqual(expected);
-      });
-
-      it('reify object attribute', () => {
-        expect(customAttrItem.attribute_object.reify)
-          .toHaveBeenCalled();
-      });
-
-      it('adds object to contexts list', () => {
-        expect(fakeOptions.contexts.add)
-          .toHaveBeenCalledWith({object: actualObject});
-      });
-
-      it('makes mustache fn-call', () => {
-        expect(fakeOptions.fn).toHaveBeenCalled();
-      });
-    });
-
-    describe('when object wasn\'t provided in attribute', () => {
-      const expected = 'expected persons';
-      const addItemResult = 'added item';
-
-      beforeEach(() => {
-        attr.attr_name = 'Persons';
-        setCustomAttrItem(undefined, 8, 'Map:Person');
-        fakeOptions = {
-          contexts: {
-            add: jasmine.createSpy('add').and.returnValue(addItemResult),
-          },
-          fn: jasmine.createSpy('fn').and.returnValue(expected),
-        };
-
-        actual = helper(attr, fakeInstance, fakeOptions);
-      });
-
-      it('returns expected result', () => {
-        expect(actual).toEqual(expected);
-      });
-
-      it('adds object to contexts list', () => {
-        expect(fakeOptions.contexts.add).toHaveBeenCalledWith({object: null});
-      });
-
-      it('makes mustache fn-call', () => {
-        expect(fakeOptions.fn).toHaveBeenCalled();
-      });
     });
   });
 });
