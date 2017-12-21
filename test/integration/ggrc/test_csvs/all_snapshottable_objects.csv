@@ -1,9 +1,9 @@
 Object type,"Use this db for custom attribute definitions
 https://gist.github.com/zidarsk8/c6335d961a7004b9f896a3e4b1db8a8b",,,,,,,,,,,,,,,,,,,,,,,,,
-Access Group,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Access Group,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Access Group code,Access Group title,Access Group description,Access Group notes,,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,22/2/2022,thREE,Access group ca text,"access group<br><br>
-rich text",yes,user4@example.com
+rich text",yes
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
 Clause,Code*,Title*,Text of Clause,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,,,,,,
@@ -16,30 +16,30 @@ Contract,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference U
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Control,Code*,Title*,Description,Notes,Assessment Procedure,Admin*,Effective Date,State,Reference URL,Assertions,Categories,Fraud Related,Significance,Kind/Nature,Type/Means,Frequency,Evidence File,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Control,Code*,Title*,Description,Notes,Assessment Procedure,Admin*,Effective Date,State,Reference URL,Assertions,Categories,Fraud Related,Significance,Kind/Nature,Type/Means,Frequency,Evidence File,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Control code,Control title,Control description,Control notes,Control test plan,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,"Privacy
 Integrity","Sites
 Data Centers",yes,non-key,corrective,physical,daily,http://url.example.zzz Evidence name,,,,22/2/2022,one,Control ca text,"control<br><br>
-rich text",yes,user4@example.com
+rich text",yes
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Data Asset,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Data Asset,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Data Assest code,Data Assest title,Data Assest description,Data Assest notes,,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,22/2/2022,tWo,DATA ASSET ca text,"data asset<br><br>
-rich text",yes,user4@example.com
+rich text",yes
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Facility,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Facility,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Facility code,Facility title,Facility description,Facility notes,,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,22/2/2022,TWO,Facility ca text,"Facility<br><br>
-rich text",no,user4@example.com
+rich text",no
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Market,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Market,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Market code,Market title,Market description,Market notes,,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,22/2/2022,three,Market ca text,"Market<br><br>
-rich text",yes,user4@example.com
+rich text",yes
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
 Objective,Code*,Title*,Description,Notes,,Admin*,,State,Reference URL,,,,,,,,,,,Delete,,,,,,
@@ -77,10 +77,10 @@ Risk,Code*,Title*,Description*,Notes,,Admin*,Effective Date,State,Reference URL,
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Section,Code*,Title*,Text of Section,Notes,,Admin*,,State,Reference URL,,,,,,,,Policy / Regulation / Standard / Contract,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Section,Code*,Title*,Text of Section,Notes,,Admin*,,State,Reference URL,,,,,,,,Policy / Regulation / Standard / Contract,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Section code,Section title,Section description,Section notes,,"user@example.com
 user1@example.com",,Draft,http://url.example.zzz,,,,,,,,policy code,,,,22/2/2022,four,Section ca text,"Section<br><br>
-rich text",yes,user4@example.com
+rich text",yes
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
 Standard,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,,,,,,
@@ -93,10 +93,10 @@ System,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,core,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
-Threat,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox,CA person
+Threat,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,CA date,CA dropdown,CA text,CA rich text,CA checkbox
 ,Threat code,Threat title,Threat description,Threat notes,,"user@example.com
 user1@example.com",20/2/2020,Draft,http://url.example.zzz,,,,,,,,,,,,22/2/2022,four,Threat ca text,"Threat<br><br>
-rich text",no,user4@example.com
+rich text",no
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Object type,,,,,,,,,,,,,,,,,,,,,,,,,,
 Vendor,Code*,Title*,Description,Notes,,Admin*,Effective Date,State,Reference URL,,,,,,,,,,,Delete,,,,,,

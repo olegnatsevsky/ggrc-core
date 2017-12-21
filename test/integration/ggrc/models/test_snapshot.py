@@ -129,7 +129,6 @@ class TestSnapshot(TestCase):
         {"title": "CA rich text", "attribute_type": "Rich Text"},
         {"title": "CA date", "attribute_type": "Date"},
         {"title": "CA checkbox", "attribute_type": "Checkbox"},
-        {"title": "CA person", "attribute_type": "Map:Person"},
         {"title": "CA dropdown", "attribute_type": "Dropdown",
          "multi_choice_options": "one,two,three,four,five"},
     ]
@@ -143,7 +142,6 @@ class TestSnapshot(TestCase):
 
   def test_revision_content(self):
     """Test that revision contains all content needed."""
-
     facility_revision = all_models.Revision.query.filter(
         all_models.Revision.resource_type == "Facility").order_by(
         all_models.Revision.id.desc()).first()
