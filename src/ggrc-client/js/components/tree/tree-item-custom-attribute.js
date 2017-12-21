@@ -12,14 +12,6 @@ const formatValueMap = {
   'Date'(item) {
     return GGRC.Utils.formatDate(item.attr('attribute_value'), true);
   },
-  'Map:Person'(item, options) {
-    let attr = item.attr('attribute_object');
-    return options.fn(options.contexts.add({
-      object: attr ?
-        attr.reify() :
-        null,
-    }));
-  },
 };
 
 const defaultValueMap = {
