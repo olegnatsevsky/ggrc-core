@@ -216,18 +216,22 @@ class TestCustomAttributableMixin(TestCase):
   def test_adding_mapping_ca_dict(self):
     """Test adding mapping custom attribute values with a dict."""
     with factories.single_commit():
+      assessment = factories.AssessmentFactory()
+      db.session.flush()  # to make sure assessment.id is set
       cad1 = factories.CustomAttributeDefinitionFactory(
-          definition_type="program",
+          definition_type="assessment",
           attribute_type="Map:Person",
           title="CA 1",
+          definition_id=assessment.id
       )
       cad2 = factories.CustomAttributeDefinitionFactory(
-          definition_type="program",
+          definition_type="assessment",
           attribute_type="Map:Person",
           title="CA 2",
+          definition_id=assessment.id
       )
-      prog = factories.ProgramFactory()
-    prog.custom_attribute_values = [
+
+    assessment.custom_attribute_values = [
         {
             "attribute_value": "Person:1",
             "custom_attribute_id": cad1.id,
@@ -237,18 +241,17 @@ class TestCustomAttributableMixin(TestCase):
             "custom_attribute_id": cad2.id,
         }
     ]
-    prog.validate_custom_attributes()
-    prog = prog.__class__.query.get(prog.id)
-
+    assessment.validate_custom_attributes()
+    assessment = assessment.__class__.query.get(assessment.id)
     self.assertEqual(
         {"1"},
-        set(v.attribute_object_id for v in prog.custom_attribute_values),
+        set(v.attribute_object_id for v in assessment.custom_attribute_values),
     )
     self.assertEqual(
         {"Person"},
-        set(v.attribute_value for v in prog.custom_attribute_values),
+        set(v.attribute_value for v in assessment.custom_attribute_values),
     )
-    self.assertEqual(len(prog.custom_attribute_values), 2)
+    self.assertEqual(len(assessment.custom_attribute_values), 2)
 
 
 @ddt.ddt
