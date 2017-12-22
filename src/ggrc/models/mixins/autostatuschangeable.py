@@ -11,7 +11,7 @@ from sqlalchemy.orm import session
 
 from ggrc.models import document
 from ggrc.models import mixins
-from ggrc.models.mixins import statusable
+from ggrc.models.mixins import statusable, session_handler
 from ggrc.models import relationship
 
 from ggrc.services import signals
@@ -214,17 +214,15 @@ class AutoStatusChangeable(object):
       obj._need_status_reset = True
 
   @classmethod
-  def adjust_status_before_flush(cls, session, flush_context, instances):
+  def adjust_status_before_flush(cls, obj):
     """Reset status of AutoStatusChangeable objects with _need_status_reset.
 
     Is registered to listen for 'before_flush' events on a later stage.
     """
-
     # pylint: disable=unused-argument,protected-access
-    for obj in session.identity_map.values():
-      if isinstance(obj, AutoStatusChangeable) and obj._need_status_reset:
-        obj.status = obj.PROGRESS_STATE
-        obj._need_status_reset = False
+    if obj._need_status_reset:
+      obj.status = obj.PROGRESS_STATE
+      obj._need_status_reset = False
 
   @staticmethod
   def has_custom_attr_changes(custom_attributes):
@@ -333,5 +331,8 @@ class AutoStatusChangeable(object):
 # pylint: disable=fixme
 # TODO: find a way to listen for updates only for classes that use
 # AutoStatusChangeable, not for every flush event for every session
-event.listen(session.Session, 'before_flush',
-             AutoStatusChangeable.adjust_status_before_flush)
+# event.listen(session.Session, 'before_flush',
+#              AutoStatusChangeable.adjust_status_before_flush)
+session_handler.register(session_handler.BEFORE_FLUSH,
+                         AutoStatusChangeable,
+                         AutoStatusChangeable.adjust_status_before_flush)

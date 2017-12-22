@@ -10,7 +10,7 @@ from sqlalchemy.orm import validates
 from sqlalchemy.sql.schema import UniqueConstraint
 
 from ggrc import db
-from ggrc.models.mixins import attributevalidator
+from ggrc.models.mixins import attributevalidator, session_handler
 from ggrc.models import mixins
 from ggrc.models.custom_attribute_value import CustomAttributeValue
 from ggrc.access_control import role as acr
@@ -166,9 +166,6 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
   @validates("attribute_type")
   def validate_attribute_type(self, _, value):
     """Check that provided attribute_type is allowed."""
-    if not self.definition_id and value == "Map:Person":
-      raise ValidationError("Invalid attribute_type: 'Map:Person' "
-                            "is not allowed for Global Custom Attributes")
 
     if value not in self.VALID_TYPES.values():
       raise ValidationError("Invalid attribute_type: got {v}, "
@@ -297,6 +294,10 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
 
     return value
 
+  def after_flush_validate(self):
+    if not self.definition_id and self.attribute_type == "Map:Person":
+      raise ValidationError("Invalid attribute_type: 'Map:Person' "
+                            "is not allowed for Global Custom Attributes")
 
 class CustomAttributeMapable(object):
   # pylint: disable=too-few-public-methods
@@ -319,3 +320,8 @@ class CustomAttributeMapable(object):
         foreign_keys="CustomAttributeValue.attribute_object_id",
         backref='attribute_{0}'.format(cls.__name__),
         viewonly=True)
+
+
+session_handler.register(session_handler.AFTER_FLUSH,
+                         CustomAttributeDefinition,
+                         CustomAttributeDefinition.after_flush_validate)
