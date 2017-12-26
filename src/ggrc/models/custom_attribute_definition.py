@@ -10,6 +10,7 @@ from sqlalchemy.orm import validates
 from sqlalchemy.sql.schema import UniqueConstraint
 
 from ggrc import db
+from ggrc.models.mixins import after_flush_handleable
 from ggrc.models.mixins import attributevalidator
 from ggrc.models import mixins
 from ggrc.models.custom_attribute_value import CustomAttributeValue
@@ -19,7 +20,8 @@ from ggrc.models import reflection
 
 
 class CustomAttributeDefinition(attributevalidator.AttributeValidator,
-                                mixins.Base, mixins.Titled, db.Model):
+                                mixins.Base, mixins.Titled, db.Model,
+                                after_flush_handleable.AfterFlushHandleable):
   """Custom attribute definition model.
 
   Attributes:
@@ -166,10 +168,6 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
   @validates("attribute_type")
   def validate_attribute_type(self, _, value):
     """Check that provided attribute_type is allowed."""
-    if not self.definition_id and value == "Map:Person":
-      raise ValidationError("Invalid attribute_type: 'Map:Person' "
-                            "is not allowed for Global Custom Attributes")
-
     if value not in self.VALID_TYPES.values():
       raise ValidationError("Invalid attribute_type: got {v}, "
                             "expected one of {l}"
@@ -296,6 +294,15 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
       self.validate_assessment_title(name)
 
     return value
+
+  def handle_after_flush(self):
+    """Validate object 'after flash' sqlalchemy event
+
+      Custom attributes with Person type allowed for LCA only
+    """
+    if not self.definition_id and self.attribute_type == "Map:Person":
+      raise ValidationError("Invalid attribute_type: 'Map:Person' "
+                            "is not allowed for Global Custom Attributes")
 
 
 class CustomAttributeMapable(object):
