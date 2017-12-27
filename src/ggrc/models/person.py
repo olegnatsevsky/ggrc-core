@@ -27,7 +27,7 @@ class Person(CustomAttributable, CustomAttributeMapable, HasOwnContext,
   __tablename__ = 'people'
 
   email = deferred(db.Column(db.String, nullable=False), 'Person')
-  name = deferred(db.Column(db.String), 'Person')
+  name = deferred(db.Column(db.String, nullable=False), 'Person')
   language_id = deferred(db.Column(db.Integer), 'Person')
   company = deferred(db.Column(db.String), 'Person')
 
