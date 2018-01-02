@@ -19,6 +19,7 @@ color
 from logging import getLogger
 from uuid import uuid1
 import datetime
+from collections import deque
 
 from sqlalchemy import event
 from sqlalchemy import orm
@@ -31,6 +32,7 @@ from ggrc import builder
 from ggrc import db
 from ggrc.models import reflection
 from ggrc.models.deferred import deferred
+from ggrc.models.exceptions import ValidationError
 from ggrc.models.inflector import ModelInflectorDescriptor
 from ggrc.models.reflection import AttributeInfo
 from ggrc.models.mixins.customattributable import CustomAttributable
@@ -42,6 +44,7 @@ from ggrc.fulltext import attributes
 # pylint: disable=invalid-name
 logger = getLogger(__name__)
 
+AUTO_INC_MAPPING = deque()
 
 class Identifiable(object):
 
@@ -59,6 +62,22 @@ class Identifiable(object):
   @builder.simple_property
   def type(self):
     return self.__class__.__name__
+
+  @validates('id')
+  def validate_id(self, key, value):
+    """Validates and cleans Title that has leading/trailing spaces"""
+    # pylint: disable=unused-argument,no-self-use
+    from ggrc.models import Revision
+
+    print 'Value -> ' + str(value)
+    print 'Type -> ' + str(self.type)
+    rr = db.session.query(Revision).filter(Revision.resource_id==value,Revision.resource_type==self.type).all()
+    print rr
+    if rr:
+      AUTO_INC_MAPPING.append((self.__tablename__, 100))
+      raise ValidationError('message!')
+    else:
+      return value
 
   @classmethod
   def eager_query(cls):
@@ -101,6 +120,16 @@ class Identifiable(object):
       table_args.append(table_dict)
     return tuple(table_args,)
 
+@event.listens_for(Session, "after_soft_rollback")
+def do_something(session, previous_transaction):
+  if session.is_active:
+    for item in AUTO_INC_MAPPING.pop():
+      session.execute('ALTER TABLE {} AUTO_INCREMENT = {}'.format(item[0],item[1]))
+    clean()
+
+def clean():
+  global AUTO_INC_MAPPING
+  AUTO_INC_MAPPING = {}
 
 class ChangeTracked(object):
 
