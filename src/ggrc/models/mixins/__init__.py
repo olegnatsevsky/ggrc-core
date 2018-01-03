@@ -21,7 +21,7 @@ from uuid import uuid1
 import datetime
 from collections import deque
 
-from sqlalchemy import event
+from sqlalchemy import event, func
 from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -68,14 +68,10 @@ class Identifiable(object):
     """Validates and cleans Title that has leading/trailing spaces"""
     # pylint: disable=unused-argument,no-self-use
     from ggrc.models import Revision
-
-    print 'Value -> ' + str(value)
-    print 'Type -> ' + str(self.type)
-    rr = db.session.query(Revision).filter(Revision.resource_id==value,Revision.resource_type==self.type).all()
-    print rr
-    if rr:
-      AUTO_INC_MAPPING.append((self.__tablename__, 100))
-      raise ValidationError('message!')
+    max_id = db.session.query(func.max(Revision.resource_id)).filter(Revision.resource_type == self.type).scalar()
+    if max_id >= value:
+      AUTO_INC_MAPPING.append((self.__tablename__, max_id+1))
+      raise ValidationError('Id collision detected, fixing ... Please try again!')
     else:
       return value
 
@@ -120,16 +116,14 @@ class Identifiable(object):
       table_args.append(table_dict)
     return tuple(table_args,)
 
-@event.listens_for(Session, "after_soft_rollback")
-def do_something(session, previous_transaction):
-  if session.is_active:
-    for item in AUTO_INC_MAPPING.pop():
-      session.execute('ALTER TABLE {} AUTO_INCREMENT = {}'.format(item[0],item[1]))
-    clean()
 
-def clean():
-  global AUTO_INC_MAPPING
-  AUTO_INC_MAPPING = {}
+@event.listens_for(Session, 'after_soft_rollback')
+def handle_auto_inc(session, previous_transaction):
+  if session.is_active and AUTO_INC_MAPPING:
+    while AUTO_INC_MAPPING:
+      table, value = AUTO_INC_MAPPING.pop()
+      session.execute('ALTER TABLE {} AUTO_INCREMENT = {}'.format(table, value))
+
 
 class ChangeTracked(object):
 
