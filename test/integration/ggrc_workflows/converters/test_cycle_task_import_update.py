@@ -80,8 +80,9 @@ class TestCycleTaskImportUpdate(BaseTestCycleTaskImportUpdate):
     # 'slug' based on auto_increment 'id' field.
     # At start of each test we suppose that created cycle-task's 'slug'
     # lie in range from 1 to 10.
-    db.session.execute('ALTER TABLE cycle_task_group_object_tasks '
-                       'AUTO_INCREMENT = 1')
+    db.session.execute("UPDATE sequences SET id_value=0 "
+                       "WHERE table_name='cycle_task_group_object_tasks'")
+    db.session.commit()
 
   def test_cycle_task_correct(self):
     """Test cycle task update via import with correct data"""
