@@ -161,16 +161,23 @@ class TestCollectionPost(TestCase):
     Posting duplicate relationships should have a mechanism for removing
     duplicates from the post request and fixing unique integrity errors.
     """
-    db.session.add(models.Policy(id=144, title="hello"))
-    db.session.add(models.Policy(id=233, title="world"))
-    db.session.add(models.Policy(id=377, title="bye"))
+    policy1 = models.Policy(title="hello")
+    policy2 = models.Policy(title="world")
+    policy3 = models.Policy(title="bye")
+
+    db.session.add(policy1)
+    db.session.add(policy2)
+    db.session.add(policy3)
     db.session.commit()
 
+    policy1_id = policy1.id
+    policy2_id = policy2.id
+    policy3_id = policy3.id
     self.client.get("/login")
     data = json.dumps([{
         "relationship": {
-            "source": {"id": 144, "type": "Policy"},
-            "destination": {"id": 233, "type": "Policy"},
+            "source": {"id": policy1_id, "type": "Policy"},
+            "destination": {"id": policy2_id, "type": "Policy"},
             "context": None,
         },
     }])
@@ -185,24 +192,25 @@ class TestCollectionPost(TestCase):
     relationships = models.Relationship.eager_query().all()
     self.assertEqual(len(relationships), 1)
     rel1 = relationships[0]
-    self.assertEqual({144, 233}, {rel1.source.id, rel1.destination.id})
+    self.assertEqual({policy1_id, policy2_id},
+                     {rel1.source.id, rel1.destination.id})
 
     data = json.dumps([{
         "relationship": {  # this should be ignored
-            "source": {"id": 144, "type": "Policy"},
-            "destination": {"id": 233, "type": "Policy"},
+            "source": {"id": policy1_id, "type": "Policy"},
+            "destination": {"id": policy2_id, "type": "Policy"},
             "context": None,
         },
     }, {
         "relationship": {
-            "source": {"id": 377, "type": "Policy"},
-            "destination": {"id": 144, "type": "Policy"},
+            "source": {"id": policy3_id, "type": "Policy"},
+            "destination": {"id": policy1_id, "type": "Policy"},
             "context": None,
         },
     }, {
         "relationship": {  # Refactored api will ignore this
-            "source": {"id": 144, "type": "Policy"},
-            "destination": {"id": 377, "type": "Policy"},
+            "source": {"id": policy1_id, "type": "Policy"},
+            "destination": {"id": policy3_id, "type": "Policy"},
             "context": None,
         },
     }])
@@ -216,7 +224,6 @@ class TestCollectionPost(TestCase):
     self.assert200(response)
     relationships = models.Relationship.eager_query().all()
     self.assertEqual(len(relationships), 3)  # This should be 2
-    rel1 = relationships[0]
 
   def test_post_person_modified_by(self):
     """Test Person POST on modified_by issue.
