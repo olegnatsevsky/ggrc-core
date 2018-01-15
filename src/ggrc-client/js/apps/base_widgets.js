@@ -17,6 +17,7 @@
     'Contract',
     'Control',
     'DataAsset',
+    'Evidence',
     'Facility',
     'Issue',
     'Market',
@@ -59,6 +60,7 @@
   // Items allowed for relationship mapping
   let excludeMappingConfig = [
     'AssessmentTemplate',
+    'Evidence',
   ];
   // Extra Tree View Widgets require to be rendered on Audit View
   let auditInclusion = [
@@ -66,6 +68,7 @@
     'Person',
     'Program',
     'Issue',
+    'Evidence',
   ];
   let baseWidgetsByType;
 
@@ -85,15 +88,17 @@
     Contract: _.difference(filteredTypes,
       ['Contract', 'Policy', 'Regulation', 'Standard']),
     Control: filteredTypes,
-    Assessment: snapshotWidgetsConfig.concat(['Audit', 'Issue']).sort(),
+    Assessment: snapshotWidgetsConfig.concat(
+      ['Audit', 'Issue', 'Evidence']).sort(),
     AssessmentTemplate: ['Audit'],
     DataAsset: filteredTypes,
+    Evidence: ['Audit', 'Assessment'],
     Facility: filteredTypes,
     Issue: objectVersions.concat(filteredTypes),
     Market: filteredTypes,
     Objective: filteredTypes,
     OrgGroup: filteredTypes,
-    Person: ['Issue'].concat(_.difference(filteredTypes, ['Person'])),
+    Person: ['Evidence'].concat(_.difference(filteredTypes, ['Person'])),
     Policy: _.difference(filteredTypes,
       ['Contract', 'Policy', 'Regulation', 'Standard']),
     Process: filteredTypes,

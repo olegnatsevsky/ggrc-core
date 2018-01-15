@@ -46,7 +46,7 @@ import {getRole} from '../plugins/utils/acl-utils';
     obj_nav_options: {
       show_all_tabs: false,
       force_show_list: ['In Scope Controls', 'Assessment Templates',
-        'Issues', 'Assessments'],
+        'Issues', 'Assessments', 'Evidence'],
     },
     tree_view_options: {
       attr_view: GGRC.mustache_path + '/audits/tree-item-attr.mustache',

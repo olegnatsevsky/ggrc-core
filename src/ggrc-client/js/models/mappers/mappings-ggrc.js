@@ -404,12 +404,13 @@ import RefreshQueue from '../refresh_queue';
       _canonical: {
         _program: 'Program',
         context: 'Context',
-
+        evidence: 'Evidence',
       },
       _mixins: [
         'related_object',
       ],
       _program: Direct('Program', 'audits', 'program'),
+      evidence: TypeFilter('related_objects', 'Evidence'),
       program_controls: Cross('_program', 'controls'),
       program_issues: Cross('_program', 'related_issues'),
       program_assessments: Cross('_program', 'related_assessments'),
@@ -434,13 +435,25 @@ import RefreshQueue from '../refresh_queue';
         'related_objects', 'AssessmentTemplate'),
     },
     Assessment: {
+      _canonical: {
+        evidence: 'Evidence',
+      },
       _mixins: [
         'related_object', 'personable', 'documentable', 'assignable',
       ],
+      evidence: TypeFilter('related_objects', 'Evidence'),
       audits: TypeFilter('related_objects', 'Audit'),
       related_controls: TypeFilter('related_objects', 'Control'),
       related_regulations: TypeFilter('related_objects', 'Regulation'),
       people: AttrFilter('related_objects', null, 'Person'),
+    },
+    Evidence: {
+      _canonical: {
+        related_objects_as_source: ['Audit', 'Assessment'],
+      },
+      related_objects_as_source: Proxy(
+        null, 'destination', 'Relationship', 'source', 'related_destinations',
+      ),
     },
     AssessmentTemplate: {
       _mixins: ['related_object'],
@@ -461,13 +474,14 @@ import RefreshQueue from '../refresh_queue';
       _canonical: {
         audits: 'Audit',
         workflows: 'Workflow',
+        evidence: 'Evidence',
       },
       audits: Proxy(
         'Audit', 'audit', 'MultitypeSearchJoin'),
       workflows: Proxy(
         'Workflow', 'workflow', 'MultitypeSearchJoin'),
-      sections: Proxy(
-        'Section', 'section', 'MultitypeSearchJoin'),
+      evidence: Proxy(
+        'Evidence', 'evidence', 'MultitypeSearchJoin'),
     },
     AuditObject: {
       _auditable: Direct(null, null, 'auditable'),

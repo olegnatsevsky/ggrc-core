@@ -261,6 +261,11 @@
   &.color { color: #8e0000; }
 }
 
+.#{$fa-css-prefix}-evidence {
+  &:before { content: $fa-var-file-archive-o; }
+  &.color { color: #005580; }
+}
+
 // Turn icons to black
 %black-icons {
   [class^="fa #{$fa-css-prefix}-"] {

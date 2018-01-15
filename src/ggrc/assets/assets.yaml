@@ -89,6 +89,9 @@ dashboard-js-template-files:
   - documents/option_column.mustache
   - documents/option_detail.mustache
   - documents/tree.mustache
+  - evidence/modal_content.mustache
+  - evidence/info.mustache
+  - evidence/tree-item-attr.mustache
   - dashboard/modal_preload.mustache
   - dashboard/object_list.mustache
   - dashboard/object_widget.mustache

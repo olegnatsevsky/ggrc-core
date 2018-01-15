@@ -1,0 +1,32 @@
+{{!
+  Copyright (C) 2018 Google Inc.
+  Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+{{#switch attr_name}}
+  {{#case 'title'}}
+    <a class="link" href="{{instance.link}}" target="_blank">
+      {{instance.title}}
+    </a>
+  {{/case}}
+  {{#case 'modified_by'}}
+      <tree-people-list-field {source}="instance.modified_by"/>
+  {{/case}}
+  {{#case 'status'}}
+    {{#using status=instance.status}}
+      <span class="state-value-dot {{addclass 'state-' status separator=''}}">
+        {{status}}
+      </span>
+    {{/using}}
+  {{/case}}
+  {{#case 'kind'}}
+    {{instance.kindTitle}}
+  {{/case}}
+  {{#case 'end_date'}}
+    {{localize_date instance.end_date}}
+  {{/case}}
+
+  {{#default}}
+    {{get_default_attr_value attr_name instance}}
+  {{/default}}
+{{/switch}}

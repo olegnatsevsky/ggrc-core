@@ -26,6 +26,7 @@ import './local_storage';
 import './display_prefs';
 import './local_list_cache';
 import './document';
+import './evidence';
 import './person';
 import './simple_models';
 import './business_object_models';

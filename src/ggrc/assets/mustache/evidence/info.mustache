@@ -1,0 +1,78 @@
+{{!
+  Copyright (C) 2018 Google Inc.
+  Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+{{#instance}}
+  <section class="info{{#is_info_pin}} sticky-info-panel{{/is_info_pin}}">
+
+    {{#is_info_pin}}
+      <info-pin-buttons class="details-wrap" maximized="maximized" on-change-maximized-state="@onChangeMaximizedState" on-close="@onClose"></info-pin-buttons>
+    {{/is_info_pin}}
+
+    {{> /static/mustache/base_objects/info-pane-utility.mustache}}
+
+    <div class="tier-content">
+      {{>'/static/mustache/base_objects/general-page-header.mustache'}}
+
+      <tab-container>
+        <tab-panel {(panels)}="panels" title-text="{{instance.type}}">
+          <div class="info-pane__body">
+            <div class="info-pane__main-content info-pane__main-content-with-sidebar">
+
+              <div class="row-fluid wrap-row">
+                <h6>
+                  {{#if_equals instance.kind "FILE"}}
+                  Attachment
+                  {{else}}
+                  Url
+                  {{/if_equals}}
+                </h6>
+                <document-object-list-item
+                  {instance}="instance">
+                </document-object-list-item>
+              </div>
+
+              {{>'/static/mustache/base_objects/description.mustache'}}
+              {{>'/static/mustache/base_objects/contacts.mustache'}}
+
+              <div class="row-fluid wrap-row">
+                <div class="info-pane__section-title">Type</div>
+                <span>{{instance.kindTitle}}</span>
+              </div>
+
+              <div class="row-fluid wrap-row">
+                <div class="info-pane__section-title">Code</div>
+                <span>{{instance.slug}}</span>
+              </div>
+
+            </div>
+            <div class="info-pane__sidebar">
+              <comment-data-provider {instance}="instance" class="flex-box flex-col">
+                <div class="info-pane__section-title">Responses/Comments</div>
+                {{#if_helpers '\
+                  ^if' instance.archived '\
+                  and ^if' isEditDenied}}
+                <comment-add-form class="comment-add-form"
+                  {instance}="instance"
+                  {is-saving}="isLoading"
+                  (before-create)="addComment(%event)"
+                  (after-create)="processComment(%event)">
+                </comment-add-form>
+                {{/if_helpers}}
+                <mapped-comments {mapped-items}="comments"></mapped-comments>
+              </comment-data-provider>
+            </div>
+          </div>
+        </tab-panel>
+          <tab-panel {(panels)}="panels" title-text="Change Log">
+              <revision-log {instance}="instance"></revision-log>
+          </tab-panel>
+      </tab-container>
+    </div><!-- tier-content end -->
+  </section>
+
+  {{#if is_info_widget}}
+    <info-pane-footer {created-at}="instance.created_at" {modified-at}="instance.updated_at" {modified-by}="instance.modified_by"></info-pane-footer>
+  {{/if}}
+{{/instance}}

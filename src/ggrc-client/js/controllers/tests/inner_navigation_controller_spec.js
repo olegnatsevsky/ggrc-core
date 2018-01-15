@@ -80,6 +80,7 @@ describe('CMS.Controllers.InnerNav', function () {
           {name: 'ddd'},
           {name: 'eee'},
           {name: 'fff'},
+          {name: 'ggg'},
         ]),
         priorityTabs: null,
         notPriorityTabs: null,
@@ -92,24 +93,24 @@ describe('CMS.Controllers.InnerNav', function () {
       method = Ctrl.prototype.setTabsPriority.bind(ctrl);
     });
 
-    it('sets first 4 tabs as priority for audit', () => {
+    it('sets first 5 tabs as priority for audit', () => {
       spyOn(CurrentPageUtils, 'getPageType').and.returnValue('Audit');
       spyOn(DashboardUtils, 'isDashboardEnabled').and.returnValue(false);
 
       method();
 
-      expect(options.priorityTabs.length).toEqual(4);
+      expect(options.priorityTabs.length).toEqual(5);
       expect(options.notPriorityTabs.length).toEqual(2);
     });
 
-    it('sets first 5 tabs as priority for audit when dashboard is enabled',
+    it('sets first 6 tabs as priority for audit when dashboard is enabled',
       () => {
         spyOn(CurrentPageUtils, 'getPageType').and.returnValue('Audit');
         spyOn(DashboardUtils, 'isDashboardEnabled').and.returnValue(true);
 
         method();
 
-        expect(options.priorityTabs.length).toEqual(5);
+        expect(options.priorityTabs.length).toEqual(6);
         expect(options.notPriorityTabs.length).toEqual(1);
       });
 
@@ -118,7 +119,7 @@ describe('CMS.Controllers.InnerNav', function () {
 
       method();
 
-      expect(options.priorityTabs.length).toEqual(6);
+      expect(options.priorityTabs.length).toEqual(7);
       expect(options.notPriorityTabs).toEqual(null);
     });
   });

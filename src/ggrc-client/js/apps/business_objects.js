@@ -31,6 +31,7 @@ import {
         facility: CMS.Models.Facility,
         product: CMS.Models.Product,
         data_asset: CMS.Models.DataAsset,
+        evidence: CMS.Models.Evidence,
         access_group: CMS.Models.AccessGroup,
         market: CMS.Models.Market,
         system_or_process: {
@@ -117,6 +118,7 @@ import {
         assessment_templates:
           path + '/assessment_templates/info.mustache',
         issues: path + '/issues/info.mustache',
+        evidence: path + '/evidence/info.mustache',
       };
       widgetList.add_widget(object.constructor.shortName, 'info', {
         widget_id: 'info',
@@ -259,7 +261,7 @@ import {
           Issue: {
             order: 8,
           },
-          Program: {
+          Evidence: {
             order: 9,
           },
           program: {
