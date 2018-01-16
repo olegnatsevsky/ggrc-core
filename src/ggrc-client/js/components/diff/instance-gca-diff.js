@@ -38,15 +38,8 @@ const viewModel = DiffBaseVM.extend({
         return;
       }
 
-      if (attr.def.attribute_type !== 'Map:Person') {
-        const diffObject = this.buildAttributeDiff(modifiedAttr, attr);
-        this.attr('diff').push(diffObject);
-        return;
-      }
-
-      this.buildPersonDiff(modifiedAttr, attr).then((diffObject) => {
-        this.attr('diff').push(diffObject);
-      });
+      const diffObject = this.buildAttributeDiff(modifiedAttr, attr);
+      this.attr('diff').push(diffObject);
     });
   },
   buildAttributeDiff(modifiedAttr, currentAttr) {
@@ -70,32 +63,6 @@ const viewModel = DiffBaseVM.extend({
       currentVal: [currentVal],
       modifiedVal: [modifiedVal],
     };
-  },
-  buildPersonDiff(modifiedAttr, currentAttr) {
-    const val = currentAttr.value;
-    const def = currentAttr.def;
-    const dfd = can.Deferred();
-    const diffObject = {
-      attrName: def.title,
-      currentVal: [this.attr('emptyValue')],
-      modifiedVal: [this.attr('emptyValue')],
-    };
-
-    if (modifiedAttr.attribute_object) {
-      diffObject.modifiedVal = [modifiedAttr.attribute_object.email];
-    }
-
-    // value is empty. Attr filled first time
-    if (val && val.attribute_object) {
-      GGRC.Utils.getPersonInfo(val.attribute_object).then((person) => {
-        diffObject.currentVal = [person.email];
-        dfd.resolve(diffObject);
-      });
-    } else {
-      dfd.resolve(diffObject);
-    }
-
-    return dfd;
   },
   convertValue(value, type) {
     if (!value) {
