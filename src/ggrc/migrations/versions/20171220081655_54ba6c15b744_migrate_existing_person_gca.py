@@ -87,6 +87,34 @@ def upgrade():
       WHERE cad.attribute_type = 'Map:person' AND
         definition_id IS null;
   """)
+  op.execute("""
+      INSERT INTO access_control_list (
+         person_id,
+         ac_role_id,
+         object_id,
+         object_type,
+         created_at,
+         modified_by_id,
+         updated_at,
+         context_id
+      )
+      SELECT 
+        cav.attribute_object_id,
+        acr.id,
+        cav.attributable_id,
+        cav.attributable_type,
+        cav.created_at,
+        cav.modified_by_id,
+        cav.updated_at,
+        cav.context_id
+      FROM custom_attribute_values cav
+      JOIN custom_attribute_definitions cad ON
+        cav.custom_attribute_id = cad.id
+      JOIN access_control_roles acr ON
+        acr.name = cad.title
+      WHERE cad.attribute_type = 'Map:person' AND
+        definition_id IS null;
+  """)
   op.execute("SET SESSION SQL_SAFE_UPDATES = 0;")
   op.execute("""
       DELETE cad FROM custom_attribute_definitions cad
