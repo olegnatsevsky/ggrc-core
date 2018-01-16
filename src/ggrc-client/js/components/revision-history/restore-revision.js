@@ -96,9 +96,7 @@ export default can.Component.extend({
           .find((def) => value.custom_attribute_id === def.id);
         let caValue;
 
-        if (def.attribute_type === 'Map:Person') {
-          caValue = `Person:${value.attribute_object.id}`;
-        } else if (def.attribute_type === 'Checkbox') {
+        if (def.attribute_type === 'Checkbox') {
           caValue = value.attribute_value === '1' ? true : false;
         } else {
           caValue = value.attribute_value;
