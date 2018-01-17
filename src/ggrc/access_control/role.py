@@ -166,3 +166,11 @@ def get_custom_roles_for(object_type):
     for type_, id_, name_ in query:
       flask.g.global_role_names[type_][id_] = name_
   return flask.g.global_role_names[object_type]
+
+
+def get_role_id(object_type, role_name):
+  """Get role id by name"""
+  roles_dict = get_custom_roles_for(object_type)
+  for k, v in roles_dict.iteritems():
+    if v == role_name:
+      return k
