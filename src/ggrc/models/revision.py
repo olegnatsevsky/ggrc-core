@@ -332,6 +332,57 @@ class Revision(Base, db.Model):
       return {}
     return {"custom_attribute_values": self._content["custom_attributes"]}
 
+  def populate_acl_from_migrated_gcas(self):
+    """Fix the representation of the migrated Person type GCAs
+
+    After migration of Person type GCAs to ACL we need to fix how an old GCA
+    represented in revisions.
+    """
+    cads = self._content.get('custom_attribute_definitions', [])
+    cavs = self._content.get('custom_attribute_values', [])
+    acl = self.populate_acl()['access_control_list']
+    new_cads = []
+    cav_id_to_remove = []
+    for cad in cads:
+      if cad['attribute_type'] == 'Map:Person' and not cad['definition_id']:
+        for cav in cavs:
+          if cav['custom_attribute_id'] == cad['id']:
+            ac_role_id = role.get_role_id(self.resource_type, cad['title'])
+
+            if ac_role_id:
+              acl.append({
+                  'display_name': cav['display_name'],
+                  'ac_role_id': ac_role_id,
+                  'context_id': cav['context_id'],
+                  'created_at': cav['created_at'],
+                  'object_type': cav['attributable_type'],
+                  'updated_at': cav['updated_at'],
+                  'object_id': cav['attributable_id'],
+                  'parent_id': None,
+                  'person': {
+                      'href': cav['attribute_object']['href'],
+                      'type': cav['attribute_object']['type'],
+                      'id': cav['attribute_object']['id']
+                  },
+                  'modified_by_id': cav['modified_by_id'],
+                  'person_id': cav['attribute_object']['id'],
+                  'modified_by': cav['modified_by'],
+                  'type': 'AccessControlList'
+              })
+
+            cav_id_to_remove.append(cav['id'])
+      else:
+        new_cads.append(cad)
+
+    new_cavs = [cav for cav in cavs if cav['id'] not in cav_id_to_remove]
+
+    return {
+        'access_control_list': acl,
+        'custom_attribute_definitions': new_cads,
+        'custom_attributes': new_cavs,
+        'custom_attribute_values': new_cavs,
+    }
+
   @builder.simple_property
   def content(self):
     """Property. Contains the revision content dict.
@@ -340,6 +391,7 @@ class Revision(Base, db.Model):
     # pylint: disable=too-many-locals
     populated_content = self._content.copy()
     populated_content.update(self.populate_acl())
+    populated_content.update(self.populate_acl_from_migrated_gcas())
     populated_content.update(self.populate_reference_url())
     populated_content.update(self.populate_folder())
     populated_content.update(self.populate_labels())
