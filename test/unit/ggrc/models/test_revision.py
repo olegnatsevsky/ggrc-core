@@ -247,7 +247,140 @@ class TestCheckPopulatedContent(unittest.TestCase):
         expected_evidence,
     )
 
-  @ddt.data(
+  def test_populate_acl_from_gca_person_type(self):
+    """Test populated ACL from old GCA Person type"""
+    obj = mock.Mock()
+    obj.id = self.object_id
+    obj.__class__.__name__ = self.object_type
+    content = {
+        "custom_attribute_values": [{
+            "display_name": "some_display_name",
+            "attribute_object": {
+                "context_id": None,
+                "href": "/api/people/3",
+                "type": "Person",
+                "id": "3"
+            },
+            "custom_attribute_id": 1,
+            "context_id": None,
+            "created_at": "2018-01-19T14:57:40",
+            "updated_at": "2018-01-19T14:57:40",
+            "attributable_type": "Control",
+            "modified_by": None,
+            "modified_by_id": 1,
+            "attribute_value": "Person",
+            "type": "CustomAttributeValue",
+            "id": 46,
+            "attributable_id": 23
+        }],
+
+        "custom_attribute_definitions": [{
+            "mandatory": None,
+            "title": "map_person_gca",
+            "multi_choice_options": None,
+            "created_at": "2018-01-19T14:57:39",
+            "modified_by_id": None,
+            "updated_at": "2018-01-19T14:57:39",
+            "multi_choice_mandatory": None,
+            "definition_id": None,
+            "definition_type": "control",
+            "modified_by": None,
+            "helptext": None,
+            "placeholder": None,
+            "attribute_type": "Map:Person",
+            "context_id": None,
+            "display_name": "map_person_gca",
+            "type": "CustomAttributeDefinition",
+            "id": 1
+        }]
+    }
+
+    dummy_ac_role_id = 10
+    revision = all_models.Revision(obj, mock.Mock(), mock.Mock(), content)
+    with mock.patch("ggrc.access_control.role.get_custom_roles_for",
+                    return_value={dummy_ac_role_id: 'map_person_gca'}):
+      result = revision.populate_acl_from_migrated_gcas()
+
+      result_ac = result['access_control_list'][0]
+      self.assertEqual(len(result['access_control_list']), 1)
+      self.assertEqual(len(result['custom_attribute_values']), 0)
+      self.assertEqual(len(result['custom_attribute_definitions']), 0)
+
+      cav = content['custom_attribute_values'][0]
+      self.assertEqual(result_ac['display_name'], cav['display_name'])
+      self.assertEqual(result_ac['ac_role_id'], dummy_ac_role_id)
+      self.assertEqual(result_ac['context_id'], cav['context_id'])
+      self.assertEqual(result_ac['created_at'], cav['created_at'])
+      self.assertEqual(result_ac['updated_at'], cav['updated_at'])
+      self.assertEqual(result_ac['object_type'], cav['attributable_type'])
+      self.assertEqual(result_ac['object_id'], cav['attributable_id'])
+      self.assertEqual(result_ac['parent_id'], None)
+      self.assertEqual(result_ac['modified_by_id'], cav['modified_by_id'])
+      self.assertEqual(result_ac['modified_by'], cav['modified_by'])
+      self.assertEqual(result_ac['type'], 'AccessControlList')
+      self.assertEqual(result_ac['person_id'], cav['attribute_object']['id'])
+      self.assertEqual(result_ac['person']['href'],
+                       cav['attribute_object']['href'])
+      self.assertEqual(result_ac['person']['type'],
+                       cav['attribute_object']['type'])
+      self.assertEqual(result_ac['person']['id'],
+                       cav['attribute_object']['id'])
+
+  def test_populate_acl_from_gca_text_type(self):
+    """Test populated ACL from old GCA not person type should stay unchanged"""
+    obj = mock.Mock()
+    obj.id = self.object_id
+    obj.__class__.__name__ = self.object_type
+    content = {
+      "custom_attribute_values": [{
+          "display_name": "",
+          "attribute_object": None,
+          "custom_attribute_id": 45,
+          "context_id": None,
+          "created_at": "2018-01-19T14:57:40",
+          "attributable_type": "Control",
+          "attribute_object_id": None,
+          "updated_at": "2018-01-19T14:57:40",
+          "modified_by": None,
+          "modified_by_id": None,
+          "attribute_value": "Super text",
+          "type": "CustomAttributeValue",
+          "id": 47,
+          "attributable_id": 23
+      }],
+
+      "custom_attribute_definitions": [{
+          "mandatory": None, "title": "sample_text_cad",
+          "multi_choice_options": None,
+          "created_at": "2018-01-19T14:57:39",
+          "modified_by_id": None,
+          "multi_choice_mandatory": None,
+          "updated_at": "2018-01-19T14:57:39",
+          "definition_id": None,
+          "definition_type": "control",
+          "modified_by": None,
+          "helptext": None,
+          "placeholder": None,
+          "attribute_type": "Text",
+          "context_id": None,
+          "display_name": "sample_text_cad",
+          "type": "CustomAttributeDefinition",
+          "id": 45
+      }]
+    }
+
+    dummy_ac_role_id = 10
+    revision = all_models.Revision(obj, mock.Mock(), mock.Mock(), content)
+    with mock.patch("ggrc.access_control.role.get_custom_roles_for",
+                    return_value={dummy_ac_role_id: 'map_person_gca'}):
+      result = revision.populate_acl_from_migrated_gcas()
+      self.assertEqual(len(result['access_control_list']), 0)
+      self.assertEqual(result['custom_attribute_definitions'],
+                       content['custom_attribute_definitions'])
+      self.assertEqual(result['custom_attribute_values'],
+                       content['custom_attribute_values'])
+
+@ddt.data(
       ({}, {}),
       ({"custom_attribute_values": [], "custom_attributes": []}, {}),
       ({"custom_attributes": []}, {"custom_attribute_values": []}),
@@ -263,3 +396,4 @@ class TestCheckPopulatedContent(unittest.TestCase):
     obj.__class__.__name__ = self.object_type
     revision = all_models.Revision(obj, mock.Mock(), mock.Mock(), content)
     self.assertEqual(expected_content, revision.populate_cavs())
+
