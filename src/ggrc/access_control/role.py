@@ -171,6 +171,6 @@ def get_custom_roles_for(object_type):
 def get_role_id(object_type, role_name):
   """Get role id by name"""
   roles_dict = get_custom_roles_for(object_type)
-  for k, v in roles_dict.iteritems():
-    if v == role_name:
-      return k
+  for key, value in roles_dict.iteritems():
+    if value == role_name:
+      return key
