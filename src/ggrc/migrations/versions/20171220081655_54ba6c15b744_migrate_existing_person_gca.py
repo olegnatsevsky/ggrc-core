@@ -89,16 +89,16 @@ def upgrade():
   """)
   op.execute("""
       INSERT INTO access_control_list (
-         person_id,
-         ac_role_id,
-         object_id,
-         object_type,
-         created_at,
-         modified_by_id,
-         updated_at,
-         context_id
+        person_id,
+        ac_role_id,
+        object_id,
+        object_type,
+        created_at,
+        modified_by_id,
+        updated_at,
+        context_id
       )
-      SELECT 
+      SELECT
         cav.attribute_object_id,
         acr.id,
         cav.attributable_id,
