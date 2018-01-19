@@ -332,41 +332,41 @@ class TestCheckPopulatedContent(unittest.TestCase):
     obj.id = self.object_id
     obj.__class__.__name__ = self.object_type
     content = {
-      "custom_attribute_values": [{
-          "display_name": "",
-          "attribute_object": None,
-          "custom_attribute_id": 45,
-          "context_id": None,
-          "created_at": "2018-01-19T14:57:40",
-          "attributable_type": "Control",
-          "attribute_object_id": None,
-          "updated_at": "2018-01-19T14:57:40",
-          "modified_by": None,
-          "modified_by_id": None,
-          "attribute_value": "Super text",
-          "type": "CustomAttributeValue",
-          "id": 47,
-          "attributable_id": 23
-      }],
+        "custom_attribute_values": [{
+            "display_name": "",
+            "attribute_object": None,
+            "custom_attribute_id": 45,
+            "context_id": None,
+            "created_at": "2018-01-19T14:57:40",
+            "attributable_type": "Control",
+            "attribute_object_id": None,
+            "updated_at": "2018-01-19T14:57:40",
+            "modified_by": None,
+            "modified_by_id": None,
+            "attribute_value": "Super text",
+            "type": "CustomAttributeValue",
+            "id": 47,
+            "attributable_id": 23
+        }],
 
-      "custom_attribute_definitions": [{
-          "mandatory": None, "title": "sample_text_cad",
-          "multi_choice_options": None,
-          "created_at": "2018-01-19T14:57:39",
-          "modified_by_id": None,
-          "multi_choice_mandatory": None,
-          "updated_at": "2018-01-19T14:57:39",
-          "definition_id": None,
-          "definition_type": "control",
-          "modified_by": None,
-          "helptext": None,
-          "placeholder": None,
-          "attribute_type": "Text",
-          "context_id": None,
-          "display_name": "sample_text_cad",
-          "type": "CustomAttributeDefinition",
-          "id": 45
-      }]
+        "custom_attribute_definitions": [{
+            "mandatory": None, "title": "sample_text_cad",
+            "multi_choice_options": None,
+            "created_at": "2018-01-19T14:57:39",
+            "modified_by_id": None,
+            "multi_choice_mandatory": None,
+            "updated_at": "2018-01-19T14:57:39",
+            "definition_id": None,
+            "definition_type": "control",
+            "modified_by": None,
+            "helptext": None,
+            "placeholder": None,
+            "attribute_type": "Text",
+            "context_id": None,
+            "display_name": "sample_text_cad",
+            "type": "CustomAttributeDefinition",
+            "id": 45
+        }]
     }
 
     dummy_ac_role_id = 10
@@ -380,7 +380,7 @@ class TestCheckPopulatedContent(unittest.TestCase):
       self.assertEqual(result['custom_attribute_values'],
                        content['custom_attribute_values'])
 
-@ddt.data(
+  @ddt.data(
       ({}, {}),
       ({"custom_attribute_values": [], "custom_attributes": []}, {}),
       ({"custom_attributes": []}, {"custom_attribute_values": []}),
