@@ -421,7 +421,8 @@ class TestProposalApi(TestCase):
       control = factories.ControlFactory(title="1")
       cad = factories.CustomAttributeDefinitionFactory(
           definition_type="control",
-          attribute_type="Map:Person"
+          attribute_type="Map:Person",
+          definition_id=control.id
       )
       person = factories.PersonFactory()
       cav = factories.CustomAttributeValueFactory(
