@@ -15,6 +15,7 @@ from ggrc.models import audit
 from ggrc.models import issuetracker_issue
 from ggrc.models import mixins
 from ggrc.models import relationship
+from ggrc.models import custom_attribute_definition
 from ggrc.models.exceptions import ValidationError
 from ggrc.models.reflection import AttributeInfo
 from ggrc.models import reflection
@@ -234,6 +235,26 @@ class AssessmentTemplate(assessment.AuditRelationship, relationship.Relatable,
     issue_obj = issuetracker_issue.IssuetrackerIssue.get_issue(
         'AssessmentTemplate', self.id)
     return issue_obj.to_dict() if issue_obj is not None else {}
+
+  def insert_definition(self, definition):
+    """We need to override insertion of CAD to set 'definition' property
+
+    When we create assessment template with CAD, CAD.definition should point to
+    this template to mark CAD as LCA. Without it CAD validator fails during
+    'Custom attributes with Person type not allowed for GCA' check
+    """
+    cad = custom_attribute_definition.CustomAttributeDefinition(
+        mandatory=definition.get('mandatory'),
+        title=definition.get('title'),
+        multi_choice_mandatory=definition.get('multi_choice_mandatory'),
+        helptext=definition.get('helptext'),
+        attribute_type=definition.get('attribute_type'),
+        placeholder=definition.get('placeholder'),
+        multi_choice_options=definition.get('multi_choice_options'),
+        context=definition.get('context'),
+        definition=self
+    )
+    db.session.add(cad)
 
 
 def create_audit_relationship(audit_stub, obj):
