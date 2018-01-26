@@ -295,14 +295,27 @@ class CustomAttributeDefinition(attributevalidator.AttributeValidator,
 
     return value
 
-  def handle_after_flush(self):
-    """Validate object 'after flash' sqlalchemy event
+  @property
+  def is_lca(self):
+    """Check if CAD is Local CAD"""
+    created_via_template = getattr(self, 'definition', None)
+    created_via_post = self.definition_id
+    return created_via_post or created_via_template
 
-      Custom attributes with Person type allowed for LCA only
-    """
-    if not self.definition_id and self.attribute_type == "Map:Person":
+  @property
+  def is_gca(self):
+    """Check if CAD is Global CAD"""
+    return not self.is_lca
+
+  def validate_gca_person_type(self):
+    """Custom attributes with Person type not allowed for GCA"""
+    if self.is_gca and self.attribute_type == "Map:Person":
       raise ValidationError("Invalid attribute_type: 'Map:Person' "
                             "is not allowed for Global Custom Attributes")
+
+  def handle_after_flush(self):
+    """Validate object 'after flash' sqlalchemy event"""
+    self.validate_gca_person_type()
 
 
 class CustomAttributeMapable(object):
