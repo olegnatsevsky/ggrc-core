@@ -18,8 +18,8 @@ from lib.utils import conftest_utils, test_utils
 from lib.utils.string_utils import StringMethods
 
 dict_executed_fixtures = {}
-_gcas_types = element.GlobalCustomAttributesTypes.GCAS_TYPES
-_lcas_types = element.LocalCustomAttributesTypes.LCAS_TYPES
+_gcas_types = element.CustomAttributesTypes.GCAS_TYPES
+_lcas_types = element.CustomAttributesTypes.LCAS_TYPES
 
 
 def _get_fixture_from_dict_fixtures(fixture):

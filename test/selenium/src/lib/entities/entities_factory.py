@@ -10,8 +10,7 @@ import random
 
 from lib.constants import (element, objects, roles, value_aliases,
                            url as const_url)
-from lib.constants.element import (
-    CustomAttributesTypes, GlobalCustomAttributesTypes)
+from lib.constants.element import CustomAttributesTypes
 from lib.entities.entity import (
     Entity, PersonEntity, CustomAttributeEntity, ProgramEntity, ControlEntity,
     ObjectiveEntity, AuditEntity, AssessmentTemplateEntity, AssessmentEntity,
@@ -267,7 +266,7 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     """
     dashboard_ca = CustomAttributeEntity()
     dashboard_ca.type = cls.obj_ca
-    dashboard_ca.attribute_type = GlobalCustomAttributesTypes.TEXT
+    dashboard_ca.attribute_type = CustomAttributesTypes.TEXT
     dashboard_ca.title = cls.generate_string(value_aliases.DASHBOARD)
     dashboard_ca.mandatory = False
     dashboard_ca.definition_type = definition_type

@@ -97,25 +97,16 @@ class AdminWidgetEvents(object):
       r"(\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2}\s[A,P]M)"
 
 
-class GlobalCustomAttributesTypes(object):
-  """Possible types of Global Custom Attributes' types."""
+class CustomAttributesTypes(object):
+  """Possible types of Global and Local Custom Attributes' types."""
   TEXT = "Text"
   RICH_TEXT = "Rich Text"
   DATE = "Date"
   CHECKBOX = "Checkbox"
   DROPDOWN = "Dropdown"
-  GCAS_TYPES = (TEXT, RICH_TEXT, DATE, CHECKBOX, DROPDOWN)
-
-
-class LocalCustomAttributesTypes(GlobalCustomAttributesTypes):
-  """Possible types of Local Custom Attributes' types."""
   PERSON = "Map:Person"
-  LCAS_TYPES = GlobalCustomAttributesTypes.GCAS_TYPES + (PERSON, )
-
-
-class CustomAttributesTypes(LocalCustomAttributesTypes):
-  """All possible types of custom attributes."""
-  CAS_TYPES = LocalCustomAttributesTypes.LCAS_TYPES
+  GCAS_TYPES = (TEXT, RICH_TEXT, DATE, CHECKBOX, DROPDOWN)
+  LCAS_TYPES = ALL_TYPES = GCAS_TYPES + (PERSON,)
 
 
 class AdminWidgetCustomAttributes(object):
