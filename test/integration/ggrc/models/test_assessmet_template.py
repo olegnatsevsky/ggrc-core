@@ -40,7 +40,7 @@ class TestAssessmentTemplate(TestAssessmentBase):
                 'type': 'Audit'
             },
             'context': {
-                'id':  context.id
+                'id': context.id
             },
         }
     }
@@ -48,9 +48,7 @@ class TestAssessmentTemplate(TestAssessmentBase):
     self.assertStatus(response, 201)
 
     template = all_models.AssessmentTemplate.query.filter_by(
-      title=template_title).first()
+        title=template_title).first()
 
     self.assertEqual(1, len(template.custom_attribute_definitions))
     self.assertEqual(lca_title, template.custom_attribute_definitions[0].title)
-
-
