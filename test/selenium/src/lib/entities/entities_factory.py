@@ -10,8 +10,7 @@ import random
 
 from lib.constants import (element, objects, roles, value_aliases,
                            url as const_url)
-from lib.constants.element import (
-    CustomAttributesTypes, GlobalCustomAttributesTypes)
+from lib.constants.element import CustomAttributesTypes
 from lib.entities.entity import (
     Entity, PersonEntity, CustomAttributeEntity, ProgramEntity, ControlEntity,
     ObjectiveEntity, AuditEntity, AssessmentTemplateEntity, AssessmentEntity,
@@ -160,7 +159,7 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
         ca = ca.__dict__
       ca_attr_type = ca.get("attribute_type")
       ca_value = None
-      if ca_attr_type in CustomAttributesTypes.CAS_TYPES:
+      if ca_attr_type in CustomAttributesTypes.ALL_TYPES:
         if not is_none_values:
           if ca_attr_type in (CustomAttributesTypes.TEXT,
                               CustomAttributesTypes.RICH_TEXT):
@@ -218,7 +217,7 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     random_ca = CustomAttributeEntity()
     random_ca.type = cls.obj_ca
     random_ca.attribute_type = unicode(random.choice(
-        CustomAttributesTypes.CAS_TYPES))
+        CustomAttributesTypes.ALL_TYPES))
     random_ca.title = cls.generate_string(random_ca.attribute_type)
     if random_ca.attribute_type == CustomAttributesTypes.DROPDOWN:
       random_ca.multi_choice_options = StringMethods.random_list_strings()
@@ -267,7 +266,7 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     """
     dashboard_ca = CustomAttributeEntity()
     dashboard_ca.type = cls.obj_ca
-    dashboard_ca.attribute_type = GlobalCustomAttributesTypes.TEXT
+    dashboard_ca.attribute_type = CustomAttributesTypes.TEXT
     dashboard_ca.title = cls.generate_string(value_aliases.DASHBOARD)
     dashboard_ca.mandatory = False
     dashboard_ca.definition_type = definition_type
