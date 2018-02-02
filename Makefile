@@ -12,8 +12,8 @@ DEV_PREFIX := $(shell cd $(DEV_PREFIX); pwd)
 
 # GCLOUD_ZIP_NAME and GCLOUD_ZIP_HREF are independent but should be
 # updated together to ensure update is forced during `vagrant provision`
-GCLOUD_ZIP_HREF=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-154.0.1-linux-x86_64.tar.gz
-GCLOUD_ZIP_NAME=google-cloud-sdk-154.0.1-linux-x86_64.tar.gz
+GCLOUD_ZIP_HREF=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-187.0.0-linux-x86_64.tar.gz
+GCLOUD_ZIP_NAME=google-cloud-sdk-187.0.0-linux-x86_64.tar.gz
 GCLOUD_ZIP_PATH=$(DEV_PREFIX)/opt/$(GCLOUD_ZIP_NAME)
 GCLOUD_SDK_PATH=$(DEV_PREFIX)/opt/google-cloud-sdk
 

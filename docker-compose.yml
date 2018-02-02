@@ -16,6 +16,7 @@ services:
      - NODE_PATH=/vagrant-dev/node_modules/
      - GGRC_DATABASE_URI=mysql+mysqldb://root:root@db/ggrcdev?charset=utf8
      - GGRC_DATABASE_HOST=db
+     - OAUTHLIB_INSECURE_TRANSPORT=1
     links:
      - db
   db:

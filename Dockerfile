@@ -45,6 +45,6 @@ COPY ./extras /vagrant/extras
 RUN make setup_dev DEV_PREFIX=/vagrant-dev \
   && make appengine_sdk DEV_PREFIX=/vagrant-dev \
   && make appengine_packages DEV_PREFIX=/vagrant-dev \
-  && rm /vagrant-dev/opt/google-cloud-sdk-154.0.1-linux-x86_64.tar.gz
+  && rm /vagrant-dev/opt/google-cloud-sdk-187.0.0-linux-x86_64.tar.gz
 
 CMD bash -c 'tail -f bin/init_env'

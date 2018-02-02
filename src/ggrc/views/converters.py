@@ -9,7 +9,7 @@ including the import/export api endponts.
 
 from logging import getLogger
 
-from apiclient.errors import HttpError
+from googleapiclient.errors import HttpError
 
 from flask import current_app
 from flask import request
