@@ -14,7 +14,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '54ba6c15b744'
-down_revision = '21db8dd549ac'
+down_revision = '19a260ec358e'
 
 
 def upgrade():
@@ -30,6 +30,7 @@ def upgrade():
       INSERT INTO gca_migration_mapping VALUES
         ('access_group','AccessGroup'),
         ('assessment',	'Assessment'),
+        ('audit','Audit'),
         ('clause','Clause'),
         ('contract','Contract'),
         ('control',	'Control'),
@@ -49,7 +50,8 @@ def upgrade():
         ('standard','Standard'),
         ('system','System'),
         ('threat','Threat'),
-        ('vendor','Vendor');
+        ('vendor','Vendor'),
+        ('workflow','Workflow');
   """)
   op.execute("""
       INSERT INTO access_control_roles (
@@ -113,8 +115,11 @@ def upgrade():
       JOIN access_control_roles acr ON
         acr.name = cad.title
       WHERE cad.attribute_type = 'Map:person' AND
-        definition_id IS null;
+        definition_id IS NULL AND
+        cav.attribute_object_id IN (SELECT id FROM people);
   """)
+  # because of WHERE clause is not contained unique fields
+  # we need SQL_SAFE_UPDATES = 0; it safe in our case.
   op.execute("SET SESSION SQL_SAFE_UPDATES = 0;")
   op.execute("""
       DELETE cad FROM custom_attribute_definitions cad
@@ -126,4 +131,4 @@ def upgrade():
 
 
 def downgrade():
-  """Downgrade database schema and/or data back to the previous revision."""
+  """Don't need to create person type CAD's back"""
