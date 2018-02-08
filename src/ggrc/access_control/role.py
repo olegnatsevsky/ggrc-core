@@ -169,7 +169,12 @@ def get_custom_roles_for(object_type):
 
 
 def get_role_id(object_type, role_name):
-  """Get role id by name"""
+  """Get role id by name
+
+  It's not a good practice to search in dict by value, it should be used for
+  revision history populate of 'old' CAD's person type only.
+  In case of more frequent use should be redeveloped.
+  """
   roles_dict = get_custom_roles_for(object_type)
   for key, value in roles_dict.iteritems():
     if value == role_name:
