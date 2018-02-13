@@ -5,7 +5,8 @@
 
 import flask
 import google.oauth2.credentials
-import google_auth_oauthlib.flow
+from google_auth_oauthlib.helpers import credentials_from_session
+from requests_oauthlib import OAuth2Session
 
 from werkzeug.exceptions import BadRequest
 
@@ -15,15 +16,6 @@ from ggrc.app import app
 _GOOGLE_AUTH_URI = "https://accounts.google.com/o/oauth2/auth"
 _GOOGLE_TOKEN_URI = "https://accounts.google.com/o/oauth2/token"
 _GOOGLE_API_GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
-
-CLIENT_CONFIG = {
-    u'web': {
-        u'token_uri': _GOOGLE_TOKEN_URI,
-        u'auth_uri': _GOOGLE_AUTH_URI,
-        u'client_id': settings.GAPI_CLIENT_ID,
-        u'client_secret': settings.GAPI_CLIENT_SECRET,
-    }
-}
 
 
 class UserCredentialException(Exception):
@@ -55,13 +47,11 @@ def verify_credentials():
 @app.route("/authorize_gdrive")
 def authorize_gdrive():
   """1st step of oauth2 flow"""
-  flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      CLIENT_CONFIG, scopes=[_GOOGLE_API_GDRIVE_SCOPE])
-  flow.redirect_uri = flask.url_for('authorize', _external=True)
-
-  authorization_url, state = flow.authorization_url(
-      # Enable incremental authorization. Recommended as a best practice.
-      include_granted_scopes='true')
+  google_session = OAuth2Session(settings.GAPI_CLIENT_ID,
+                                 scope=[_GOOGLE_API_GDRIVE_SCOPE],
+                                 redirect_uri=flask.url_for('authorize',
+                                                            _external=True))
+  authorization_url, state = google_session.authorization_url(_GOOGLE_AUTH_URI)
   flask.session['state'] = state
 
   ggrc_view_to_redirect = flask.request.url
@@ -84,15 +74,20 @@ def authorize():
   # verified in the authorization server response.
   state = flask.session['state']
 
-  flow = google_auth_oauthlib.flow.Flow.from_client_config(
-      CLIENT_CONFIG, scopes=[_GOOGLE_API_GDRIVE_SCOPE], state=state)
-  flow.redirect_uri = flask.url_for('authorize', _external=True)
   authorization_response = flask.request.url
-  flow.fetch_token(authorization_response=authorization_response)
+
+  google_session = OAuth2Session(settings.GAPI_CLIENT_ID,
+                                 state=state,
+                                 scope=[_GOOGLE_API_GDRIVE_SCOPE],
+                                 redirect_uri=flask.url_for('authorize',
+                                                            _external=True))
+  google_session.fetch_token(_GOOGLE_TOKEN_URI,
+                             client_secret=settings.GAPI_CLIENT_SECRET,
+                             authorization_response=authorization_response)
 
   # Store credentials in the session.
   # ACTION ITEM: To save these credentials in a persistent database instead.
-  credentials = flow.credentials
+  credentials = credentials_from_session(google_session)
   flask.session['credentials'] = credentials_to_dict(credentials)
   del flask.session['state']
   ggrc_view_to_redirect = flask.session['ggrc_view_to_redirect']

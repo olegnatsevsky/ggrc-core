@@ -54,6 +54,8 @@ libraries:
     version: "latest"
   - name: jinja2
     version: "2.6"
+  - name: ssl
+    version: latest
 
 builtins:
 - remote_api: on
@@ -114,3 +116,4 @@ env_variables:
   DASHBOARD_INTEGRATION: "{DASHBOARD_INTEGRATION}"
   ALLOWED_QUERYAPI_APP_IDS: "{ALLOWED_QUERYAPI_APP_IDS}"
   ACCESS_TOKEN: "{ACCESS_TOKEN}"
+  GAE_USE_SOCKETS_HTTPLIB : 'true'
