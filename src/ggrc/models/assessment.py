@@ -33,9 +33,9 @@ from ggrc.models.mixins.assignable import Assignable
 from ggrc.models.mixins.autostatuschangeable import AutoStatusChangeable
 from ggrc.models.mixins.validate_on_complete import ValidateOnComplete
 from ggrc.models.mixins.with_action import WithAction
+from ggrc.models.mixins.with_evidence import WithEvidence
 from ggrc.models.mixins.with_similarity_score import WithSimilarityScore
 from ggrc.models.deferred import deferred
-from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models import reflection
 from ggrc.models.relationship import Relatable
@@ -45,7 +45,7 @@ from ggrc.fulltext.mixin import Indexed
 
 class Assessment(Assignable, statusable.Statusable, AuditRelationship,
                  AutoStatusChangeable, HasObjectState, TestPlanned,
-                 CustomAttributable, PublicDocumentable, Commentable,
+                 CustomAttributable, WithEvidence, Commentable,
                  Personable, reminderable.Reminderable, Relatable,
                  LastDeprecatedTimeboxed, WithSimilarityScore, FinishedDate,
                  VerifiedDate, ValidateOnComplete, Notifiable, WithAction,

@@ -68,6 +68,18 @@ def create_gdrive_file(csv_string, filename):
     hande_http_error(ex)
 
 
+def hande_http_error(ex):
+  """Helper for http error handling"""
+  message = json.loads(ex.content).get("error").get("message")
+  if ex.resp.status == 404:
+    raise NotFound(message)
+  if ex.resp.status == 401:
+    raise Unauthorized("{} Try to reload /import page".format(message))
+  if ex.resp.status == 400:
+    raise BadRequest(message + " Probably the file is of a wrong type.")
+  raise InternalServerError(message)
+
+
 def get_gdrive_file(file_data):
   """Get text/csv data from gdrive file"""
   csv_data, _, _ = get_gdrive_file_data(file_data)

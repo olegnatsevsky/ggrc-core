@@ -70,7 +70,7 @@ class AssessmentRelatedObjects(DefaultHandler):
         "order_by":[{"name": "created_at", "desc": True}],
         "fields": []
     }, {
-        "object_name": "Document",
+        "object_name": "Evidence",
         "filters": {
             "expression": {
                 "left": {
@@ -80,9 +80,9 @@ class AssessmentRelatedObjects(DefaultHandler):
                 },
                 "op": {"name": "AND"},
                 "right": {
-                    "left": "document_type",
+                    "left": "kind",
                     "op": {"name": "="},
-                    "right": "EVIDENCE"
+                    "right": "FILE"
                 }
             },
             "keys": [None]
@@ -90,7 +90,7 @@ class AssessmentRelatedObjects(DefaultHandler):
         "order_by":[{"name": "created_at", "desc": True}],
         "fields": []
     }, {
-        "object_name": "Document",
+        "object_name": "Evidence",
         "filters": {
             "expression": {
                 "left": {
@@ -100,7 +100,7 @@ class AssessmentRelatedObjects(DefaultHandler):
                 },
                 "op": {"name": "AND"},
                 "right": {
-                    "left": "document_type",
+                    "left": "kind",
                     "op": {"name": "="},
                     "right": "URL"
                 }
@@ -110,7 +110,7 @@ class AssessmentRelatedObjects(DefaultHandler):
         "order_by":[{"name": "created_at", "desc": True}],
         "fields": []
     }, {
-        "object_name": "Document",
+        "object_name": "Evidence",
         "filters": {
             "expression": {
                 "left": {
@@ -120,7 +120,7 @@ class AssessmentRelatedObjects(DefaultHandler):
                 },
                 "op": {"name": "AND"},
                 "right": {
-                    "left": "document_type",
+                    "left": "kind",
                     "op": {"name": "="},
                     "right": "REFERENCE_URL"
                 }
@@ -268,44 +268,44 @@ class AssessmentRelatedObjects(DefaultHandler):
                              reverse=True)
       _set_data(query, sorted_data)
 
-  def set_document_result(self, assessment):
-    """Set document result"""
+  def set_evidence_result(self, assessment):
+    """Set evidence result"""
     data_map = collections.defaultdict(list)
     query_map = {
-        models.Document.ATTACHMENT: self.query[2],
-        models.Document.URL: self.query[3],
-        models.Document.REFERENCE_URL: self.query[4],
+        models.Evidence.FILE: self.query[2],
+        models.Evidence.URL: self.query[3],
+        models.Evidence.REFERENCE_URL: self.query[4],
     }
     self.query[1]["last_modified"] = None
     with benchmark("Get assessment snapshot relationships"):
-      documents = db.session.query(
-          models.Document
+      evidences = db.session.query(
+          models.Evidence
       ).join(
           models.Relationship,
           and_(
-              models.Document.id == models.Relationship.source_id,
-              models.Relationship.source_type == "Document",
+              models.Evidence.id == models.Relationship.source_id,
+              models.Relationship.source_type == "Evidence",
               models.Relationship.destination_id == assessment.id,
               models.Relationship.destination_type == "Assessment"
           )
       ).union(
           db.session.query(
-              models.Document
+              models.Evidence
           ).join(
               models.Relationship,
               and_(
-                  models.Document.id == models.Relationship.destination_id,
-                  models.Relationship.destination_type == "Document",
+                  models.Evidence.id == models.Relationship.destination_id,
+                  models.Relationship.destination_type == "Evidence",
                   models.Relationship.source_id == assessment.id,
                   models.Relationship.source_type == "Assessment"
               )
           )
       ).all()
     with benchmark("Set assessment snapshot relationships"):
-      for document in documents:
-        data_map[document.document_type].append(document.log_json())
-      for document_type, query in query_map.items():
-        _set_data(query, data_map[document_type])
+      for evidence in evidences:
+        data_map[evidence.kind].append(evidence.log_json())
+      for kind, query in query_map.items():
+        _set_data(query, data_map[kind])
 
   def get_results(self):
     """Filter the objects and get their information.
@@ -321,7 +321,7 @@ class AssessmentRelatedObjects(DefaultHandler):
 
     self.set_snapshot_result(assessment)
     self.set_comment_result(assessment)
-    self.set_document_result(assessment)
+    self.set_evidence_result(assessment)
     self.set_audit_result(assessment)
 
     return self.query

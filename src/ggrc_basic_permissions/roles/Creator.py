@@ -144,6 +144,7 @@ permissions = {
         "Regulation",
         "Standard",
         "Document",
+        "Evidence",
         "Facility",
         "Help",
         "Market",

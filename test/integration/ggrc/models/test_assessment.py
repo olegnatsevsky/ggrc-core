@@ -235,14 +235,15 @@ class TestAssessment(TestAssessmentBase):
             object=assessment
         )
       factories.RelationshipFactory(source=audit, destination=assessment)
-      document = factories.DocumentFactory()
-      factories.RelationshipFactory(source=assessment, destination=document)
 
-    db.session.add(document)
-    for role in ["Assignees Document Mapped",
-                 "Creators Document Mapped",
-                 "Verifiers Document Mapped"]:
-      self.assert_mapped_role(role, person_email, document)
+      evidence = factories.EvidenceFactory()
+      factories.RelationshipFactory(source=assessment, destination=evidence)
+      db.session.add(evidence)
+
+    for role in ["Assignees Evidence Mapped",
+                 "Creators Evidence Mapped",
+                 "Verifiers Evidence Mapped"]:
+      self.assert_mapped_role(role, person_email, evidence)
 
   def test_deletion_mapped_roles(self):
     """Test deletion of mapped roles."""

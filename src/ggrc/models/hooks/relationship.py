@@ -389,14 +389,14 @@ def get_mapped_role(object_type, acr_name, mapped_obj_type):
 
   Returns:
     Id of AC role with name '<Assignee type> Mapped' or
-    '<Assignee type> Document Mapped' will be returned
+    '<Assignee type> Evidence Mapped' will be returned
   """
   obj_roles = {
       role_name: role_id
       for role_id, role_name in get_custom_roles_for(object_type).items()
   }
-  doc_part = " Document" if mapped_obj_type == "Document" else ""
-  return obj_roles.get("{}{} Mapped".format(acr_name, doc_part))
+  evid_part = " Evidence" if mapped_obj_type == "Evidence" else ""
+  return obj_roles.get("{}{} Mapped".format(acr_name, evid_part))
 
 
 def create_related_roles(base_objects, related_objects):

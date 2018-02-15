@@ -3,7 +3,7 @@
 
 """Integration tests for "preconditions_failed" CAV and CAable fields logic."""
 
-from ggrc.models.assessment import Assessment
+from ggrc.models import all_models
 from integration.ggrc import TestCase
 from integration.ggrc import generator
 from integration.ggrc.models import factories
@@ -63,7 +63,7 @@ class TestPreconditionsFailed(TestCase):
   def setUp(self):
     super(TestPreconditionsFailed, self).setUp()
     self.assessment = factories.AssessmentFactory(
-        status=Assessment.PROGRESS_STATE,
+        status=all_models.Assessment.PROGRESS_STATE,
     )
 
   def test_preconditions_failed_with_no_ca(self):
@@ -194,14 +194,13 @@ class TestPreconditionsFailed(TestCase):
         dropdown_parameters=("foo,evidence_required", "0,2"),
         value="evidence_required",
     )
-    evidence = factories.EvidenceTypeDocumentFactory(
+    evidence = factories.EvidenceFileFactory(
         title="Mandatory evidence",
     )
     factories.RelationshipFactory(
         source=self.assessment,
         destination=evidence,
     )
-
     preconditions_failed = self.assessment.preconditions_failed
 
     self.assertEqual(preconditions_failed, False)
@@ -285,7 +284,7 @@ class TestPreconditionsFailed(TestCase):
         value="evidence_required"
     )
     # only one evidence provided yet
-    evidence = factories.EvidenceTypeDocumentFactory(
+    evidence = factories.EvidenceFileFactory(
         title="Mandatory evidence",
     )
     factories.RelationshipFactory(
@@ -314,7 +313,7 @@ class TestPreconditionsFailed(TestCase):
         value="evidence_required"
     )
     # only one evidence provided yet
-    evidence = factories.EvidenceTypeDocumentFactory(
+    evidence = factories.EvidenceFileFactory(
         title="Mandatory evidence",
     )
     factories.RelationshipFactory(
@@ -323,7 +322,7 @@ class TestPreconditionsFailed(TestCase):
     )
 
     # the second evidence
-    evidence = factories.EvidenceTypeDocumentFactory(
+    evidence = factories.EvidenceFileFactory(
         title="Second mandatory evidence",
     )
     factories.RelationshipFactory(

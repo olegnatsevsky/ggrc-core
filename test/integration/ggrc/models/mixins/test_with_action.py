@@ -46,18 +46,18 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
                                                 "remove_related": []}})
     self.assert200(response)
 
-  def test_add_url(self):
-    """Test add url action."""
+  def test_add_evidence_url(self):
+    """Test add evidence url action."""
     assessment = factories.AssessmentFactory()
     context = factories.ContextFactory(related_object=assessment)
     assessment.context = context
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
             "id": None,
-            "type": "Document",
+            "type": "Evidence",
             "link": "google.com",
             "title": "google.com",
-            "document_type": all_models.Document.URL,
+            "kind": all_models.Evidence.URL,
         }
     ]}})
     self.assert200(response)
@@ -65,26 +65,53 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     relationship = _get_relationship(
         "Assessment", response.json["assessment"]["id"])
     self.assertIsNotNone(relationship)
-    document = all_models.Document.query.get(relationship.destination_id)
-    self.assertEqual(document.link, "google.com")
-    self.assertEqual(document.document_type, all_models.Document.URL)
-    self.assertEqual(document.context_id, assessment.context_id)
+    evidence = all_models.Evidence.query.get(relationship.destination_id)
+    self.assertEqual(evidence.link, "google.com")
+    self.assertEqual(evidence.kind, all_models.Evidence.URL)
+    self.assertEqual(evidence.context_id, assessment.context_id)
 
-  def test_map_document_assessment(self):
-    """Test map document action on assessment."""
+  def test_add_evidence_file(self):
+    """Test add evidence file action."""
     assessment = factories.AssessmentFactory()
-    document = factories.DocumentFactory()
+    context = factories.ContextFactory(related_object=assessment)
+    assessment.context = context
+    response = self.api.put(assessment, {"actions": {"add_related": [
+      {
+          "id": None,
+          "type": "Evidence",
+          "link": "google.com",
+          "title": "google.com",
+          "kind": all_models.Evidence.FILE,
+          "source_gdrive_id": "source_gdrive_id",
+      }
+    ]}})
+
+    self.assert200(response)
+
+    relationship = _get_relationship(
+        "Assessment", response.json["assessment"]["id"])
+    self.assertIsNotNone(relationship)
+    evidence = all_models.Evidence.query.get(relationship.destination_id)
+    self.assertEqual(evidence.link, "google.com")
+    self.assertEqual(evidence.kind, all_models.Evidence.FILE)
+    self.assertEqual(evidence.source_gdrive_id, "source_gdrive_id")
+    self.assertEqual(evidence.context_id, assessment.context_id)
+
+  def test_map_evidence_assessment(self):
+    """Test map evidence action on assessment."""
+    assessment = factories.AssessmentFactory()
+    evidence = factories.EvidenceUrlFactory()
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
-            "id": document.id,
-            "type": "Document",
+            "id": evidence.id,
+            "type": "Evidence",
         }
     ]}})
     self.assert200(response)
 
     relationship = _get_relationship(
         "Assessment", response.json["assessment"]["id"])
-    self.assertEqual(relationship.destination_id, document.id)
+    self.assertEqual(relationship.destination_id, evidence.id)
     self.assertEqual(relationship.source_id, assessment.id)
 
   def test_map_document_issue(self):
@@ -116,7 +143,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     ]}})
     self.assert400(response)
 
-    wrong_params["document_type"] = "Evidence URL"
+    wrong_params["kind"] = "Evidence URL"
     response = self.api.put(assessment, {"actions": {"add_related": [
         wrong_params
     ]}})
@@ -136,7 +163,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
 
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
     self.assert400(response)
@@ -176,17 +203,17 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     ]}})
     self.assert400(response)
 
-  def test_unmap_document_as_dst_assessment(self):
-    """Test unmapping of documents set as relationship destination on
+  def test_unmap_evidence_as_dst_assessment(self):
+    """Test unmapping of evidence set as relationship destination on
     assessment."""
     assessment = factories.AssessmentFactory()
-    document = factories.DocumentFactory()
+    evidence = factories.EvidenceUrlFactory()
     rel_id = factories.RelationshipFactory(source=assessment,
-                                           destination=document).id
+                                           destination=evidence).id
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
-            "id": document.id,
-            "type": "Document",
+            "id": evidence.id,
+            "type": "Evidence",
         }
     ]}})
     self.assert200(response)
@@ -210,17 +237,17 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     relationship = all_models.Relationship.query.get(rel_id)
     self.assertIsNone(relationship)
 
-  def test_unmap_document_as_src_assessment(self):
-    """Test unmapping of documents set as relationship source on
+  def test_unmap_evidence_as_src_assessment(self):
+    """Test unmapping of evidence set as relationship source on
     assessment."""
     assessment = factories.AssessmentFactory()
-    document = factories.DocumentFactory()
+    evidence = factories.EvidenceUrlFactory()
     rel_id = factories.RelationshipFactory(destination=assessment,
-                                           source=document).id
+                                           source=evidence).id
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
-            "id": document.id,
-            "type": "Document",
+            "id": evidence.id,
+            "type": "Evidence",
         }
     ]}})
     self.assert200(response)
@@ -247,21 +274,21 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
   def test_wrong_remove_action_assessment(self):
     """Test wrong remove action on assessment."""
     assessment = factories.AssessmentFactory()
-    document_id = factories.DocumentFactory().id
+    evidence_id = factories.EvidenceUrlFactory().id
 
     response = self.api.put(assessment, {"actions": {"remove_related": [{}]}})
     self.assert400(response)
 
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
-            "id": document_id,
+            "id": evidence_id,
         }
     ]}})
     self.assert400(response)
 
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
     self.assert400(response)
@@ -269,7 +296,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
             "id": None,
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
     self.assert400(response)
@@ -310,7 +337,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
             "id": 0,
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
     self.assert400(response)
@@ -331,7 +358,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     assessment = factories.AssessmentFactory()
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
     self.assert400(response)
@@ -352,10 +379,11 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
             "id": None,
-            "type": "Document",
-            "document_type": "EVIDENCE",
+            "type": "Evidence",
+            "kind": "FILE",
             "title": "evidence1",
             "link": "google.com",
+            "source_gdrive_id": "source_gdrive_id"
 
         }
     ]}})
@@ -364,20 +392,21 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     relationship = _get_relationship(
         "Assessment", response.json["assessment"]["id"])
     self.assertIsNotNone(relationship)
-    document = all_models.Document.query.get(relationship.destination_id)
-    self.assertEqual(document.link, "google.com")
-    self.assertEqual(document.title, "evidence1")
-    self.assertEqual(document.document_type, all_models.Document.ATTACHMENT)
+    evidence = all_models.Evidence.query.get(relationship.destination_id)
+    self.assertEqual(evidence.link, "google.com")
+    self.assertEqual(evidence.title, "evidence1")
+    self.assertEqual(evidence.kind, all_models.Evidence.FILE)
 
   def test_wrong_add_evidence(self):
     """Test wrong add evidence action."""
     assessment = factories.AssessmentFactory()
     proper_values = {
         "id": None,
-        "type": "Document",
-        "document_type": "EVIDENCE",
+        "type": "Evidence",
+        "kind": "FILE",
         "title": "evidence1",
         "link": "google.com",
+        "source_gdrive_id": "source_gdrive_id"
     }
 
     wrong_values = copy.copy(proper_values)
@@ -393,22 +422,22 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     self.assert400(response)
 
     wrong_values = copy.copy(proper_values)
-    wrong_values["document_type"] = "EVDNCE"
+    wrong_values["kind"] = "EVDNCE"
     response = self.api.put(assessment, {"actions": {"add_related":
                                          [wrong_values]}})
     self.assert400(response)
 
-  def test_status_change_document(self):
-    """Test auto status change after add document action"""
+  def test_status_change_evidence(self):
+    """Test auto status change after add evidence action"""
     assessment = factories.AssessmentFactory(
         status=all_models.Assessment.FINAL_STATE)
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
             "id": None,
-            "type": "Document",
+            "type": "Evidence",
             "link": "google.com",
             "title": "google.com",
-            "document_type": "URL",
+            "kind": "URL",
         }
     ]}})
     self.assert200(response)
@@ -427,18 +456,19 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     response = self.api.put(issue, {"description": "test"})
     self.assert200(response)
 
-  def test_document_indexing(self):
-    """Test document_indexing"""
+  def test_evidence_indexing(self):
+    """Test evidence indexing"""
     assessment = factories.AssessmentFactory()
     response = self.api.put(assessment, {"actions": {"add_related": [
         {
             "id": None,
-            "type": "Document",
+            "type": "Evidence",
             "link": "google.com",
             "title": "google.com",
-            "document_type": "URL",
+            "kind": "URL",
         }
     ]}})
+
     self.assert200(response)
 
     assessments_by_url = self.simple_query(
@@ -453,7 +483,7 @@ class TestDocumentWithActionMixin(TestCase, WithQueryApi):
     response = self.api.put(assessment, {"actions": {"remove_related": [
         {
             "id": relationship.destination_id,
-            "type": "Document",
+            "type": "Evidence",
         }
     ]}})
 
@@ -679,10 +709,10 @@ class TestMultiplyActions(TestCase, WithQueryApi):
   def test_multiply_actions(self):
     """Test multiply actions"""
     assessment = factories.AssessmentFactory()
-    doc_map = factories.DocumentFactory(link="google1.com")
-    doc_del = factories.DocumentFactory(link="google2.com")
+    evid_map = factories.EvidenceUrlFactory(link="google1.com")
+    evid_del = factories.EvidenceUrlFactory(link="google2.com")
     factories.RelationshipFactory(source=assessment,
-                                  destination=doc_del)
+                                  destination=evid_del)
 
     ca_def = factories.CustomAttributeDefinitionFactory(
         title="def1",
@@ -708,14 +738,15 @@ class TestMultiplyActions(TestCase, WithQueryApi):
         "actions": {"add_related": [
             {
                 "id": None,
-                "type": "Document",
-                "document_type": "EVIDENCE",
+                "type": "Evidence",
+                "kind": "FILE",
                 "title": "evidence1",
                 "link": "google3.com",
+                "source_gdrive_id": "source_gdrive_id",
             },
             {
-                "id": doc_map.id,
-                "type": "Document",
+                "id": evid_map.id,
+                "type": "Evidence",
             },
             {
                 "id": None,
@@ -725,9 +756,10 @@ class TestMultiplyActions(TestCase, WithQueryApi):
             }
         ], "remove_related": [
             {
-                "id": doc_del.id,
-                "type": "Document",
+                "id": evid_del.id,
+                "type": "Evidence",
             }]}})
+
     self.assert200(response)
 
     preconditions_failed = response.json["assessment"]["preconditions_failed"]

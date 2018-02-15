@@ -39,6 +39,7 @@ def contributed_services():
       service('data_assets', models.DataAsset),
       service('directives', models.Directive, ReadOnlyResource),
       service('contracts', models.Contract),
+      service('evidence', models.Evidence),
       service('policies', models.Policy),
       service('regulations', models.Regulation),
       service('standards', models.Standard),

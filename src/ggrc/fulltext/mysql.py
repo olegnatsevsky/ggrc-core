@@ -246,7 +246,7 @@ def update_indexer(session):  # pylint:disable=unused-argument
 @event.listens_for(all_models.Relationship, "after_insert")
 @event.listens_for(all_models.Relationship, "after_delete")
 def refresh_documents(mapper, connection, target):
-  """Refreshes related Documents to Documentable"""
+  """Refreshes related Documents"""
   if target.source_type == 'Document':
     for_refresh = target.destination
   elif target.destination_type == 'Document':
@@ -254,3 +254,18 @@ def refresh_documents(mapper, connection, target):
   else:
     return
   db.session.expire(for_refresh, ['documents'])
+
+
+# pylint:disable=unused-argument
+@event.listens_for(all_models.Relationship, "after_insert")
+@event.listens_for(all_models.Relationship, "after_delete")
+def refresh_evidences(mapper, connection, target):
+  """Refreshes related Evidences"""
+  if target.source_type == 'Evidence':
+    for_refresh = target.destination
+  elif target.destination_type == 'Evidence':
+    for_refresh = target.source
+  else:
+    return
+  if hasattr(for_refresh, 'evidences'):
+    db.session.expire(for_refresh, ['evidences'])

@@ -1,7 +1,7 @@
-# Copyright (C) 2018 Google Inc.
+# Copyright (C) 2017 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
-"""Module containing Document model."""
+"""Module containing Evidence model."""
 
 from sqlalchemy import orm
 from sqlalchemy import func, case
@@ -10,120 +10,134 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.builder import simple_property
-from ggrc.fulltext.mixin import Indexed
+from ggrc.fulltext import mixin
+from ggrc.models.deferred import deferred
+from ggrc.models.mixins import Base, Slugged
+from ggrc.models.mixins import WithLastDeprecatedDate
+from ggrc.models.mixins.statusable import Statusable
+from ggrc.models.relationship import Relatable
+from ggrc.models import comment
 from ggrc.models import exceptions
 from ggrc.models import reflection
 from ggrc.models import mixins
-from ggrc.models.deferred import deferred
-from ggrc.models.mixins import Base
-from ggrc.models.mixins import before_flush_handleable as bfh
-from ggrc.models.relationship import Relatable
 from ggrc.utils import referenced_objects
+from ggrc.models.mixins import before_flush_handleable as bfh
 
 
-class Document(Roleable, Relatable, Base, mixins.Titled, Indexed,
-               bfh.BeforeFlushHandleable, db.Model):
-  """Document model."""
-  __tablename__ = 'documents'
+class Evidence(Roleable, Relatable, mixins.Titled,
+               bfh.BeforeFlushHandleable, Slugged, mixin.Indexed, Statusable,
+               WithLastDeprecatedDate, comment.Commentable, db.Model):
+  """Evidence (Audit-scope URLs, FILE's) model."""
+  __tablename__ = "evidence"
 
   _title_uniqueness = False
 
-  link = deferred(db.Column(db.String, nullable=False), 'Document')
-  description = deferred(db.Column(db.Text, nullable=False, default=u""),
-                         'Document')
-
   URL = "URL"
   FILE = "FILE"
-  REFERENCE_URL = "REFERENCE_URL"
-  VALID_DOCUMENT_KINDS = [URL, FILE, REFERENCE_URL]
-  kind = deferred(db.Column(db.Enum(*VALID_DOCUMENT_KINDS),
+  VALID_EVIDENCE_KINDS = [URL, FILE]
+
+  START_STATE = 'Active'
+  DEPRECATED = 'Deprecated'
+
+  VALID_STATES = (START_STATE, DEPRECATED, )
+
+  kind = deferred(db.Column(db.Enum(*VALID_EVIDENCE_KINDS),
                             default=URL,
                             nullable=False),
-                  "Document")
-  source_gdrive_id = deferred(db.Column(db.String, nullable=False,
-                                        default=u""),
-                              'Document')
+                  "Evidence")
+  source_gdrive_id = deferred(db.Column(db.String, nullable=False, default=u""),
+                              "Evidence")
+  gdrive_id = deferred(db.Column(db.String, nullable=False, default=u""),
+                       "Evidence")
 
-  gdrive_id = deferred(db.Column(db.String, nullable=False,
-                               default=u""),
-                      'Document')
+  link = deferred(db.Column(db.String), "Evidence")
+
+  description = deferred(db.Column(db.Text, nullable=False, default=u""),
+                         "Evidence")
 
   _api_attrs = reflection.ApiAttributes(
-      'title',
-      'description',
-      reflection.Attribute('link', update=False),
-      reflection.Attribute('kind', update=False),
-      reflection.Attribute('source_gdrive_id', update=False),
-      reflection.Attribute('gdrive_id', create=False, update=False),
-      reflection.Attribute('parent_obj', read=False, update=False),
+      "title",
+      reflection.Attribute("link", update=False),
+      reflection.Attribute("source_gdrive_id", update=False),
+      "description",
+      "status",
+      reflection.Attribute("kind", update=False),
+      reflection.Attribute("parent_obj", read=False, update=False),
+      reflection.Attribute('archived', create=False, update=False),
       reflection.Attribute('is_uploaded', read=False, update=False),
   )
 
+  # assessment -> get related objects should return evidences
   _fulltext_attrs = [
-    'title',
-    'link',
-    'description',
-    'kind',
+    "title",
+    "link",
+    "description",
+    "kind",
+    "status",
+    "archived"
+  ]
+
+  AUTO_REINDEX_RULES = [
+    mixin.ReindexRule("Audit", lambda x: x.assessments, ["archived"]),
   ]
 
   _sanitize_html = [
-      'title',
-      'description',
+      "title",
+      "description",
   ]
 
   _aliases = {
-      'title': 'Title',
-      'link': 'Link',
-      'description': 'description',
+      "title": "Title",
+      "link": "Attachment",
+      "description": "description",
+      "archived": {
+        "display_name": "Archived",
+        "mandatory": False
+      },
   }
 
-  ALLOWED_PARENTS = {'Control', 'Issue', 'RiskAssessment'}
-
+  _allowed_parents = {'Assessment', 'Audit'}
   FILE_NAME_SEPARATOR = '_ggrc'
 
-  @orm.validates('kind')
+  @orm.validates("kind")
   def validate_kind(self, key, kind):
     """Returns correct option, otherwise rises an error"""
     if kind is None:
       kind = self.URL
-    if kind not in self.VALID_DOCUMENT_KINDS:
+    if kind not in self.VALID_EVIDENCE_KINDS:
       raise exceptions.ValidationError(
           "Invalid value for attribute {attr}. "
-          "Expected options are `{url}`, `{kind}`, `{reference_url}`".
+          "Expected options are `{url}`, `{file}`".
           format(
               attr=key,
               url=self.URL,
-              kind=self.FILE,
-              reference_url=self.REFERENCE_URL
+              file=self.FILE
           )
       )
     return kind
 
   @classmethod
   def indexed_query(cls):
-    return super(Document, cls).indexed_query().options(
+    return super(Evidence, cls).indexed_query().options(
         orm.Load(cls).undefer_group(
-            "Document_complete",
+            "Evidence_complete",
         ),
     )
 
-  @hybrid_property
-  def slug(self):
-    """Slug property"""
-    if self.kind in (self.URL, self.REFERENCE_URL):
-      return self.link
-    return u"{} {}".format(self.link, self.title)
+  @simple_property
+  def parent(self):
+    parent_candidates = self.related_objects(_types=Evidence._allowed_parents)
+    # TODO: make sure that only one parent (during relationship creation)
+    return parent_candidates.pop() if parent_candidates else None
 
-  # pylint: disable=no-self-argument
-  @slug.expression
-  def slug(cls):
-    return case([(cls.kind == cls.FILE,
-                  func.concat(cls.link, ' ', cls.title))],
-                else_=cls.link)
+  @simple_property
+  def archived(self):
+    """Returns a boolean whether parent is archived or not."""
+    return self.parent.archived if self.parent else False
 
   def log_json(self):
-    tmp = super(Document, self).log_json()
-    tmp['type'] = "Document"
+    tmp = super(Evidence, self).log_json()
+    tmp['type'] = 'Evidence'
     return tmp
 
   @simple_property
@@ -153,9 +167,9 @@ class Document(Roleable, Relatable, Base, mixins.Titled, Indexed,
     if 'type' not in self._parent_obj:
       raise exceptions.ValidationError(
         '"type" is mandatory for parent_obj')
-    if self._parent_obj['type'] not in self.ALLOWED_PARENTS:
+    if self._parent_obj['type'] not in self._allowed_parents:
       raise exceptions.ValidationError(
-        'Allowed types are: {}.'.format(', '.join(self.ALLOWED_PARENTS)))
+        'Allowed types are: {}.'.format(', '.join(self._allowed_parents)))
 
     parent_type = self._parent_obj['type']
     parent_id = self._parent_obj['id']
@@ -170,7 +184,7 @@ class Document(Roleable, Relatable, Base, mixins.Titled, Indexed,
   @staticmethod
   def _build_file_name_postfix(parent_obj):
     """Build postfix for given parent object"""
-    postfix_parts = [Document.FILE_NAME_SEPARATOR, parent_obj.slug]
+    postfix_parts = [Evidence.FILE_NAME_SEPARATOR, parent_obj.slug]
 
     related_snapshots = parent_obj.related_objects(_types=['Snapshot'])
     related_snapshots = sorted(related_snapshots, key=lambda it: it.id)
@@ -184,49 +198,49 @@ class Document(Roleable, Relatable, Base, mixins.Titled, Indexed,
     return postfix_sting
 
   def _build_relationship(self, parent_obj):
-    """Build relationship between document and documentable object"""
+    """Build relationship between evidence and parent object"""
     from ggrc.models import relationship
     rel = relationship.Relationship(
-        source=parent_obj,
-        destination=self
+      source=parent_obj,
+      destination=self
     )
     db.session.add(rel)
 
   def _update_fields(self, response):
-    """Update fields of document with values of the copied file"""
+    """Update fields of evidence with values of the copied file"""
     self.gdrive_id = response['id']
     self.link = response['webViewLink']
     self.title = response['name']
-    self.kind = Document.FILE
+    self.kind = Evidence.FILE
 
   @staticmethod
   def _get_folder(parent):
     return parent.folder if hasattr(parent, 'folder') else ''
 
   def _map_parent(self):
-    """Maps document to documentable object
+    """Maps evidence to parent object
 
     If Document.ATTACHMENT and source_gdrive_id => copy file
     """
     if self.is_with_parent_obj():
       parent = self._get_parent_obj()
-      if self.kind == Document.FILE and self.source_gdrive_id:
+      if self.kind == Evidence.FILE and self.source_gdrive_id:
         self.exec_gdrive_file_copy_flow(parent)
       self._build_relationship(parent)
       self._parent_obj = None
 
-  def exec_gdrive_file_copy_flow(self, documentable_obj):
+  def exec_gdrive_file_copy_flow(self, parent):
     """Execute google gdrive file copy flow
 
     Build file name, destination folder and copy file to that folder.
-    After coping fills document object fields with new gdrive URL
+    After coping fills evidence object fields with new gdrive URL
     """
-    postfix = self._build_file_name_postfix(documentable_obj)
-    folder_id = self._get_folder(documentable_obj)
+    postfix = self._build_file_name_postfix(parent)
+    folder_id = self._get_folder(parent)
     file_id = self.source_gdrive_id
     from ggrc.gdrive.file_actions import process_gdrive_file
     response = process_gdrive_file(folder_id, file_id, postfix,
-                                   separator=Document.FILE_NAME_SEPARATOR,
+                                   separator=Evidence.FILE_NAME_SEPARATOR,
                                    is_uploaded=self.is_uploaded)
     self._update_fields(response)
 

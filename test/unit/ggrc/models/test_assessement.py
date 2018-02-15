@@ -11,7 +11,6 @@ from ggrc import db
 from ggrc.models import all_models
 from ggrc.models import comment
 from ggrc.models import mixins
-from ggrc.models import object_document
 from ggrc.models import object_person
 from ggrc.models import relationship
 from ggrc.models import track_object_state
@@ -31,7 +30,7 @@ class TestAssessmentMixins(test_mixins_base.TestMixinsBase):
         mixins.BusinessObject,
         mixins.CustomAttributable,
         db.Model,
-        object_document.Documentable,
+        mixins.with_evidence.WithEvidence,
         track_object_state.HasObjectState,
         mixins.TestPlanned,
         mixins.Timeboxed,
@@ -50,11 +49,11 @@ class TestAssessmentMixins(test_mixins_base.TestMixinsBase):
         ('description', attributes.InstrumentedAttribute),               # Described      # noqa
         ('end_date', attributes.InstrumentedAttribute),                  # Timeboxed      # noqa
         ('notes', attributes.InstrumentedAttribute),                     # Noted          # noqa
-        ('document_url', property),                                      # Documentable   # noqa
-        ('document_evidence', property),                                 # Documentable   # noqa
+        ('evidences_url', property),                                     # Documentable   # noqa
+        ('evidences_file', property),                                    # Documentable   # noqa
         ('object_people', attributes.InstrumentedAttribute),             # Personable     # noqa
         ('os_state', attributes.InstrumentedAttribute),                  # HasObjectState # noqa
-        ('reference_url', property),                                     # Documentable   # noqa
+        ('evidences_reference_url', property),                           # Documentable   # noqa
         ('related_sources', attributes.InstrumentedAttribute),           # Relatable      # noqa
         ('related_destinations', attributes.InstrumentedAttribute),      # Relatable      # noqa
         ('slug', attributes.InstrumentedAttribute),                      # Slugged        # noqa

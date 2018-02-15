@@ -82,15 +82,15 @@ class AuditRolesHandler(object):
 
     for stub in related_stubs[audit_stub]:
       if stub.type not in ("Assessment", "AssessmentTemplate", "Issue",
-                           "Comment", "Document"):
+                           "Comment", "Evidence"):
         continue
       acl_manager.get_or_create(stub, acl, acl.person, role_map[stub.type])
 
-    # Add Audit Captains Mapped to all realted comments and documents
+    # Add Audit Captains Mapped to all realted comments and evidences
     mapped_stubs = related(related_stubs[audit_stub], relationship_cache)
     for parent in mapped_stubs:
       for stub in mapped_stubs[parent]:
-        if stub.type not in ("Comment", "Document"):
+        if stub.type not in ("Comment", "Evidence"):
           continue
         acl_manager.get_or_create(stub, acl, acl.person, role_map[stub.type])
 
@@ -100,7 +100,7 @@ class AuditRolesHandler(object):
         "Snapshot": audit_roles["Auditors Snapshot Mapped"],
         "Assessment": audit_roles["Auditors Assessment Mapped"],
         "Issue": audit_roles["Auditors Issue Mapped"],
-        "Document": audit_roles["Auditors Document Mapped"]
+        "Evidence": audit_roles["Auditors Evidence Mapped"]
     })
     self._create_mapped_acls(acl, role_map)
 
@@ -151,7 +151,7 @@ class AuditRolesHandler(object):
       else:
         assessment, other = first, second
         access_control_list = assessment.full_access_control_list
-    elif (isinstance(first, (all_models.Comment, all_models.Document)) and
+    elif (isinstance(first, (all_models.Comment, all_models.Evidence)) and
           isinstance(second, all_models.Issue)):
       access_control_list = second.full_access_control_list
       other = first
@@ -163,7 +163,7 @@ class AuditRolesHandler(object):
                               all_models.Audit,
                               all_models.Issue,
                               all_models.Snapshot,
-                              all_models.Document,
+                              all_models.Evidence,
                               all_models.Comment)):
       return
 
@@ -172,7 +172,7 @@ class AuditRolesHandler(object):
         lambda: audit_roles["Auditors Mapped"], {
             all_models.Assessment: audit_roles["Auditors Assessment Mapped"],
             all_models.AssessmentTemplate: audit_roles["Auditors Mapped"],
-            all_models.Document: audit_roles["Auditors Document Mapped"],
+            all_models.Evidence: audit_roles["Auditors Evidence Mapped"],
             all_models.Issue: audit_roles["Auditors Issue Mapped"],
             all_models.Comment: audit_roles["Auditors Mapped"],
         })

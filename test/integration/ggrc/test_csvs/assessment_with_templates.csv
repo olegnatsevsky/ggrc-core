@@ -1,5 +1,5 @@
 Object type,,,,,,,,,,,,,,,,,,,,
-Assessment,Code*,Template,Audit*,Title*,reference url,Evidence File,Assessment Procedure,Assignees*,Creators*,Verifiers,Recipients,,Send by default,Due Date,Finished Date,Verified Date,State*,,Conclusion: Design,Conclusion: Operation
+Assessment,Code*,Template,Audit*,Title*,Evidence url,Evidence File,Assessment Procedure,Assignees*,Creators*,Verifiers,Recipients,,Send by default,Due Date,Finished Date,Verified Date,State*,,Conclusion: Design,Conclusion: Operation
 ,A 1,,Audit,No template Assessment 1,https://i.imgur.com/17h9PH3.gif,https://docs.google.com/drawings/d/1_J2anxP8_SLMFf1SXyVNriVh25MVgH_LfhFN1wdP1d8/edit with a title,,user@example.com,user@example.com,user@example.com,,,no,,,,not started,,,
 ,A 2,,Audit,No template Assessment 2,,https://docs.google.com/drawings/d/1_J2anxP8_SLMFf1SXyVNriVh25MVgH_LfhFN1wdP1d9/edit with a title,,user@example.com,user@example.com,user@example.com,"Assignees , 	Creators,	Verifiers",,,,,,not started,,,
 ,A 3,,Audit,No template Assessment 3,,,,user@example.com,user@example.com,user@example.com,"Creators

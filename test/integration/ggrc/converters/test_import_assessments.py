@@ -50,33 +50,33 @@ class TestAssessmentImport(TestCase):
     self.assertIn("2015-07-15", values)
 
   def test_import_assessment_with_evidence_proper_url1(self):
-    """Test import document with proper gdrive url pattern '/d/'"""
+    """Test import evidence with proper gdrive url pattern '/d/'"""
     self.import_file("assessment_with_evidence_proper_url_pattern1.csv")
-    documents = models.Document.query.filter(
-        models.Document.document_type == models.Document.ATTACHMENT).all()
-    self.assertEquals(len(documents), 1)
-    self.assertEquals(documents[0].gdrive_id,
+    evidences = models.Evidence.query.filter(
+        models.Evidence.kind == models.Evidence.FILE).all()
+    self.assertEquals(len(evidences), 1)
+    self.assertEquals(evidences[0].gdrive_id,
                       "1_J2anxP8_SLMFf1SXyVNriVh25MVgH_LfhFN1wdP1d8")
 
   def test_import_assessment_with_evidence_proper_url2(self):
-    """Test import document with proper gdrive url pattern '?id='"""
+    """Test import evidence with proper gdrive url pattern '?id='"""
     self.import_file("assessment_with_evidence_proper_url_pattern2.csv")
-    documents = models.Document.query.filter(
-        models.Document.document_type == models.Document.ATTACHMENT).all()
-    self.assertEquals(len(documents), 1)
-    self.assertEquals(documents[0].gdrive_id,
+    evidences = models.Evidence.query.filter(
+        models.Evidence.kind == models.Evidence.FILE).all()
+    self.assertEquals(len(evidences), 1)
+    self.assertEquals(evidences[0].gdrive_id,
                       "0B_oNZ3Jm01MJLWVsVWZJWm")
 
   def test_import_assessment_with_evidence_invalid_url(self):
-    """Test import document with invalid gdrive url"""
+    """Test import evidence with invalid gdrive url"""
     response = self.import_file("assessment_with_evidence_invalid_url.csv")
-    documents = models.Document.query.filter(
-        models.Document.document_type == models.Document.ATTACHMENT).all()
+    evidences = models.Evidence.query.filter(
+        models.Evidence.kind == models.Evidence.FILE).all()
     expected_warning = u"Line 3: Unable to extract gdrive_id from" \
-                       u" https://xxx.com/img1.jpg. This document can't" \
+                       u" https://xxx.com/img1.jpg. This evidence can't" \
                        u" be reused after import"
 
-    self.assertEquals(len(documents), 1)
+    self.assertEquals(len(evidences), 1)
     self.assertEquals([expected_warning], response[2]['row_warnings'])
 
   def _test_assessment_users(self, asmt, users):
@@ -150,7 +150,7 @@ class TestAssessmentImport(TestCase):
     audit = [obj for obj in asmt_1.related_objects() if obj.type == "Audit"][0]
     self.assertEqual(audit.context, asmt_1.context)
 
-    evidence = models.Document.query.filter_by(title="some title 2").first()
+    evidence = models.Evidence.query.filter_by(title="some title 2").first()
     self.assertEqual(audit.context, evidence.context)
 
   def test_assessment_import_states(self):
@@ -193,9 +193,9 @@ class TestAssessmentImport(TestCase):
     # Check that there is only one attachment left
     asmt1 = assessments["Assessment 1"]
     self.assertEqual({"a.b.com", "c d com"},
-                     {i.title for i in asmt1.document_url})
+                     {i.title for i in asmt1.evidences_url})
     self.assertEqual({u'evidence title 1'},
-                     {i.title for i in asmt1.document_evidence})
+                     {i.title for i in asmt1.evidences_file})
 
   @ddt.data(
       (True, True),

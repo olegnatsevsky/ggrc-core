@@ -24,7 +24,6 @@ def dummy_gdrive_response(*args, **kwargs):  # noqa
 
 class TestDocument(TestCase):
   """Document test cases"""
-
   # pylint: disable=invalid-name
 
   def setUp(self):
@@ -32,44 +31,43 @@ class TestDocument(TestCase):
     self.api = Api()
     self.gen = generator.ObjectGenerator()
 
-  def test_get_documentable_obj_control_type(self):
-    """Test mapping documentable of Control type"""
+  def test_get_parent_obj_control_type(self):
+    """Test mapping parent of Control type"""
     control = factories.ControlFactory()
     document = factories.EvidenceTypeDocumentFactory(
-        documentable_obj={
+        parent_obj={
             'id': control.id,
             'type': 'Control'
         })
     expected_control = document.related_objects(_types=[control.type]).pop()
     self.assertEqual(expected_control, control)
 
-  def test_documentable_obj_validation_is_id_presents(self):
-    """Validation documentable_obj id should present."""
+  def test_parent_obj_validation_is_id_presents(self):
+    """Validation parent_obj id should present."""
     with self.assertRaises(exceptions.ValidationError):
       factories.EvidenceTypeDocumentFactory(
-          documentable_obj={
+          parent_obj={
               'type': 'Control'
           })
 
-  def test_documentable_obj_validation_is_type_presents(self):
-    """Validation documentable_obj type should present."""
+  def test_parent_obj_validation_is_type_presents(self):
+    """Validation parent_obj type should present."""
     control = factories.ControlFactory()
     with self.assertRaises(exceptions.ValidationError):
       factories.EvidenceTypeDocumentFactory(
-          documentable_obj={
+          parent_obj={
               'id': control.id
           })
 
-  def test_documentable_obj_validation_wrong_type(self):
-    """Validation documentable_obj type.
+  def test_parent_obj_validation_wrong_type(self):
+    """Validation parent_obj type.
 
-    Type should be in 'Assessment', 'Control', 'Audit',
-    'Issue', 'RiskAssessment'.
+    Type should be in 'Control', 'Issue', 'RiskAssessment'.
     """
     control = factories.ControlFactory()
     with self.assertRaises(exceptions.ValidationError):
       factories.EvidenceTypeDocumentFactory(
-          documentable_obj={
+          parent_obj={
               'id': control.id,
               'type': 'Program'
           })
@@ -77,51 +75,18 @@ class TestDocument(TestCase):
   def test_documentable_postfix_one_control(self):
     """Test documentable postfix for assessment with one control."""
 
-    with factories.single_commit():
-      audit = factories.AuditFactory()
-      control = factories.ControlFactory()
-      snapshot = self._create_snapshots(audit, [control])[0]
-      assessment = factories.AssessmentFactory(audit=audit)
-      factories.RelationshipFactory(source=assessment, destination=snapshot)
-
+    control = factories.ControlFactory()
     document = factories.EvidenceTypeDocumentFactory(
-        documentable_obj={
-            'id': assessment.id,
-            'type': 'Assessment'
+        parent_obj={
+            'id': control.id,
+            'type': 'Control'
         })
 
-    expected = '_ggrc_assessment-{}_control-{}'.format(assessment.id,
-                                                       control.id)
+    expected = '_ggrc_control-{}'.format(control.id)
     # pylint: disable=protected-access
-    result = document._build_file_name_postfix(assessment)
+    result = document._build_file_name_postfix(control)
     self.assertEqual(expected, result)
 
-  def test_documentable_postfix_two_controls(self):
-    """Test documentable postfix for assessment with two controls."""
-
-    with factories.single_commit():
-      audit = factories.AuditFactory()
-      control1 = factories.ControlFactory()
-      control2 = factories.ControlFactory()
-      snapshots = self._create_snapshots(audit, [control1, control2])
-      assessment = factories.AssessmentFactory(audit=audit)
-      factories.RelationshipFactory(source=assessment,
-                                    destination=snapshots[0])
-      factories.RelationshipFactory(source=assessment,
-                                    destination=snapshots[1])
-
-    document = factories.EvidenceTypeDocumentFactory(
-        documentable_obj={
-            'id': assessment.id,
-            'type': 'Assessment'
-        })
-
-    expec = '_ggrc_assessment-{}_control-{}_control-{}'.format(assessment.id,
-                                                               control1.id,
-                                                               control2.id)
-    # pylint: disable=protected-access
-    result = document._build_file_name_postfix(assessment)
-    self.assertEqual(expec, result)
 
   @mock.patch('ggrc.gdrive.file_actions.process_gdrive_file',
               dummy_gdrive_response)
@@ -130,15 +95,15 @@ class TestDocument(TestCase):
     control = factories.ControlFactory()
     factories.EvidenceTypeDocumentFactory(
         source_gdrive_id='test_gdrive_id',
-        documentable_obj={
+        parent_obj={
             'id': control.id,
             'type': 'Control'
         })
     self.assertEqual(len(control.documents), 1)
 
     # data from dummy_gdrive_response
-    self.assertEqual(control.document_evidence[0].title, 'test_name')
-    self.assertEqual(control.document_evidence[0].gdrive_id, '1234567')
+    self.assertEqual(control.documents_file[0].title, 'test_name')
+    self.assertEqual(control.documents_file[0].gdrive_id, '1234567')
 
   def test_rename_document(self):
     """Test rename document."""
@@ -152,7 +117,7 @@ class TestDocument(TestCase):
       factories.EvidenceTypeDocumentFactory(
           is_uploaded=True,
           source_gdrive_id='some link',
-          documentable_obj={
+          parent_obj={
               'id': control.id,
               'type': 'Control'
           })
@@ -162,7 +127,7 @@ class TestDocument(TestCase):
                                 is_uploaded=True,
                                 separator='_ggrc')
       self.assertEqual(len(control.documents), 1)
-      self.assertEqual(control.document_evidence[0].title, 'new_name')
+      self.assertEqual(control.documents_file[0].title, 'new_name')
 
   def test_update_title(self):
     """Test update document title."""
@@ -174,15 +139,15 @@ class TestDocument(TestCase):
     self.assertEqual(all_models.Document.query.get(document.id).title,
                      update_title)
 
-  def create_document_by_type(self, doc_type):
+  def create_document_by_type(self, kind):
     """Create document with sent type."""
     data = {
         "title": "test_title",
         "link": "test_link",
     }
-    if doc_type is not None:
-      data["document_type"] = doc_type
-    doc_type = doc_type or all_models.Document.URL
+    if kind is not None:
+      data["kind"] = kind
+    kind = kind or all_models.Document.URL
     resp, doc = self.gen.generate_object(
         all_models.Document,
         data
@@ -190,7 +155,7 @@ class TestDocument(TestCase):
     self.assertTrue(
         all_models.Document.query.filter(
             all_models.Document.id == resp.json["document"]["id"],
-            all_models.Document.document_type == doc_type,
+            all_models.Document.kind == kind,
         ).all()
     )
     return (resp, doc)
@@ -205,12 +170,12 @@ class TestDocument(TestCase):
 
   def test_create_evidence(self):
     """Test create evidence."""
-    self.create_document_by_type(all_models.Document.ATTACHMENT)
+    self.create_document_by_type(all_models.Document.FILE)
 
   def test_create_invalid_type(self):
     """Test validation document_type."""
     data = {
-        "document_type": 3,
+        "kind": 3,
         "title": "test_title",
         "link": "test_link",
         "owners": [self.gen.create_stub(all_models.Person.query.first())],
@@ -221,8 +186,8 @@ class TestDocument(TestCase):
     obj_dict[obj_name].update(data)
     resp = self.api.post(all_models.Document, obj_dict)
     self.assert400(resp)
-    self.assertEqual('"Invalid value for attribute document_type. '
-                     'Expected options are `URL`, `EVIDENCE`, '
+    self.assertEqual('"Invalid value for attribute kind. '
+                     'Expected options are `URL`, `FILE`, '
                      '`REFERENCE_URL`"',
                      resp.data)
 
@@ -241,12 +206,12 @@ class TestDocument(TestCase):
       control = factories.ControlFactory()
       response = self.api.post(all_models.Document, [{
           "document": {
-              "document_type": all_models.Document.ATTACHMENT,
+              "kind": all_models.Document.FILE,
               "source_gdrive_id": "some link",
               "link": "some link",
               "title": "some title",
               "context": None,
-              "documentable_obj": {
+              "parent_obj": {
                   "id": control.id,
                   "type": "Control"
               }
@@ -270,12 +235,12 @@ class TestDocument(TestCase):
       control = factories.ControlFactory()
       response = self.api.post(all_models.Document, [{
           "document": {
-              "document_type": all_models.Document.ATTACHMENT,
+              "kind": all_models.Document.FILE,
               "source_gdrive_id": "some link",
               "link": "some link",
               "title": "some title",
               "context": None,
-              "documentable_obj": {
+              "parent_obj": {
                   "id": control.id,
                   "type": "Control"
               }
@@ -299,12 +264,12 @@ class TestDocument(TestCase):
 
       doc1 = {
           "document": {
-              "document_type": all_models.Document.ATTACHMENT,
+              "kind": all_models.Document.FILE,
               "source_gdrive_id": "some link",
               "link": "some link",
               "title": "some title",
               "context": None,
-              "documentable_obj": {
+              "parent_obj": {
                   "id": control.id,
                   "type": "Control"
               }
@@ -312,7 +277,7 @@ class TestDocument(TestCase):
       }
       doc2 = {
           "document": {
-              "document_type": all_models.Document.URL,
+              "kind": all_models.Document.URL,
               "link": "some link",
               "title": "some title",
               "context": None,
@@ -323,10 +288,10 @@ class TestDocument(TestCase):
     self.assertEqual(response.status_code, 401)
     self.assertIn('X-Expected-Error', response.headers)
 
-  def test_create_document_by_api(self, document_type=all_models.Document.URL):
+  def create_document_by_api(self, kind=all_models.Document.URL):
     document_data = dict(
         title='Simple title',
-        document_type=document_type,
+        kind=kind,
         link='some_url.com',
         description='mega description'
     )
@@ -339,7 +304,7 @@ class TestDocument(TestCase):
         all_models.Document.id == document.id).one()
 
     self.assertEqual(result.title, 'Simple title')
-    self.assertEqual(result.document_type, document_type)
+    self.assertEqual(result.kind, kind)
     self.assertEqual(result.link, 'some_url.com')
     self.assertEqual(result.description, 'mega description')
 
@@ -348,7 +313,7 @@ class TestDocument(TestCase):
     control = factories.ControlFactory()
     document = factories.UrlTypeDocumentFactory(
         description='mega description',
-        documentable_obj={
+        parent_obj={
             'id': control.id,
             'type': 'Control'
         }

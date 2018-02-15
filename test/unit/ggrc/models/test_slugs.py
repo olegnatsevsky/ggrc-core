@@ -27,6 +27,7 @@ class TestSlugPrefix(unittest.TestCase):
       'CycleTaskGroupObjectTask': 'CYCLETASK',
       'DataAsset': 'DATAASSET',
       'Directive': 'DIRECTIVE',  # unused but has slug prefix
+      'Evidence': 'EVIDENCE',
       'Facility': 'FACILITY',
       'Help': 'HELP',
       'Issue': 'ISSUE',

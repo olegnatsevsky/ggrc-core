@@ -44,6 +44,7 @@ from ggrc.converters.handlers import handlers
 from ggrc.converters.handlers import list_handlers
 from ggrc.converters.handlers import template
 from ggrc.converters.handlers import document
+from ggrc.converters.handlers import evidence
 from ggrc.converters.handlers import custom_attribute
 from ggrc.converters.handlers import acl
 from ggrc.converters.handlers.snapshot_instance_column_handler import (
@@ -66,8 +67,11 @@ _DEFAULT_COLUMN_HANDLERS_DICT = {
     "delete": handlers.DeleteColumnHandler,
     "description": handlers.TextareaColumnHandler,
     "design": handlers.ConclusionColumnHandler,
-    "document_evidence": document.DocumentEvidenceHandler,
-    "document_url": document.DocumentUrlHandler,
+    "documents_file": document.DocumentFileHandler,
+    "documents_url": document.DocumentUrlHandler,
+    "documents_reference_url": document.DocumentReferenceUrlHandler,
+    "evidences_file": evidence.EvidenceFileHandler,
+    "evidences_url": evidence.EvidenceUrlHandler,
     "documents": handlers.DocumentsColumnHandler,
     "due_on": handlers.DateColumnHandler,
     "email": handlers.EmailColumnHandler,
@@ -86,7 +90,6 @@ _DEFAULT_COLUMN_HANDLERS_DICT = {
     "program": handlers.ProgramColumnHandler,
     "recipients": list_handlers.ValueListHandler,
     "labels": handlers.LabelsHandler,
-    "reference_url": document.ReferenceUrlHandler,
     "report_end_date": handlers.DateColumnHandler,
     "last_assessment_date": handlers.DateColumnHandler,
     "report_start_date": handlers.DateColumnHandler,

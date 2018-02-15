@@ -12,11 +12,14 @@ from ggrc import db
 from ggrc.login import get_current_user
 from ggrc.models.comment import Comment
 from ggrc.models.document import Document
+from ggrc.models.evidence import Evidence
 from ggrc.models.snapshot import Snapshot
 from ggrc.models.exceptions import ValidationError
 from ggrc.models.reflection import ApiAttributes
 from ggrc.models.reflection import Attribute
 from ggrc.models.relationship import Relationship
+
+
 
 
 class WithAction(object):
@@ -31,6 +34,7 @@ class WithAction(object):
   ]
   _object_map = {
       "Document": Document,
+      "Evidence": Evidence,
       "Comment": Comment,
       "Snapshot": Snapshot,
   }
@@ -191,12 +195,65 @@ class WithAction(object):
                                            "link",
                                            "title"])
 
+    @staticmethod
+    def _validate_parent(parent):
+      if parent not in Document.ALLOWED_PARENTS:
+        allowed_parents = ','.join(Document.ALLOWED_PARENTS)
+        raise ValueError('Unable to mad Document to {}.'
+                         ' Allowed parents: {}'.format(parent.type, allowed_parents))
+
     def _create(self, parent, action):
+      self._validate_parent(parent)
       obj = Document(link=action.link,
                      title=action.title,
                      document_type=action.document_type,
                      context=parent.context)
       return obj
+
+
+
+
+
+  class EvidenceAction(BaseAction):
+    """Evidence action"""
+
+    AddRelatedTuple = namedtuple("AddRelated", ["id",
+                                                "type",
+                                                "kind",
+                                                "link",
+                                                "title",
+                                                "source_gdrive_id"])
+
+    def add_related_wrapper(self, id, type, kind, link, title, source_gdrive_id=''):
+      """Used to add 'default' value to the named tuple
+
+      In case of Evidence.FILE source_gdrive_id is mandatory
+      """
+      return self.AddRelatedTuple(id, type, kind, link, title, source_gdrive_id)
+
+    AddRelated = add_related_wrapper
+    AddRelated._fields = AddRelatedTuple._fields
+
+    def _create(self, parent, action):
+      obj = Evidence(link=action.link,
+                     title=action.title,
+                     kind=action.kind,
+                     source_gdrive_id=action.source_gdrive_id,
+                     context=parent.context)
+      return obj
+
+    def remove_related(self, parent, _action):
+      """Remove relationship"""
+      action = self._validate(_action, self.RemoveRelated)
+      deleted = []
+      obj = self._get(action)
+      # pylint: disable=protected-access
+      rel = parent._relationships_map.get((obj.type, obj.id))
+      if rel:
+        db.session.delete(rel)
+        deleted.append(rel)
+        obj.status = Evidence.DEPRECATED
+      return [], deleted
 
   class CommentAction(BaseAction):
     """Comment action"""

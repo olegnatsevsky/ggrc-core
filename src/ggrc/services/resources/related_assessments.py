@@ -107,68 +107,67 @@ class RelatedAssessmentsResource(common.Resource):
     return query, total
 
   @classmethod
-  def _get_documents(cls, assessments):
-    """Get documents mapped to assessments and their mappings."""
+  def _get_evidences(cls, assessments):
+    """Get evidences mapped to assessments and their mappings."""
 
     assessment_ids = [asmt.id for asmt in assessments]
 
-    related_document_types = (
-        models.Document.ATTACHMENT,
-        models.Document.URL,
+    related_evidence_types = (
+      models.Evidence.FILE,
+      models.Evidence.URL,
     )
 
     source_query = db.session.query(
         models.Relationship.destination_id.label("assessment_id"),
-        models.Relationship.source_id.label("document_id")
+        models.Relationship.source_id.label("evidence_id")
     ).join(
-        models.Document,
+      models.Evidence,
         and_(
-            models.Relationship.source_type == models.Document.__name__,
-            models.Relationship.source_id == models.Document.id
+            models.Relationship.source_type == models.Evidence.__name__,
+            models.Relationship.source_id == models.Evidence.id
         )
     ).filter(
         models.Relationship.destination_id.in_(assessment_ids),
         models.Relationship.destination_type == models.Assessment.__name__,
-        models.Document.document_type.in_(related_document_types)
+        models.Evidence.kind.in_(related_evidence_types)
     )
 
     destination_query = db.session.query(
         models.Relationship.source_id.label("assessment_id"),
-        models.Relationship.destination_id.label("document_id")
+        models.Relationship.destination_id.label("evidence_id")
     ).join(
-        models.Document,
+        models.Evidence,
         and_(
-            models.Relationship.destination_type == models.Document.__name__,
-            models.Relationship.destination_id == models.Document.id
+            models.Relationship.destination_type == models.Evidence.__name__,
+            models.Relationship.destination_id == models.Evidence.id
         )
     ).filter(
         models.Relationship.source_id.in_(assessment_ids),
         models.Relationship.source_type == models.Assessment.__name__,
-        models.Document.document_type.in_(related_document_types)
+        models.Evidence.kind.in_(related_evidence_types)
     )
 
-    assessment_document_map = defaultdict(set)
-    all_document_ids = set()
-    for assessment_id, document_id in source_query.union(destination_query):
-      assessment_document_map[assessment_id].add(document_id)
-      all_document_ids.add(document_id)
+    assessment_evidence_map = defaultdict(set)
+    all_evidence_ids = set()
+    for assessment_id, evidence_id in source_query.union(destination_query):
+      assessment_evidence_map[assessment_id].add(evidence_id)
+      all_evidence_ids.add(evidence_id)
 
-    if all_document_ids:
-      documents = models.Document.query.options(
-          orm.Load(models.Document).undefer_group("Document_complete")
+    if all_evidence_ids:
+      evidences = models.Evidence.query.options(
+          orm.Load(models.Evidence).undefer_group("Evidence_complete")
       ).filter(
-          models.Document.id.in_(all_document_ids)
+          models.Evidence.id.in_(all_evidence_ids)
       ).all()
 
-      documents_map = {document.id: document for document in documents}
-
-    document_json_map = {}
+      evidences_map = {evidence.id: evidence for evidence in evidences}
+    evidence_json_map = {}
     for assessment in assessments:
-      document_json_map[assessment.id] = [
-          documents_map[document_id].log_json_base()
-          for document_id in assessment_document_map[assessment.id]
+      evidence_json_map[assessment.id] = [
+          evidences_map[evidence_id].log_json_base()
+          for evidence_id in assessment_evidence_map[assessment.id]
       ]
-    return document_json_map
+    return evidence_json_map
 
   @staticmethod
   def _get_snapshots_json(assessment, assessment_snapshot_map, snapshots_map):
@@ -297,7 +296,7 @@ class RelatedAssessmentsResource(common.Resource):
   def _get_assessments_json(self, obj, assessments):
     """Get json representation for all assessments in result set."""
     with benchmark("get documents of related assessments"):
-      document_json_map = self._get_documents(assessments)
+      evidence_json_map = self._get_evidences(assessments)
     with benchmark("get snapshots of related assessments"):
       snapshot_json_map = self._get_snapshots(obj, assessments)
 
@@ -315,7 +314,7 @@ class RelatedAssessmentsResource(common.Resource):
             for cad in assessment.custom_attribute_definitions
         ]
         single_json["snapshots"] = snapshot_json_map[assessment.id]
-        single_json["documents"] = document_json_map[assessment.id]
+        single_json["evidences"] = evidence_json_map[assessment.id]
         single_json["audit"]["viewLink"] = utils.view_url_for(
             assessment.audit)
         single_json["viewLink"] = utils.view_url_for(assessment)

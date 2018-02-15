@@ -543,6 +543,7 @@ def contributed_object_views():
       object_view(models.Control),
       object_view(models.DataAsset),
       object_view(models.Document),
+      object_view(models.Evidence),
       object_view(models.Facility),
       object_view(models.Issue),
       object_view(models.Market),

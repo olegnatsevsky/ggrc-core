@@ -40,6 +40,7 @@ from ggrc.models.directive import Regulation
 from ggrc.models.directive import Standard
 from ggrc.models.document import Document
 from ggrc.models.event import Event
+from ggrc.models.evidence import Evidence
 from ggrc.models.facility import Facility
 from ggrc.models.help import Help
 from ggrc.models.import_export import ImportExport
@@ -101,6 +102,7 @@ all_models = [  # pylint: disable=invalid-name
     DataAsset,
     Directive,
     Contract,
+    Evidence,
     Policy,
     Regulation,
     Standard,

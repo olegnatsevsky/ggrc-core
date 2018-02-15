@@ -512,8 +512,8 @@ class CustomAttributable(object):
     Any additional changes to evidences after the first checking
     of the precondition will cause incorrect result of the function.
     """
-    from ggrc.models.object_document import Documentable
-    if isinstance(self, Documentable):
+    from ggrc.models.mixins.with_evidence import WithEvidence
+    if isinstance(self, WithEvidence):
       # Note: this is a suboptimal implementation of mandatory evidence check;
       # it should be refactored once Evicence-CA mapping is introduced
       def evidence_required(cav):
@@ -524,7 +524,7 @@ class CustomAttributable(object):
         return flags and flags.evidence_required
 
       if self._evidence_found is None:
-        self._evidence_found = (len(self.document_evidence) >=
+        self._evidence_found = (len(self.evidences_file) >=
                                 len([cav
                                      for cav in self.custom_attribute_values
                                      if evidence_required(cav)]))

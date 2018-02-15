@@ -1,6 +1,6 @@
 Object type,"This needs to be imported after assessment_full_no_warnings
 ",,,These are the expected warnings,,,,,,,,,,
-Assessment,Code*,Audit*,Title*,Error description - non existing column will be ignored,Actual Error message,Notes,State*,Assignees*,Creators*,Finished Date,Verified Date,map:project,map: Market versions,reference url
+Assessment,Code*,Audit*,Title*,Error description - non existing column will be ignored,Actual Error message,Notes,State*,Assignees*,Creators*,Finished Date,Verified Date,map:project,map: Market versions,Evidence URL
 ,Assessment 2,Audit,Assessment title 2,"you are not verifier, you can not verify this assessment",,notes 2,In Progress,user1@a.com,user2@a.com,7/2/2015,5/12/2016,,,http://i.imgur.com/Lppr247.jpg some invalid title
 ,Assessment 3,Audit,Assessment title 3,"this assessment has changed and can not be verified in the first step, verification will be done only upon re-importing this csv", ,changed notes,In Progress,user1@a.com,user2@a.com,7/3/2015,5/13/2016,,,
 ,Assessment 4,Audit,Assessment title 4,This should work and the state will be changed to verified,,notes 4,In Progress,user1@a.com,user2@a.com,7/4/2015,5/14/2016,,,
@@ -12,7 +12,7 @@ Assessment,Code*,Audit*,Title*,Error description - non existing column will be i
 ,Assessment 10,Audit,Assessment title 6,"This works because the change is removing verifier, and state does not change",,,In Progress,user1@a.com,user2@a.com,7/10/2015,5/20/2016,,,
 ,Assessment 11,Audit,Assessment title 7,State can not transition back to open,,,In Progress,user1@a.com,user2@a.com,7/11/2015,5/21/2016,,,
 ,Assessment 12,Audit,Assessment title 8,"State will be changed to in-progress, because of the updates to assessment.",,changes,In Progress,user1@a.com,user2@a.com,7/12/2015,5/22/2016,,,
-,Assessment 16,Audit,Assessment title 1,"proj-55 does not exist non_existing@a.com does not exist ", --- already exists ---,notes 1,In Progress,"user1@a.com
+,Assessment 16,Audit,Assessment title 1,proj-55 does not exist non_existing@a.com does not exist , --- already exists ---,notes 1,In Progress,"user1@a.com
 user2@a.com","user2@a.com
 user3@a.com",7/1/2015,5/11/2016,proj-55,,
 ,Assessment 17,Audit,Assessment title 2,Missing Due On date - will default to today + 7 days,,notes 2,In Progress,user1@a.com,user2@a.com,5/11/2016,,proj-1,,
