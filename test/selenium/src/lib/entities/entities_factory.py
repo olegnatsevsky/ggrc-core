@@ -11,7 +11,8 @@ import random
 from lib import factory
 from lib.constants import (element, objects, roles, value_aliases,
                            url as const_url, messages)
-from lib.constants.element import AdminWidgetCustomAttributes
+from lib.constants.element import (
+    CustomAttributesTypes, GlobalCustomAttributesTypes)
 from lib.entities.entity import (
     PersonEntity, CustomAttributeDefinitionEntity, CommentEntity)
 from lib.utils import help_utils, string_utils
@@ -162,24 +163,24 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
         ca = ca.__dict__
       ca_attr_type = ca.get("attribute_type")
       ca_value = None
-      if ca_attr_type in AdminWidgetCustomAttributes.ALL_CA_TYPES:
+      if ca_attr_type in CustomAttributesTypes.CAS_TYPES:
         if not is_none_values:
-          if ca_attr_type in (AdminWidgetCustomAttributes.TEXT,
-                              AdminWidgetCustomAttributes.RICH_TEXT):
+          if ca_attr_type in (CustomAttributesTypes.TEXT,
+                              CustomAttributesTypes.RICH_TEXT):
             ca_value = cls.generate_string(ca_attr_type)
-          if ca_attr_type == AdminWidgetCustomAttributes.DATE:
+          if ca_attr_type == CustomAttributesTypes.DATE:
             ca_value = unicode(ca["created_at"][:10])
-          if ca_attr_type == AdminWidgetCustomAttributes.CHECKBOX:
+          if ca_attr_type == CustomAttributesTypes.CHECKBOX:
             ca_value = random.choice((True, False))
-          if ca_attr_type == AdminWidgetCustomAttributes.DROPDOWN:
+          if ca_attr_type == CustomAttributesTypes.DROPDOWN:
             ca_value = unicode(
                 random.choice(ca["multi_choice_options"].split(",")))
-          if ca_attr_type == AdminWidgetCustomAttributes.PERSON:
+          if ca_attr_type == CustomAttributesTypes.PERSON:
             ca_value = ":".join([unicode(ca["modified_by"]["type"]),
                                  unicode(ca["modified_by"]["id"])])
         else:
           ca_value = (
-              None if ca_attr_type != AdminWidgetCustomAttributes.CHECKBOX
+              None if ca_attr_type != CustomAttributesTypes.CHECKBOX
               else u"0")
       return {ca["id"]: ca_value}
     return {
@@ -207,7 +208,7 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     """
     return self.obj_inst().update_attrs(
         title=self.generate_string(value_aliases.DASHBOARD),
-        attribute_type=AdminWidgetCustomAttributes.TEXT,
+        attribute_type=GlobalCustomAttributesTypes.TEXT,
         definition_type=definition_type, mandatory=False)
 
   def create(self, is_add_rest_attrs=False, **attrs):
@@ -222,13 +223,13 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     """Create Custom Attribute entity with randomly and predictably filled
     fields, if 'is_add_rest_attrs' then add attributes for REST."""
     ca_obj_attr_type = unicode(random.choice(
-        AdminWidgetCustomAttributes.ALL_CA_TYPES))
+        CustomAttributesTypes.CAS_TYPES))
     ca_obj = self.obj_inst().update_attrs(
         title=self.generate_string(ca_obj_attr_type),
         attribute_type=ca_obj_attr_type,
         multi_choice_options=(
             StringMethods.random_list_strings()
-            if ca_obj_attr_type == AdminWidgetCustomAttributes.DROPDOWN
+            if ca_obj_attr_type == CustomAttributesTypes.DROPDOWN
             else None),
         definition_type=unicode(objects.get_singular(
             random.choice(objects.ALL_CA_OBJS))), mandatory=False)
@@ -249,22 +250,22 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
     if attrs.get("attribute_type"):
       obj.title = self.generate_string(attrs["attribute_type"])
     if (obj.multi_choice_options and
-            obj.attribute_type == AdminWidgetCustomAttributes.DROPDOWN and
+            obj.attribute_type == CustomAttributesTypes.DROPDOWN and
             attrs.get("attribute_type") !=
-            AdminWidgetCustomAttributes.DROPDOWN):
+            CustomAttributesTypes.DROPDOWN):
       obj.multi_choice_options = None
     # fix entered data
     if (attrs.get("multi_choice_options") and
             attrs.get("attribute_type") !=
-            AdminWidgetCustomAttributes.DROPDOWN):
+            CustomAttributesTypes.DROPDOWN):
       attrs["multi_choice_options"] = None
     if (attrs.get("placeholder") and attrs.get("attribute_type") not in
-        (AdminWidgetCustomAttributes.TEXT,
-         AdminWidgetCustomAttributes.RICH_TEXT)):
+        (CustomAttributesTypes.TEXT,
+         CustomAttributesTypes.RICH_TEXT)):
       attrs["placeholder"] = None
     # extend entered data
     if (attrs.get("attribute_type") ==
-            AdminWidgetCustomAttributes.DROPDOWN and not
+            CustomAttributesTypes.DROPDOWN and not
             obj.multi_choice_options):
       obj.multi_choice_options = StringMethods.random_list_strings()
     return obj.update_attrs(**attrs)
