@@ -5,11 +5,11 @@
 
 """Tests for /query api endpoint."""
 
-from sqlalchemy import func
-
 from ddt import data
 from ddt import ddt
 from ddt import unpack
+
+from sqlalchemy import func
 
 from ggrc import app
 from ggrc import models
@@ -65,6 +65,7 @@ class TestAuditSnapshotQueries(TestCase, WithQueryApi):
 
   @classmethod
   def setUpClass(cls):
+    """Setting up test class"""
     TestCase.clear_data()
     with app.app.app_context():
       cls._setup_objects()
@@ -541,7 +542,8 @@ class TestSnapshotIndexing(TestCase, WithQueryApi):
                           for snap in order_by_nz_result["values"]],
                          [process_nz_core_id, process_nz_prod_id])
 
-  def _add_owner(self, ownable_type, ownable_id, person_id):
+  @staticmethod
+  def _add_owner(ownable_type, ownable_id, person_id):
     """Create ACL for provided object and person."""
     acr = all_models.AccessControlRole.query.filter_by(
         object_type=ownable_type,
