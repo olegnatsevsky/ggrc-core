@@ -145,7 +145,11 @@
         <ggrc-gdrive-folder-picker instance="instance" deferred="true" tabindex="13"></ggrc-gdrive-folder-picker>
       </div>
       <div class="span3 hidable">
-        <related-documents instance={instance} kind="URL" autorefresh="false">
+        <related-documents 
+          {instance}="instance"
+          {model-type}="'Evidence'"
+          {kind}="'URL'" 
+          {autorefresh}="false">
           <related-urls
             tabindex="20"
             {instance}="instance"

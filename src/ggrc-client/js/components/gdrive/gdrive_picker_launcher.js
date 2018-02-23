@@ -24,6 +24,7 @@ import {backendGdriveClient} from '../../plugins/ggrc-gapi-client';
           },
         },
       },
+      modelType: 'Document',
       tooltip: null,
       instance: {},
       link_class: '@',
@@ -158,9 +159,11 @@ import {backendGdriveClient} from '../../plugins/ggrc-gapi-client';
         let instanceId = this.attr('instance.id');
         let instanceType = this.attr('instance.type');
         let contextId = this.attr('instance.context.id') || null;
+        let modelType = this.attr('modelType');
+        let ModelClass = CMS.Models[modelType];
 
         let dfdDocs = files.map(function (file) {
-          let model = new CMS.Models.Document({
+          let model = new ModelClass({
             context: {id: contextId},
             title: file.title,
             source_gdrive_id: file.id,

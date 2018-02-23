@@ -9,6 +9,7 @@
       {{#if canAttach}}
         {{#if isFolderAttached}}
           <ggrc-gdrive-picker-launcher class="attachment-upload-control__button"
+                                       {model-type}="'Evidence'"
                                        instance="instance"
                                        click_event="trigger_upload_parent"
                                        {tooltip}="'A new copy of the file will be stored at the destination Audit folder if exists or main gDrive folder of user.'"
@@ -19,6 +20,7 @@
           </ggrc-gdrive-picker-launcher>
         {{else}}
          <ggrc-gdrive-picker-launcher class="attachment-upload-control__button"
+                                       {model-type}="'Evidence'"
                                        instance="instance"
                                        click_event="trigger_upload"
                                        {tooltip}="'A new copy of the file will be stored at the destination Audit folder if exists or main gDrive folder of user.'"

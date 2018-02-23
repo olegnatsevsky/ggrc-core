@@ -14,7 +14,7 @@
       create: function () {
         let value = this.attr('value');
         let self = this;
-        let document;
+        let evidence;
         let attrs;
 
         if (!value || !value.length) {
@@ -32,9 +32,9 @@
           _stamp: Date.now(),
         };
 
-        document = new CMS.Models.Document(attrs);
-        this.dispatch({type: 'beforeCreate', items: [document]});
-        document.save()
+        evidence = new CMS.Models.Evidence(attrs);
+        this.dispatch({type: 'beforeCreate', items: [evidence]});
+        evidence.save()
           .fail(function () {
             GGRC.Errors.notifier('error', 'Unable to create URL.');
           })

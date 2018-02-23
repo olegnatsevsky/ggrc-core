@@ -98,13 +98,13 @@
                     <div class="assessment-controls__extra-controls">
                         <div>
                             <div class="info-pane__section-title">
-                                <spinner class="info-pane__section-title-icon" {toggle}="isUpdatingEvidences"></spinner>
+                                <spinner class="info-pane__section-title-icon" {toggle}="isUpdatingFiles"></spinner>
                                 Evidence file
                             </div>
-                            <object-list {items}="evidences" {empty-message}="noItemsText">
+                            <object-list {items}="files" {empty-message}="noItemsText">
                                 <editable-document-object-list-item {document}="{.}">
                                   <confirm-edit-action
-                                      (set-edit-mode)="removeRelatedItem(document, 'evidences')"
+                                      (set-edit-mode)="removeRelatedItem(document, 'files')"
                                       (set-in-progress)="setInProgressState()"
                                       {is-edit-icon-denied}="isEditDenied"
                                       {instance}="instance"
@@ -123,9 +123,9 @@
                                         {on-state-change-dfd}="onStateChangeDfd"
                                         {edit-mode}="editMode">
                             <attach-button
-                                        (before-create)="addItems(%event, 'evidences')"
-                                        (refresh-evidences)="updateItems('evidences')"
-                                        {is-attach-action-disabled}="isUpdatingEvidences"
+                                        (before-create)="addItems(%event, 'files')"
+                                        (refresh-evidences)="updateItems('files')"
+                                        {is-attach-action-disabled}="isUpdatingFiles"
                                         {confirmation-callback}="@confirmEdit"
                                         {instance}="instance"></attach-button>
                             </confirm-edit-action>
@@ -188,7 +188,7 @@
                     <assessment-local-ca
                         {instance}="instance"
                         {deferred-save}="deferredSave"
-                        {evidence-amount}="evidences.length"
+                        {evidence-amount}="files.length"
                         {fields}="formFields"
                         {edit-mode}="editMode"
                         {^saving}="formState.saving"
@@ -206,12 +206,12 @@
                       <simple-modal {state}="modal.state"
                                     {modal-title}="modal.modalTitle"
                                     {instance}="instance"
-                                    {is-disabled}="isUpdatingEvidences">
+                                    {is-disabled}="isUpdatingFiles">
                           <ca-object-modal-content {instance}="instance"
                                                    {content}="modal.content"
                                                    {state}="state"
-                                                   {evidences}="evidences"
-                                                   {is-updating-evidences}="isUpdatingEvidences"
+                                                   {evidences}="files"
+                                                   {is-updating-evidences}="isUpdatingFiles"
                                                    (before-comment-created)="addItems(%event, 'comments')"
                                                    (after-comment-created)="addRelatedItem(%event, 'comments')"
                           ></ca-object-modal-content>
@@ -289,7 +289,7 @@
                 <related-assessments
                     {instance}="instance"
                     {need-reuse}="true"
-                    (after-object-reused)="updateItems('evidences', 'urls')">
+                    (after-object-reused)="updateItems('files', 'urls')">
                 </related-assessments>
             {{/instance}}
           </tab-panel>
