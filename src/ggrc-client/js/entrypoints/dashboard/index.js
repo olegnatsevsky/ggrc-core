@@ -25,7 +25,6 @@ import '../../components/reusable_objects';
 import '../../components/tabs/tab-container';
 import '../../components/lazy_open_close';
 import '../../components/revision-log/revision-log';
-import '../../components/quick_form/quick_add';
 import '../../components/quick_form/quick_update';
 import '../../components/reminder';
 import '../../components/rich_text/rich_text';
