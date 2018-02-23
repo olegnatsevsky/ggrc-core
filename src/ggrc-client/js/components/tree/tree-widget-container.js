@@ -470,7 +470,7 @@ viewModel = can.Map.extend({
     let total = this.attr('pageInfo.total');
     let counts = _.get(getCounts(), modelName);
 
-    if ((modelName === 'Issue') && !_.isNull(loaded) && (total !== counts)) {
+    if (!_.isNull(loaded) && (total !== counts)) {
       this.loadItems();
     }
 
