@@ -217,19 +217,23 @@ import {
 
       extraDescriptorOptions = {
         all: (function () {
+          let all = {
+            Evidence: {
+              treeViewDepth: 0,
+            },
+            Person: {
+              widget_icon: 'person',
+            },
+          };
+
           let defOrder = GGRC.tree_view.attr('defaultOrderTypes');
-          let all = {};
           Object.keys(defOrder).forEach(function (type) {
-            all[type] = {
-              order: defOrder[type],
-            };
+            if (!all[type]) {
+              all[type] = {};
+            }
+            all[type].order = defOrder[type];
           });
 
-          all.Document = {
-            widget_icon: 'fa fa-link!',
-            order: 150,
-          };
-          all.Person.widget_icon = 'person';
           return all;
         })(),
         Contract: {
