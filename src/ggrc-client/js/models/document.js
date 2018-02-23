@@ -54,11 +54,10 @@ import {getRole} from '../plugins/utils/acl-utils';
     },
     attributes: {
       context: 'CMS.Models.Context.stub',
-      kind: 'CMS.Models.Option.stub',
       year: 'CMS.Models.Option.stub',
     },
     defaults: {
-      document_type: 'EVIDENCE',
+      kind: 'EVIDENCE',
       access_control_list: getAccessControlList(),
     },
     tree_view_options: {

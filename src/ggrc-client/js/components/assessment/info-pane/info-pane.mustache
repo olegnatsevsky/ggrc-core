@@ -154,7 +154,7 @@
                           {{#unless isEditDenied}}
                             {{#if urlsEditMode}}
                                 <create-url
-                                    {type}="documentTypes.urls"
+                                    {type}="documentKinds.urls"
                                     {context}="instance.context"
                                     (before-create)="addItems(%event, 'urls')"
                                     (created)="addRelatedItem(%event, 'urls')">
@@ -494,7 +494,7 @@
                                         {{#unless isEditDenied}}
                                             {{#if referenceUrlsEditMode}}
                                                 <create-url
-                                                    {type}="documentTypes.referenceUrls"
+                                                    {type}="documentKinds.referenceUrls"
                                                     {context}="instance.context"
                                                     (before-create)="addItems(%event, 'referenceUrls')"
                                                     (created)="addRelatedItem(%event, 'referenceUrls')">

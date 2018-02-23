@@ -20,16 +20,16 @@ describe('GGRC.Components.relatedDocuments', function () {
   });
 
   describe('"getDocumentsQuery" method', function () {
-    function checkAdditionFilter(documentType) {
+    function checkAdditionFilter(kind) {
       let query;
       let additionFilter;
-      viewModel.attr('documentType', documentType);
+      viewModel.attr('kind', kind);
       query = viewModel.getDocumentsQuery();
 
       expect(query.filters.expression).toBeDefined();
       additionFilter = query.filters.expression.right;
-      expect(additionFilter.left).toEqual('document_type');
-      expect(additionFilter.right).toEqual(documentType);
+      expect(additionFilter.left).toEqual('kind');
+      expect(additionFilter.right).toEqual(kind);
     }
 
     it('should get query for urls', function () {
@@ -43,7 +43,7 @@ describe('GGRC.Components.relatedDocuments', function () {
     it('should get query for all documents', function () {
       let query;
       let expression;
-      viewModel.attr('documentType', undefined);
+      viewModel.attr('kind', undefined);
       query = viewModel.getDocumentsQuery();
       expression = query.filters.expression;
       expect(expression).toBeDefined();

@@ -12,7 +12,7 @@
   <div class="w-status">
     {{{instance.description}}}
     <div class="evidence-list">
-      <related-documents {instance}="instance" document-type="EVIDENCE">
+      <related-documents {instance}="instance" kind="EVIDENCE">
         <object-list {items}="documents">
           <editable-document-object-list-item {document}="{.}">
             {{^if_equals parentInstance.status 'Verified'}}

@@ -27,7 +27,7 @@
           link: value,
           title: value,
           context: this.attr('context') || new CMS.Models.Context({id: null}),
-          document_type: this.attr('type'),
+          kind: this.attr('type'),
           created_at: new Date(),
           isDraft: true,
           _stamp: Date.now(),

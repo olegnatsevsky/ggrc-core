@@ -67,7 +67,7 @@ import {relatedAssessmentsTypes} from '../../../plugins/utils/models-utils';
     tag: 'assessment-info-pane',
     template: template,
     viewModel: {
-      documentTypes: {
+      documentKinds: {
         evidences: CMS.Models.Document.EVIDENCE,
         urls: CMS.Models.Document.URL,
         referenceUrls: CMS.Models.Document.REFERENCE_URL,
@@ -225,11 +225,11 @@ import {relatedAssessmentsTypes} from '../../../plugins/utils/models-utils';
       getSnapshotQuery: function () {
         return this.getQuery('Snapshot');
       },
-      getDocumentQuery: function (documentType) {
+      getDocumentQuery: function (kind) {
         let query = this.getQuery(
           'Document',
           {sortBy: 'created_at', sortDirection: 'desc'},
-          this.getDocumentAdditionFilter(documentType));
+          this.getDocumentAdditionFilter(kind));
         return query;
       },
       requestQuery: function (query, type) {
@@ -265,17 +265,17 @@ import {relatedAssessmentsTypes} from '../../../plugins/utils/models-utils';
       },
       loadEvidences: function () {
         let query = this.getDocumentQuery(
-          this.attr('documentTypes.evidences'));
+          this.attr('documentKinds.evidences'));
         return this.requestQuery(query, 'evidences');
       },
       loadUrls: function () {
         let query = this.getDocumentQuery(
-          this.attr('documentTypes.urls'));
+          this.attr('documentKinds.urls'));
         return this.requestQuery(query, 'urls');
       },
       loadReferenceUrls: function () {
         let query = this.getDocumentQuery(
-          this.attr('documentTypes.referenceUrls'));
+          this.attr('documentKinds.referenceUrls'));
         return this.requestQuery(query, 'referenceUrls');
       },
       updateItems: function () {
@@ -314,13 +314,13 @@ import {relatedAssessmentsTypes} from '../../../plugins/utils/models-utils';
         return this.attr(type).unshift.apply(this.attr(type),
           can.makeArray(items));
       },
-      getDocumentAdditionFilter: function (documentType) {
-        return documentType ?
+      getDocumentAdditionFilter: function (kind) {
+        return kind ?
           {
             expression: {
-              left: 'document_type',
+              left: 'kind',
               op: {name: '='},
-              right: documentType,
+              right: kind,
             },
           } :
           [];
