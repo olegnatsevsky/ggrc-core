@@ -15,7 +15,7 @@ import {
 
 const tag = 'tree-item-actions';
 const forbiddenEditList = ['Cycle', 'CycleTaskGroup'];
-const forbiddenMapList = ['Workflow', 'RiskAssessment'];
+const forbiddenMapList = ['Workflow', 'RiskAssessment', 'Evidence'];
 
 const viewModel = can.Map.extend({
   define: {
