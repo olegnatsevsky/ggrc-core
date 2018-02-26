@@ -187,7 +187,7 @@ describe('GGRC.Components.relatedAssessments', () => {
             id: 'contextId',
             type: 'Context',
           },
-          documentable_obj: {
+          parent_obj: {
             id: 'instanceId',
             type: 'instanceType',
           },
@@ -211,7 +211,7 @@ describe('GGRC.Components.relatedAssessments', () => {
             id: 'contextId',
             type: 'Context',
           },
-          documentable_obj: {
+          parent_obj: {
             id: 'instanceId',
             type: 'instanceType',
           },

@@ -70,7 +70,7 @@ export default can.Component.extend({
     buildEvidenceModel: function (evidence) {
       const baseData = {
         context: {id: this.attr('instance.context.id') || null},
-        documentable_obj: {
+        parent_obj: {
           id: this.attr('instance.id'),
           type: this.attr('instance.type'),
         },

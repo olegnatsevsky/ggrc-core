@@ -165,7 +165,7 @@ import {backendGdriveClient} from '../../plugins/ggrc-gapi-client';
             title: file.title,
             source_gdrive_id: file.id,
             is_uploaded: file.newUpload,
-            documentable_obj: {
+            parent_obj: {
               id: instanceId,
               type: instanceType,
             },
