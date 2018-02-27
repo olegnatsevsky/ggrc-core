@@ -21,13 +21,7 @@
 
         {{#case 'default'}}
           {{#instance}}
-            {{#if_equals attr_name 'title'}}
-              <span class="title-attr">
-                {{title}}
-              </span>
-            {{else}}
-              {{> attrTemplate}}
-            {{/if_equals}}
+            {{> attrTemplate}}
           {{/instance}}
         {{/case}}
       {{/switch}}

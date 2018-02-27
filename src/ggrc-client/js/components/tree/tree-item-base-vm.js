@@ -30,7 +30,12 @@ export default can.Map.extend({
       this.attr('expanded', !isExpanded);
     }
   },
-  onClick: function ($element) {
+  onClick: function ($element, event) {
+    if ($(event.target).is('.link')) {
+      event.stopPropagation();
+      return;
+    }
+
     let instance = this.attr('instance');
 
     switch (instance.attr('type')) {

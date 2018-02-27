@@ -156,7 +156,7 @@ mapper-results {
     padding: 2px $list-item-padding;
     padding: 0 $list-item-padding;
     line-height: 32px;
-    font-size: 12px;
+    font-size: 13px;
     align-items: center;
     justify-content: space-between;
 
@@ -370,10 +370,6 @@ mapper-results-item-attrs {
           text-overflow: ellipsis;
         }
       }
-    }
-
-    .title-attr {
-      font-size: 14px;
     }
 
     &:first-child {

@@ -11,7 +11,7 @@
                        {expanded}="expanded"
                        {deep-limit}="limitDepthTree"
     ></tree-item-actions>
-    <div class="flex-box selectable-attrs width-100" ($click)="onClick($element)">
+    <div class="flex-box selectable-attrs width-100" ($click)="onClick($element, %event)">
         {{#selectedColumns}}
           <div class="flex-box attr-cell">
             {{#switch attr_type}}
@@ -41,6 +41,9 @@
                       {{/case}}
                       {{#case 'Directive'}}
                         {{> '/static/mustache/directives/tree-item-attr.mustache'}}
+                      {{/case}}
+                      {{#case 'Evidence'}}
+                        {{> '/static/mustache/evidence/tree-item-attr.mustache'}}
                       {{/case}}
                       {{#case 'Objective'}}
                         {{> '/static/mustache/objectives/tree-item-attr.mustache'}}

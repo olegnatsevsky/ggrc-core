@@ -3,9 +3,7 @@
  Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
  */
 
-import * as TreeViewUtils from '../../../plugins/utils/tree-view-utils';
 import * as CurrentPageUtils from '../../../plugins/utils/current-page-utils';
-import * as ObjectVersions from '../../../plugins/utils/object-versions-utils';
 import BaseTreeItemVM from '../tree-item-base-vm';
 
 describe('GGRC.VM.BaseTreeItemVM', function () {
@@ -36,8 +34,31 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
   });
 
   describe('onClick() method', function () {
+    let event;
     beforeEach(function () {
       spyOn(vm, 'select');
+      event = {};
+    });
+
+    describe('if event target is link', ()=> {
+      beforeEach(()=> {
+        event = {
+          target: $('<a class="link"></a>'),
+          stopPropagation: jasmine.createSpy(),
+        };
+      });
+
+      it('it is stopping event propagation', ()=> {
+        vm.onClick('element', event);
+
+        expect(event.stopPropagation).toHaveBeenCalled();
+      });
+
+      it('does not select current item', ()=> {
+        vm.onClick('element', event);
+
+        expect(vm.select).not.toHaveBeenCalled();
+      });
     });
 
     describe('if instance is Cycle', ()=> {
@@ -55,7 +76,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
         it('when option was false', ()=> {
           vm.attr('expanded', false);
 
-          vm.onClick('element');
+          vm.onClick('element', event);
 
           expect(vm.attr('expanded')).toBe(true);
         });
@@ -63,7 +84,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
         it('when option was true', ()=> {
           vm.attr('expanded', true);
 
-          vm.onClick('element');
+          vm.onClick('element', event);
 
           expect(vm.attr('expanded')).toBe(false);
         });
@@ -74,7 +95,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
           .and.returnValue('AnotherType');
         vm.attr('result', true);
 
-        vm.onClick('element');
+        vm.onClick('element', event);
 
         expect(vm.select).toHaveBeenCalledWith('element');
       });
@@ -96,7 +117,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
         it('when option was false', ()=> {
           vm.attr('expanded', false);
 
-          vm.onClick('element');
+          vm.onClick('element', event);
 
           expect(vm.attr('expanded')).toBe(true);
         });
@@ -104,7 +125,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
         it('when option was true', ()=> {
           vm.attr('expanded', true);
 
-          vm.onClick('element');
+          vm.onClick('element', event);
 
           expect(vm.attr('expanded')).toBe(false);
         });
@@ -115,7 +136,7 @@ describe('GGRC.VM.BaseTreeItemVM', function () {
           .and.returnValue('AnotherType');
         vm.attr('result', true);
 
-        vm.onClick('element');
+        vm.onClick('element', event);
 
         expect(vm.select).toHaveBeenCalledWith('element');
       });

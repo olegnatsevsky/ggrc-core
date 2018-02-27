@@ -27,5 +27,12 @@ import template from './templates/mapper-results-item-attrs.mustache';
       modelType: '',
       attrTemplate: DEFAULT_ATTR_TEMPLATE,
     },
+    events: {
+      click(element, event) {
+        if ($(event.target).is('.link')) {
+          event.stopPropagation();
+        }
+      },
+    },
   });
 })(window.can, window.GGRC);
