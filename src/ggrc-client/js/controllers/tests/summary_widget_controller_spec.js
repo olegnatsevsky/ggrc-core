@@ -43,11 +43,11 @@ describe('SummaryWidgetController', function () {
       method = Ctrl.prototype.onRelationshipChange.bind(ctrlInst);
     });
 
-    it('sets true to options.forceRefresh if destination type is Document' +
+    it('sets true to options.forceRefresh if destination type is Evidence' +
     'and source type is Assessment', function () {
       let relationship = new CMS.Models.Relationship({
         destination: {
-          type: 'Document',
+          type: 'Evidence',
           id: 1,
         }, source: {
           type: 'Assessment',
@@ -59,7 +59,7 @@ describe('SummaryWidgetController', function () {
     });
 
     it('does not set true to options.forceRefresh' +
-    ' if destination type is not Document', function () {
+    ' if destination type is not Evidence', function () {
       let relationship = new CMS.Models.Relationship({
         destination: {
           type: 'Control',
@@ -77,7 +77,7 @@ describe('SummaryWidgetController', function () {
     ' if source type is not Assessment', function () {
       let relationship = new CMS.Models.Relationship({
         destination: {
-          type: 'Document',
+          type: 'Evidence',
           id: 1,
         }, source: {
           type: 'Issue',
@@ -277,7 +277,7 @@ describe('SummaryWidgetController', function () {
       });
 
       it('contains object statuses with default names ' +
-      'and counsts of assessments and mapped documents', () => {
+      'and counsts of assessments and mapped evidence', () => {
         let expecteResult;
 
         raw = {
@@ -285,17 +285,17 @@ describe('SummaryWidgetController', function () {
           statuses: [{
             name: 'In Progress',
             assessments: 5,
-            documents: 10,
+            evidence: 10,
             verified: 0,
           }, {
             name: 'Completed',
             assessments: 6,
-            documents: 1,
+            evidence: 1,
             verified: 0,
           }, {
             name: 'Completed',
             assessments: 3,
-            documents: 13,
+            evidence: 13,
             verified: 1,
           }],
         };
@@ -308,19 +308,19 @@ describe('SummaryWidgetController', function () {
           statuses: [{
             name: 'Not Started',
             assessments: 0,
-            documents: 0,
+            evidence: 0,
           }, {
             name: 'In Progress',
             assessments: 5,
-            documents: 10,
+            evidence: 10,
           }, {
             name: 'Completed (no verification)',
             assessments: 6,
-            documents: 1,
+            evidence: 1,
           }, {
             name: 'Completed and Verified',
             assessments: 3,
-            documents: 13,
+            evidence: 13,
           }],
         });
 

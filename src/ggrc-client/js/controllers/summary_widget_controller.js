@@ -83,7 +83,7 @@ export default can.Control({
   },
   onRelationshipChange: function (model, ev, instance) {
     if (instance instanceof CMS.Models.Relationship &&
-    instance.attr('destination.type') === 'Document' &&
+    instance.attr('destination.type') === 'Evidence' &&
     instance.attr('source.type') === 'Assessment') {
       this.options.forceRefresh = true;
     }
@@ -190,7 +190,7 @@ export default can.Control({
         title: status.name,
         count: status.assessments,
         percent: (status.assessments / data.total.assessments * 100).toFixed(1),
-        documents: status.documents,
+        evidence: status.evidence,
         rowIndex: rowIndex,
         color: colorsMap[status.name],
       });
@@ -234,7 +234,7 @@ export default can.Control({
   setState: function (type, data, isLoading) {
     let chartOptions = this.options.context.charts[type];
     chartOptions.attr('total', data.total.assessments);
-    chartOptions.attr('totalDocuments', data.total.documents);
+    chartOptions.attr('totalEvidence', data.total.evidence);
     chartOptions.attr('any', data.total.assessments > 0);
     chartOptions.attr('none', isLoading || data.total.assessments === 0);
     chartOptions.attr('isLoading', isLoading);
@@ -248,7 +248,7 @@ export default can.Control({
       return {
         name: status,
         assessments: 0,
-        documents: 0,
+        evidence: 0,
       };
     });
 
@@ -267,7 +267,7 @@ export default can.Control({
         return el.name === statusName;
       });
       statusObj.assessments = item.assessments;
-      statusObj.documents = item.documents;
+      statusObj.evidence = item.evidence;
     });
 
     return {
@@ -276,7 +276,7 @@ export default can.Control({
     };
   },
   /**
-   * Get count of Assessments and mapped documents with breakdown by status
+   * Get count of Assessments and mapped evidence with breakdown by status
    * @param {Number} auditId
    * @return {Promise<Array>}
    * @example
@@ -287,7 +287,7 @@ export default can.Control({
    *      "name": "Not Started",
    *      "verified": 0,
    *      "assessments": X,
-   *      "documents": Y
+   *      "evidence": Y
    *    },
    *    {"name": "In Progress", ...},
    *    {"name": "In Review", ...},
@@ -306,12 +306,12 @@ export default can.Control({
    *  ],
    *  total: {
    *    assessments: N,
-   *    documents: L
+   *    evidence: L
    *  }
    * }
    * X - number of assessments with this status;
-   * Y - number of documents attached to assessments with this status;
-   * N, L - total count of assessments, documents accordingly in this audit.
+   * Y - number of evidence attached to assessments with this status;
+   * N, L - total count of assessments, evidence accordingly in this audit.
    */
   getStatuses: function (auditId) {
     return $.get('/api/audits/'+ auditId + '/summary');
