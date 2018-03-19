@@ -77,13 +77,13 @@ export default can.Component.extend({
         kind: evidence.attr('kind'),
         title: evidence.attr('title'),
       };
-      const specificData = evidence.attr('kind') === 'EVIDENCE' ?
+      const specificData = evidence.attr('kind') === 'FILE' ?
         {source_gdrive_id: evidence.attr('gdrive_id')} :
         {link: evidence.attr('link')};
 
       let data = Object.assign({}, baseData, specificData);
 
-      return new CMS.Models.Document(data);
+      return new CMS.Models.Evidence(data);
     },
     reuseSelected: function () {
       let reusedObjectList = this.attr('selectedEvidences').map((evidence)=> {
@@ -141,7 +141,7 @@ export default can.Component.extend({
         });
     },
     checkReuseAbility(evidence) {
-      let isFile = evidence.attr('kind') === 'EVIDENCE';
+      let isFile = evidence.attr('kind') === 'FILE';
       let isGdriveIdProvided = !!evidence.attr('gdrive_id');
 
       let isAble = !isFile || isGdriveIdProvided;

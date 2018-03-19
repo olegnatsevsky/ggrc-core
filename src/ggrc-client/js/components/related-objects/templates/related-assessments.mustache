@@ -76,9 +76,9 @@
             <a href="{{instance.audit.viewLink}}" class="grid-data-item__title-cell" target="_blank">{{instance.audit.title}}</a>
           </div>
           <div class="flex-size-3">
-            {{#if instance.documents.length}}
+            {{#if instance.evidence.length}}
               {{#if needReuse}}
-                <object-list {items}="instance.documents" show-more="true">
+                <object-list {items}="instance.evidence" show-more="true">
                   <reusable-objects-item {instance}="{.}"
                                          {disabled}="isSaving"
                                          {reuse-allowed}="{{isAllowedToReuse .}}"
@@ -93,7 +93,7 @@
                   </reusable-objects-item>
                 </object-list>
               {{else}}
-                <object-list {items}="instance.documents">
+                <object-list {items}="instance.evidence">
                   <document-object-list-item {instance}="{.}"></document-object-list-item>
                 </object-list>
               {{/if}}
