@@ -37,7 +37,7 @@ describe('GGRC.Components.relatedDocuments', function () {
     });
 
     it('should get query for evidences', function () {
-      checkAdditionFilter(CMS.Models.Document.EVIDENCE);
+      checkAdditionFilter(CMS.Models.Document.FILE);
     });
 
     it('should get query for all documents', function () {

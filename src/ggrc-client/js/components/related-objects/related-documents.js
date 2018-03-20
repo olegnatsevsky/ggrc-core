@@ -14,9 +14,9 @@ import {initCounts} from '../../plugins/utils/current-page-utils';
 
   let DOCUMENT_KIND_MAP = {};
 
-  DOCUMENT_KIND_MAP[CMS.Models.Document.EVIDENCE] = 'document_evidence';
-  DOCUMENT_KIND_MAP[CMS.Models.Document.URL] = 'document_url';
-  DOCUMENT_KIND_MAP[CMS.Models.Document.REFERENCE_URL] = 'reference_url';
+  DOCUMENT_KIND_MAP[CMS.Models.Document.FILE] = 'documents_file';
+  DOCUMENT_KIND_MAP[CMS.Models.Document.URL] = 'documents_url';
+  DOCUMENT_KIND_MAP[CMS.Models.Document.REFERENCE_URL] = 'documents_reference_url';
 
   GGRC.Components('relatedDocuments', {
     tag: 'related-documents',
