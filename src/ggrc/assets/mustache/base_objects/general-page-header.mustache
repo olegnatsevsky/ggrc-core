@@ -18,9 +18,11 @@
         {{#if status}}
           <span class="state-value {{addclass 'state' status}}">{{un_camel_case status}}</span>
         {{/if}}
-        {{#if snapshot.archived}}
+        {{#if_helpers '\
+          #if' instance.archived '\
+          or #if' snapshot.archived}}
           <span class="state-value state-archived">Archived</span>
-        {{/if}}
+        {{/if_helpers}}
         {{^if isSnapshot}}
           <span class="proposal">
             <create-proposal-button {instance}="instance">
