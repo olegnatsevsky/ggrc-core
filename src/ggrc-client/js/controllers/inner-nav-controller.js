@@ -52,7 +52,7 @@ export default can.Control({
         this.options.attr('contexts', new can.Observe(this.options.contexts));
       }
       this.options.attr('showAddTabButton',
-        !['Audit', 'Person'].includes(getPageType()));
+        !['Audit', 'Person', 'Evidence'].includes(getPageType()));
 
       router.bind('widget', (ev, newVal)=>{
         this.route(newVal);
