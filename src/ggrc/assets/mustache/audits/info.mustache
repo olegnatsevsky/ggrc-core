@@ -75,18 +75,16 @@
                 {{#if_helpers '\
                   #if' instance.archived '\
                   or ^is_allowed' "update" instance context="for"}}
-                    <folder-attachments-list {title}="'Attachment'"
-                      readonly="true"
-                      {instance}="instance"
-                      deny-no-folder="true"
-                      {tooltip}="'A new copy of the file will be stored at the destination Audit folder if exists or main gDrive folder of user.''">
-                    </folder-attachments-list>
+                    <ggrc-gdrive-folder-picker 
+                      {hide-label}="true"
+                      {readonly}="true"
+                      {instance}="instance">
+                    </ggrc-gdrive-folder-picker>
                 {{else}}
-                  <folder-attachments-list {title}="'Attachment'"
-                    {instance}="instance"
-                    deny-no-folder="true"
-                    {tooltip}="'A new copy of the file will be stored at the destination Audit folder if exists or main gDrive folder of user.''">
-                  </folder-attachments-list>
+                  <ggrc-gdrive-folder-picker 
+                    {hide-label}="true"
+                    {instance}="instance">
+                  </ggrc-gdrive-folder-picker>
                 {{/if_helpers}}
             </div>
           </div>
