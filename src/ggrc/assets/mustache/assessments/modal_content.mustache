@@ -208,31 +208,6 @@
         </div>
       </div>
 
-      <div class="ggrc-form-item">
-        <div class="ggrc-form-item__multiple-row">
-          <related-documents
-            instance={instance}
-            kind="REFERENCE_URL"
-            autorefresh="false"
-            custom-loader="true"
-            {documents}="referenceUrls"
-            {^pending-items-changed}="referenceUrlChanged">
-            <related-urls
-              {instance}="instance"
-              {allow-to-remove}="new_object_form"
-              {(urls)}="documents"
-              {is-disabled}="isLoading"
-              (createUrl)="markDocumentForAddition(%event.payload)"
-              (removeUrl)="markDocumentForDeletion(%event.payload)">
-              <label class="ggrc-form-item__label">
-                Reference URL
-                <spinner {toggle}="isDisabled"></spinner>
-              </label>
-            </related-urls>
-          </related-documents>
-        </div>
-      </div>
-
       <div class="additional-fields">
         <div class="expand-link">
           <a tabindex="9" class="show-hidden-fields info-show-hide active" href="javascript://">

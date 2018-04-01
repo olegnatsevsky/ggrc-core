@@ -27,14 +27,12 @@ describe('<assessment-modal/> component', () => {
 
       spyOn(model, 'getRelatedObjects').and
         .returnValue(can.Deferred().resolve({
-          'Document:REFERENCE_URL': [{}],
           Snapshot: [{}, {}, {}],
         }));
 
       vm.attr('instance', model);
 
       vm.loadData().then(() => {
-        expect(vm.attr('referenceUrls').length).toBe(1);
         expect(vm.attr('mappedObjects').length).toBe(3);
 
         done();

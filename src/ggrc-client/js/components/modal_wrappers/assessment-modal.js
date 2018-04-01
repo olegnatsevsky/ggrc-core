@@ -12,7 +12,6 @@ export default can.Component.extend({
   viewModel: {
     instance: null,
     isNewInstance: false,
-    referenceUrls: [],
     mappedObjects: [],
     loadData() {
       return this.attr('instance').getRelatedObjects()
@@ -29,7 +28,6 @@ export default can.Component.extend({
             return snapshot;
           });
 
-          this.attr('referenceUrls', data['Document:REFERENCE_URL']);
           this.attr('mappedObjects', snapshots);
         });
     },

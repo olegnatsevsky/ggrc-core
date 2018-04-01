@@ -154,7 +154,6 @@
                           {{#unless isEditDenied}}
                             {{#if urlsEditMode}}
                                 <create-url
-                                    {type}="documentKinds.urls"
                                     {context}="instance.context"
                                     (before-create)="addItems(%event, 'urls')"
                                     (created)="addRelatedItem(%event, 'urls')">
@@ -461,74 +460,6 @@
                                     </p>
                                 </div>
                         </assessment-inline-item>
-                    </div>
-                </div>
-                <div class="ggrc-form-item">
-                    <div class="ggrc-form-item__row">
-                        <div class="row-fluid wrap-row">
-
-                                    <!-- <REFERENCE URLS> -->
-                                    <div>
-                                        <div class="ggrc-form__title">
-                                            <spinner class="info-pane__section-title-icon"
-                                                {toggle}="isUpdatingReferenceUrls">
-                                            </spinner>
-                                            Reference Url
-                                        </div>
-                                        <object-list {items}="referenceUrls" {empty-message}="noItemsText">
-                                            <editable-document-object-list-item {document}="{.}">
-                                                <confirm-edit-action
-                                                    (set-edit-mode)="removeRelatedItem(document, 'referenceUrls')"
-                                                    (set-in-progress)="setInProgressState()"
-                                                    {is-edit-icon-denied}="isEditDenied"
-                                                    {instance}="instance"
-                                                    {on-state-change-dfd}="onStateChangeDfd">
-                                                        <a ($click)="confirmEdit()">
-                                                            <action-toolbar-control>
-                                                                <i class="fa fa-trash"></i>
-                                                            </action-toolbar-control>
-                                                        </a>
-                                                </confirm-edit-action>
-                                            </editable-document-object-list-item>
-                                        </object-list>
-                                        {{#unless isEditDenied}}
-                                            {{#if referenceUrlsEditMode}}
-                                                <create-url
-                                                    {type}="documentKinds.referenceUrls"
-                                                    {context}="instance.context"
-                                                    (before-create)="addItems(%event, 'referenceUrls')"
-                                                    (created)="addRelatedItem(%event, 'referenceUrls')">
-                                                    <form class="create-form">
-                                                        <fieldset class="create-form__layout">
-                                                            <input {($value)}="value" class="create-form__input"type="text" placeholder="Add URL" spellcheck="false" autocomplete="false">
-                                                            <div class="create-form__controls">
-                                                                <button type="button" class="create-form__confirm" ($click)="create; setUrlEditMode(false, 'referenceUrls')">
-                                                                    <i class="fa fa-check"></i>
-                                                                </button>
-                                                                <button type="button" class="create-form__cancel" ($click)="clear; setUrlEditMode(false, 'referenceUrls')">
-                                                                    <i class="fa fa-times"></i>
-                                                                </button>
-                                                            </div>
-                                                        </fieldset>
-                                                    </form>
-                                                </create-url>
-                                            {{else}}
-                                                <confirm-edit-action
-                                                    (set-edit-mode)="setUrlEditMode(true, 'referenceUrls')"
-                                                    (set-in-progress)="setInProgressState()"
-                                                    {is-edit-icon-denied}="isEditDenied"
-                                                    {instance}="instance"
-                                                    {on-state-change-dfd}="onStateChangeDfd">
-                                                        <button class="btn btn-small btn-gray" ($click)="confirmEdit()">
-                                                            Add
-                                                        </button>
-                                                </confirm-edit-action>
-                                            {{/if}}
-                                        {{/unless}}
-                                    </div>
-
-                            <!-- </REFERENCE URLS> -->
-                        </div>
                     </div>
                 </div>
                 {{#if instance.can_use_issue_tracker}}

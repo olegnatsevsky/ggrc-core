@@ -11,7 +11,6 @@
     viewModel: {
       value: null,
       context: null,
-      type: null,
       create: function () {
         let value = this.attr('value');
         let self = this;
@@ -27,7 +26,7 @@
           link: value,
           title: value,
           context: this.attr('context') || new CMS.Models.Context({id: null}),
-          kind: this.attr('type'),
+          kind: 'URL',
           created_at: new Date(),
           isDraft: true,
           _stamp: Date.now(),
