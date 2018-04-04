@@ -136,11 +136,9 @@ class AssessmentResource(common.ExtendedResource):
       ).all()
     urls = [evd.log_json() for evd in evidences
             if evd.kind == evd.URL]
-    ref_urls = [evd.log_json() for evd in evidences
-                if evd.kind == evd.REFERENCE_URL]
     files = [evd.log_json() for evd in evidences
-                   if evd.kind == evd.FILE]
-    return urls, ref_urls, files
+             if evd.kind == evd.FILE]
+    return urls, files
 
   def _get_issue_data(self, relationships):
     """Get related issue data."""
@@ -174,17 +172,15 @@ class AssessmentResource(common.ExtendedResource):
     assessment.
     """
     relationships = self._get_relationships(assessment)
-    urls, ref_urls, attachments = self._get_evidence_data(relationships)
+    urls, attachments = self._get_evidence_data(relationships)
     urls_key = "Evidence:{}".format(models.Evidence.URL)
     attachments_key = "Evidence:{}".format(models.Evidence.FILE)
-    ref_urls_key = "Evidence:{}".format(models.Evidence.REFERENCE_URL)
     data = {
         "Audit": self._get_audit_data(assessment),
         "Snapshot": self._get_snapshot_data(assessment, relationships),
         "Comment": self._get_comment_data(relationships),
         "Issue": self._get_issue_data(relationships),
         urls_key: urls,
-        ref_urls_key: ref_urls,
         attachments_key: attachments,
     }
     return data

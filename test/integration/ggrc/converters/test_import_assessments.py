@@ -859,7 +859,7 @@ class TestAssessmentExport(TestCase):
   )
   @ddt.unpack
   def test_export_by_modified_by(self, field, email):
-    "Test for creation assessment with mapped creator"
+    """Test for creation assessment with mapped creator"""
     slug = "TestAssessment"
     with factories.single_commit():
       factories.AssessmentFactory(

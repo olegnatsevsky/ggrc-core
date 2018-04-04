@@ -55,8 +55,7 @@ class AuditResource(common.ExtendedResource):
           models.Evidence,
           sa.and_(
             models.Relationship.destination_id == models.Evidence.id,
-            models.Relationship.destination_type == "Evidence",
-            models.Evidence.kind != models.Evidence.REFERENCE_URL
+            models.Relationship.destination_type == "Evidence"
           )
       ).subquery()
       #  evidence_relationship => evidence source
@@ -68,8 +67,7 @@ class AuditResource(common.ExtendedResource):
         models.Evidence,
         sa.and_(
           models.Relationship.source_id == models.Evidence.id,
-          models.Relationship.source_type == "Evidence",
-          models.Evidence.kind != models.Evidence.REFERENCE_URL
+          models.Relationship.source_type == "Evidence"
         )
       ).subquery()
 
@@ -111,21 +109,21 @@ class AuditResource(common.ExtendedResource):
           statuses_data[(status, verified)]["assessments"].add(id_)
           all_assessment_ids.add(id_)
         if evidence_id:
-          statuses_data[(status, verified)]["evidences"].add(evidence_id)
+          statuses_data[(status, verified)]["evidence"].add(evidence_id)
           all_evidence_ids.add(evidence_id)
 
     with benchmark("Make response"):
       statuses_json = []
-      total = {"assessments": 0, "evidences": 0}
+      total = {"assessments": 0, "evidence": 0}
       for (status, verified), data in statuses_data.items():
         statuses_json.append({
             "name": status,
             "verified": verified,
             "assessments": len(data["assessments"]),
-            "evidences": len(data["evidences"]),
+            "evidence": len(data["evidence"]),
         })
       total["assessments"] = len(all_assessment_ids)
-      total["evidences"] = len(all_evidence_ids)
+      total["evidence"] = len(all_evidence_ids)
 
       statuses_json.sort(key=lambda k: (k["name"], k["verified"]))
       response_object = {"statuses": statuses_json, "total": total}
