@@ -172,7 +172,7 @@ class AssessmentResource(common.ExtendedResource):
     assessment.
     """
     relationships = self._get_relationships(assessment)
-    urls, attachments = self._get_evidence_data(relationships)
+    urls, files = self._get_evidence_data(relationships)
     urls_key = "Evidence:{}".format(models.Evidence.URL)
     attachments_key = "Evidence:{}".format(models.Evidence.FILE)
     data = {
@@ -181,7 +181,7 @@ class AssessmentResource(common.ExtendedResource):
         "Comment": self._get_comment_data(relationships),
         "Issue": self._get_issue_data(relationships),
         urls_key: urls,
-        attachments_key: attachments,
+        attachments_key: files,
     }
     return data
 

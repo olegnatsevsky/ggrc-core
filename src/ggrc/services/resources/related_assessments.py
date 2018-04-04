@@ -314,7 +314,7 @@ class RelatedAssessmentsResource(common.Resource):
             for cad in assessment.custom_attribute_definitions
         ]
         single_json["snapshots"] = snapshot_json_map[assessment.id]
-        single_json["evidences"] = evidence_json_map[assessment.id]
+        single_json["evidence"] = evidence_json_map[assessment.id]
         single_json["audit"]["viewLink"] = utils.view_url_for(
             assessment.audit)
         single_json["viewLink"] = utils.view_url_for(assessment)
