@@ -492,6 +492,16 @@ class ProposalFactory(ModelFactory):
   content = None
 
 
+class ReviewFactory(ModelFactory):
+
+  class Meta:
+    model = all_models.Review
+
+  created_by = factory.LazyAttribute(lambda _: PersonFactory())
+  instance = factory.LazyAttribute(lambda _: ControlFactory())
+  notification_type = all_models.Review.NotificationContext.Types.EMAIL_TYPE
+
+
 class RiskAssessmentFactory(TitledFactory):
 
   class Meta:
