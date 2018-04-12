@@ -766,6 +766,23 @@ def person_relation_factory(relation_name, fulltext_attr=None, api_attr=None):
       })
 
 
+def datetime_mixin_factory(relation_name, fulltext_attr=None, api_attr=None):
+  """Factory responsible for datetime mixin generation."""
+
+  def field_declaration(cls):  # pylint: disable=no-self-argument
+    return deferred(db.Column(db.DateTime, nullable=True), cls.__name__)
+
+  return type(
+      "{}_mixin".format(relation_name),
+      (object, ),
+      {
+          relation_name: declared_attr(field_declaration),
+          "_api_attrs": reflection.ApiAttributes(api_attr or relation_name),
+          "fulltext_attr": [fulltext_attr or relation_name],
+      },
+  )
+
+
 __all__ = [
     "Base",
     "BusinessObject",
