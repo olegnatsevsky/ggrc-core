@@ -27,7 +27,9 @@ def upgrade():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('instance_id', sa.Integer(), nullable=False),
         sa.Column('instance_type', sa.String(length=250), nullable=False),
-        sa.Column('notification_type', sa.Enum('email', 'issue_tracker'), nullable=False),
+        sa.Column('notification_type',
+                  sa.Enum('email', 'issue_tracker'),
+                  nullable=False),
         sa.Column('email_message', sa.Text(), nullable=False),
         sa.Column('agenda', sa.Text(), nullable=False),
         sa.Column('last_set_reviewed_by_id', sa.Integer(), nullable=True),
@@ -37,11 +39,13 @@ def upgrade():
         sa.Column('status', sa.String(length=250), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.Column('modified_by_id', sa.Integer(), nullable=True),
+        sa.Column('created_by_id', sa.Integer(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('context_id', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(['context_id'], ['contexts.id'], ),
         sa.ForeignKeyConstraint(['last_set_reviewed_by_id'], ['people.id'], ),
         sa.ForeignKeyConstraint(['last_set_unreviewed_by_id'], ['people.id'], ),
+        sa.ForeignKeyConstraint(['created_by_id'], ['people.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index('fk_reviews_contexts', 'reviews', ['context_id'], unique=False)
