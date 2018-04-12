@@ -62,13 +62,25 @@ class JsonPolymorphicRelationship(PolymorphicRelationship):
   Allow to setup instance over json serializaion."""
   # pylint: disable=too-few-public-methods
 
+  INSTANCE_TYPE = None
+
   def __call__(self, obj, json_obj):
     for field_name, prop_instance in obj.__class__.__dict__.iteritems():
       if prop_instance is self:
         instance = referenced_objects.get(json_obj[field_name]["type"],
                                           json_obj[field_name]["id"])
+        if self.INSTANCE_TYPE:
+          assert isinstance(instance, self.INSTANCE_TYPE)
         return instance
     return None
+
+
+def json_polimorphic_relationship_factory(instance_type):
+  return type(
+      "{}JsonPolymorphicRelationship".format(instance_type.__name__),
+      (JsonPolymorphicRelationship, ),
+      {"INSTANCE_TYPE": instance_type}
+  )
 
 
 class FasadeProperty(object):  # pylint: disable=too-few-public-methods
