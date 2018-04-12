@@ -13,6 +13,7 @@ from ggrc.models.hooks import issue_tracker
 from ggrc.models.hooks import relationship
 from ggrc.models.hooks import acl
 from ggrc.models.hooks import proposal
+from ggrc.models.hooks import review
 
 
 ALL_HOOKS = [
@@ -29,6 +30,7 @@ ALL_HOOKS = [
     # are already executed and all data is final.
     issue_tracker,
     proposal,
+    review,
 ]
 
 

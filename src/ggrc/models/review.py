@@ -87,13 +87,14 @@ class Review(mixins.person_relation_factory("last_set_reviewed_by"),
       REVIEWED = 'Reviewed'
       UNREVIEWED = 'Unreviewed'
 
+  VALID_STATES = [STATES.UNREVIEWED, STATES.REVIEWED]
+
   class NotificationContext(object):
 
       class Types(object):
           EMAIL_TYPE = "email"
           ISSUE_TRACKER = "issue_tracker"
 
-  VALID_STATES = [STATES.UNREVIEWED, STATES.REVIEWED]
 
   instance_id = db.Column(db.Integer, nullable=False)
   instance_type = db.Column(db.String, nullable=False)
@@ -116,11 +117,12 @@ class Review(mixins.person_relation_factory("last_set_reviewed_by"),
   agenda = db.Column(db.Text, nullable=False, default="")
 
   _api_attrs = reflection.ApiAttributes(
-      reflection.Attribute('agenda'),
-      reflection.Attribute('email_message'),
+      'notification_type',
+      'email_message',
       reflection.Attribute('instance', update=False),
-      reflection.Attribute('issuetracker_issue'),
-      reflection.Attribute('notification_type'),
+      'issuetracker_issue',
+      reflection.Attribute('agenda', create=False, update=False),
+      'status',
   )
 
   _fulltext_attrs = [

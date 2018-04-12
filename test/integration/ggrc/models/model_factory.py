@@ -22,6 +22,8 @@ from ggrc.fulltext import get_indexer
 
 class ModelFactory(factory.Factory, object):
 
+  modified_by = factory.LazyAttribute(lambda _: ModelFactory._get_user())
+
   @classmethod
   def _create(cls, target_class, *args, **kwargs):
     instance = target_class(*args, **kwargs)

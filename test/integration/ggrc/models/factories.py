@@ -47,6 +47,7 @@ def single_commit():
 
 class TitledFactory(ModelFactory):
   title = factory.LazyAttribute(lambda m: random_str(prefix='title '))
+  modified_by = factory.LazyAttribute(lambda _: PersonFactory())
 
 
 class WithACLandCAFactory(ModelFactory):
@@ -497,7 +498,6 @@ class ReviewFactory(ModelFactory):
   class Meta:
     model = all_models.Review
 
-  created_by = factory.LazyAttribute(lambda _: PersonFactory())
   instance = factory.LazyAttribute(lambda _: ControlFactory())
   notification_type = all_models.Review.NotificationContext.Types.EMAIL_TYPE
 
