@@ -8,8 +8,8 @@
 
 from datetime import datetime
 from logging import getLogger
+import dateutil
 
-import iso8601
 import sqlalchemy
 from sqlalchemy.ext.associationproxy import AssociationProxy
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -208,17 +208,14 @@ class UpdateAttrHandler(object):
   def DateTime(cls, obj, json_obj, attr_name, class_attr):
     """Translate the JSON value for a ``Datetime`` column."""
     value = json_obj.get(attr_name)
+    if not value:
+      return None
     try:
-      if value:
-        date = iso8601.parse_date(value)
-        date = date.replace(tzinfo=None)
-      else:
-        date = None
-      return date
-    except iso8601.ParseError as error:
+      return dateutil.parser.parse(value).replace(tzinfo=None)
+    except ValueError as error:
       raise BadRequest(
-          'Malformed DateTime {0} for parameter {1}. '
-          'Error message was: {2}'.format(value, attr_name, error.message)
+        'Malformed DateTime {0} for parameter {1}. '
+        'Error message was: {2}'.format(value, attr_name, error.message)
       )
 
   @classmethod
