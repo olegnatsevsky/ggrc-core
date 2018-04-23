@@ -98,6 +98,7 @@ class TestReviewApi(TestCase):
             all_models.Review.STATES.REVIEWED)
   def test_create_review(self, state):
     control = factories.ControlFactory()
+    control_id = control.id
     resp = self.api.post(
         all_models.Review,
         {
@@ -116,3 +117,41 @@ class TestReviewApi(TestCase):
     review_id = resp.json["review"]["id"]
     review = all_models.Review.query.get(review_id)
     self.assertEqual(state, review.status)
+    self.assertEqual(control.type, review.instance_type)
+    self.assertEqual(control_id, review.instance_id)
+    self.assertEqual(
+        1,
+        all_models.Relationship.query.filter(
+            all_models.Relationship.source_id == review.id,
+            all_models.Relationship.source_type == review.type,
+            all_models.Relationship.destination_id == control_id,
+            all_models.Relationship.destination_type == control.type,
+        ).union(
+            all_models.Relationship.query.filter(
+                all_models.Relationship.destination_id == review.id,
+                all_models.Relationship.destination_type == review.type,
+                all_models.Relationship.source_id == control_id,
+                all_models.Relationship.source_type == control.type,
+            )
+        ).count()
+    )
+
+  @ddt.data(all_models.Review.STATES.UNREVIEWED,
+            all_models.Review.STATES.REVIEWED)
+  def test_delete_review(self, state):
+    control = factories.ControlFactory()
+    review = factories.ReviewFactory(status=all_models.Review.STATES.REVIEWED,
+                                     instance=control)
+    relationship = factories.RelationshipFactory(source=control,
+                                                 destination=review)
+    review_id = review.id
+    relationship_id = relationship.id
+    resp = self.api.delete(review)
+    self.assert200(resp)
+    review = all_models.Review.query.get(review_id)
+    relationship = all_models.Relationship.query.get(relationship_id)
+    self.assertIsNone(review)
+    self.assertIsNone(relationship)
+
+
+

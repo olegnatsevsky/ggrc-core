@@ -14,6 +14,7 @@ from ggrc.models import reflection
 from ggrc.models import issuetracker_issue
 from ggrc.fulltext import mixin as ft_mixin
 from ggrc.access_control import roleable
+from ggrc.models.relationship import Relatable
 
 
 class Reviewable(object):
@@ -72,6 +73,7 @@ class Review(mixins.person_relation_factory("last_set_reviewed_by"),
              mixins.Stateful,
              roleable.Roleable,
              issuetracker_issue.IssueTracked,
+             Relatable,
              mixins.Base,
              ft_mixin.Indexed,
              db.Model):

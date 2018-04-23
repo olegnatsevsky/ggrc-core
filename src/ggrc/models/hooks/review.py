@@ -39,11 +39,28 @@ def set_review_msg(mapper, connecion, target):
       target_slug=target.instance.slug,
   )
 
+
+def create_relationship(sender, obj=None, sources=None, objects=None):
+  objects = objects or []
+  if obj:
+    objects.append(obj)
+  for object in objects:
+    if object:
+      db.session.add(
+          all_models.Relationship(source=object.instance, destination=object)
+      )
+
+
 def init_hook():
   """Init proposal signal handlers."""
   for model in all_models.all_models:
     if issubclass(model, review.Reviewable):
-      signals.Restful.model_put.connect(update_review_status_on_reviewable_update,
-                                        model,
-                                        weak=False)
+        signals.Restful.model_put.connect(
+            update_review_status_on_reviewable_update,
+            model,
+            weak=False)
   event.listen(all_models.Review, "before_insert", set_review_msg)
+  signals.Restful.collection_posted.connect(
+      create_relationship,
+      sender=review.Review,
+      weak=False)
