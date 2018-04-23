@@ -783,6 +783,30 @@ def datetime_mixin_factory(relation_name, fulltext_attr=None, api_attr=None):
   )
 
 
+def auto_status_log_factory(logged_statuses,
+                            relation_name,
+                            fulltext_attr=None,
+                            api_attr=None):
+
+  class LogDateMixin(
+    Stateful,
+    datetime_mixin_factory(relation_name, fulltext_attr, api_attr)):
+
+    @validates('status')
+    def validate_status(self, key, value):
+      super_class = super(LogDateMixin, self)
+      if hasattr(super_class, "validate_status"):
+        value = super_class.validate_status(key, value)
+      if value in logged_statuses:
+        print relation_name, datetime.datetime.now()
+        setattr(self, relation_name, datetime.datetime.now())
+
+      return value
+
+  return LogDateMixin
+
+
+
 __all__ = [
     "Base",
     "BusinessObject",
