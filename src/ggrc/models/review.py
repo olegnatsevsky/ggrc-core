@@ -64,12 +64,17 @@ class Reviewable(object):
   def eager_query(cls):
     return super(Reviewable, cls).eager_query(orm.joinedload('review'))
 
+class _STATES(object):
+    REVIEWED = 'Reviewed'
+    UNREVIEWED = 'Unreviewed'
 
 class Review(mixins.person_relation_factory("last_set_reviewed_by"),
              mixins.person_relation_factory("last_set_unreviewed_by"),
              mixins.person_relation_factory("created_by"),
-             mixins.datetime_mixin_factory("last_set_reviewed_at"),
-             mixins.datetime_mixin_factory("last_set_unreviewed_at"),
+             mixins.auto_status_log_factory([_STATES.REVIEWED],
+                                            "last_set_reviewed_at"),
+             mixins.auto_status_log_factory([_STATES.UNREVIEWED],
+                                            "last_set_unreviewed_at"),
              mixins.Stateful,
              roleable.Roleable,
              issuetracker_issue.IssueTracked,
@@ -85,9 +90,7 @@ class Review(mixins.person_relation_factory("last_set_reviewed_by"),
       REVIEWABLE_READER = 'Reviewable Reader'
       REVIEW_EDITOR = 'Review Editor'
 
-  class STATES(object):
-      REVIEWED = 'Reviewed'
-      UNREVIEWED = 'Unreviewed'
+  STATES = _STATES
 
   VALID_STATES = [STATES.UNREVIEWED, STATES.REVIEWED]
 
