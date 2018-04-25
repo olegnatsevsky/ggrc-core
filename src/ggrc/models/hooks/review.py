@@ -2,6 +2,7 @@
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
 """Review object hooks."""
+from datetime import datetime
 
 from ggrc.services import signals
 from ggrc.models import all_models
@@ -51,6 +52,17 @@ def create_relationship(sender, obj=None, sources=None, objects=None):
       )
 
 
+def update_review_on_status_update(sender, obj=None, *args, **kwargs):
+  if not db.inspect(obj).attrs["status"].history.has_changes():
+    return
+  if obj.status == all_models.Review.STATES.UNREVIEWED:
+    obj.last_set_unreviewed_by = obj.modified_by
+    obj.last_set_unreviewed_at = datetime.now()
+  elif obj.status == all_models.Review.STATES.REVIEWED:
+    obj.last_set_reviewed_by = obj.modified_by
+    obj.last_set_reviewed_at = datetime.now()
+
+
 def init_hook():
   """Init proposal signal handlers."""
   for model in all_models.all_models:
@@ -62,5 +74,9 @@ def init_hook():
   event.listen(all_models.Review, "before_insert", set_review_msg)
   signals.Restful.collection_posted.connect(
       create_relationship,
+      sender=review.Review,
+      weak=False)
+  signals.Restful.model_put.connect(
+      update_review_on_status_update,
       sender=review.Review,
       weak=False)

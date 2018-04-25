@@ -5,6 +5,7 @@
 
 import contextlib
 import itertools
+import datetime
 
 import ddt
 
@@ -80,19 +81,69 @@ class TestReviewApi(TestCase):
     self.assertEqual(review.status, all_models.Review.STATES.UNREVIEWED)
     self.assertEqual("msg", review.agenda)
 
-  @ddt.data(all_models.Review.STATES.UNREVIEWED,
-            all_models.Review.STATES.REVIEWED)
-  def test_update_review(self, state):
-    control = factories.ControlFactory()
-    review = factories.ReviewFactory(status=all_models.Review.STATES.REVIEWED,
-                                     instance=control)
+  @ddt.data(
+      {
+          "start_state": all_models.Review.STATES.UNREVIEWED,
+          "update_state": all_models.Review.STATES.REVIEWED,
+      },
+      {
+          "start_state": all_models.Review.STATES.REVIEWED,
+          "update_state": all_models.Review.STATES.UNREVIEWED,
+      },
+      {
+          "start_state": all_models.Review.STATES.UNREVIEWED,
+          "update_state": all_models.Review.STATES.UNREVIEWED,
+      },
+      {
+          "start_state": all_models.Review.STATES.REVIEWED,
+          "update_state": all_models.Review.STATES.REVIEWED,
+      }
+  )
+  @ddt.unpack
+  def test_update_review(self, start_state, update_state):
+    """Update review from {start_state} to {update_state}"""
+    with factories.single_commit():
+      control = factories.ControlFactory()
+      person = factories.PersonFactory()
+    person_id = person.id
+    event_datetime = datetime.datetime.now() - datetime.timedelta(10)
+    event_datetime.microsecond = 0
+    review = factories.ReviewFactory(
+        status=start_state,
+        instance=control,
+        last_set_reviewed_by=person,
+        last_set_unreviewed_by=person,
+        modified_by=person,
+        last_set_reviewed_at=event_datetime,
+        last_set_unreviewed_at=event_datetime,
+    )
     review_id = review.id
     review = all_models.Review.query.get(review_id)
-    self.assertEqual(all_models.Review.STATES.REVIEWED, review.status)
-    resp = self.api.put(review, {"status": state})
+    self.assertEqual(start_state, review.status)
+    self.assertEqual(person_id, review.last_set_reviewed_by_id)
+    self.assertEqual(person_id, review.last_set_unreviewed_by_id)
+    resp = self.api.put(review, {"status": update_state})
     self.assert200(resp)
     review = all_models.Review.query.get(review_id)
-    self.assertEqual(state, review.status)
+    self.assertEqual(update_state, review.status)
+    self.assertEqual(1, review.modified_by_id)
+    if start_state == update_state:
+      self.assertEqual(person_id, review.last_set_reviewed_by_id)
+      self.assertEqual(person_id, review.last_set_unreviewed_by_id)
+      self.assertEqual(event_datetime, review.last_set_reviewed_at)
+      self.assertEqual(event_datetime, review.last_set_unreviewed_at)
+    elif update_state == all_models.Review.STATES.UNREVIEWED:
+      self.assertEqual(person_id, review.last_set_reviewed_by_id)
+      self.assertEqual(event_datetime, review.last_set_reviewed_at)
+      self.assertNotEqual(person_id, review.last_set_unreviewed_by_id)
+      self.assertNotEqual(event_datetime, review.last_set_unreviewed_at)
+    else:
+      self.assertNotEqual(person_id, review.last_set_reviewed_by_id)
+      self.assertNotEqual(event_datetime, review.last_set_reviewed_at)
+      self.assertEqual(person_id, review.last_set_unreviewed_by_id)
+      self.assertEqual(event_datetime, review.last_set_unreviewed_at)
+
+
 
   @ddt.data(all_models.Review.STATES.UNREVIEWED,
             all_models.Review.STATES.REVIEWED)
