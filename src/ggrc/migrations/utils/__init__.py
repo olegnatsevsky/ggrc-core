@@ -204,3 +204,21 @@ def add_to_objects_without_revisions_bulk(connection, obj_ids,
 def clean_new_revisions(connection):
   """Clean objects_without_revisions table"""
   connection.execute(text("truncate objects_without_revisions"))
+
+
+def crete_event(connection, user_id, resource_type,
+                action='BULK'):
+  """Create event. Can be used for creating revisions in migrations"""
+  sql = """
+      INSERT INTO events (
+          modified_by_id,
+          created_at,
+          action,
+          resource_type,
+          updated_at)
+      VALUES (:user_id, NOW(), :action, :resource_type, NOW());
+  """
+  connection.execute(text(sql),
+                     action=action, resource_type=resource_type,
+                     user_id=user_id)
+  return last_insert_id(connection)
