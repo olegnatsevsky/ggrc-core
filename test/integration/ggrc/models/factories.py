@@ -231,6 +231,7 @@ class AssessmentTemplateFactory(TitledFactory):
   class Meta:
     model = all_models.AssessmentTemplate
 
+  audit = factory.LazyAttribute(lambda m: AuditFactory())
   template_object_type = None
   test_plan_procedure = False
   procedure_description = factory.LazyAttribute(
