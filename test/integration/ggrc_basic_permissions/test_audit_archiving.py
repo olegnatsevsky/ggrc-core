@@ -58,6 +58,10 @@ def _create_obj_dict(obj, audit_id, context_id, assessment_id=None):
               "id": context_id,
               "type": "Context"
           },
+          "audit": {
+              "id": audit_id,
+              "type": "Audit"
+          }
       },
       "relationship": {
           "context": {
