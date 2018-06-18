@@ -1,6 +1,8 @@
 # Copyright (C) 2018 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
+# pylint: disable=invalid-name
+
 """Tests for Audit model."""
 from ggrc.models import all_models
 from integration.ggrc import generator
@@ -74,6 +76,42 @@ class TestAudit(TestCase):
     self.assertIsNotNone(audit)
     self.assertIsNotNone(program)
     self.assertIsNotNone(relationships)
+
+  def test_delete_audit_with_assessment_template(self):
+    """Check inability to delete audit in relation with assessment template."""
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      assessment_template = factories.AssessmentTemplateFactory(audit=audit)
+      factories.RelationshipFactory(
+          source=audit,
+          destination=assessment_template
+      )
+    response = self.api.delete(audit)
+    self.assert400(response)
+    self.assertEqual(response.json["message"],
+                     "This request will break a mandatory relationship from "
+                     "assessment_templates to audits.")
+
+  def test_delete_audit_with_assessment_template_proper_way(self):
+    """Check delete audit with assessment template. Remove template first"""
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      audit_id = audit.id
+      assessment_template = factories.AssessmentTemplateFactory(audit=audit)
+      assessment_template_id = assessment_template.id
+      factories.RelationshipFactory(
+          source=audit,
+          destination=assessment_template
+      )
+
+    assessment_template = \
+        all_models.AssessmentTemplate.query.get(assessment_template_id)
+    response = self.api.delete(assessment_template)
+    self.assert200(response)
+
+    audit = all_models.Audit.query.get(audit_id)
+    response = self.api.delete(audit)
+    self.assert200(response)
 
   def test_new_audit_snapshots(self):
     """Test audit snapshot relationships on new audit creation."""
