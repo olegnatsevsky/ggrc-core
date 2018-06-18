@@ -60,7 +60,7 @@ class AssessmentTemplate(assessment.AuditRelationship, relationship.Relatable,
   default_people = db.Column(JsonType, nullable=False)
 
   # parent audit
-  audit_id = db.Column(db.Integer, db.ForeignKey('audits.id'), nullable=True)
+  audit_id = db.Column(db.Integer, db.ForeignKey('audits.id'), nullable=False)
 
   # labels to show to the user in the UI for various default people values
   DEFAULT_PEOPLE_LABELS = {
