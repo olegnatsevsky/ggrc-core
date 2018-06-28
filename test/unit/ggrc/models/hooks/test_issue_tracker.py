@@ -11,6 +11,7 @@ import mock
 from ggrc.models import all_models
 from ggrc.models.hooks.issue_tracker import assessment_integration
 from ggrc.integrations import integrations_errors
+from ggrc.models.hooks.issue_tracker import integration_utils
 
 
 @ddt.ddt
@@ -32,9 +33,9 @@ class TestUtilityFunctions(unittest.TestCase):
       ({'hotlist_id': '2222'},
        None,),
       ({'component_id': 'zzz'},
-       assessment_integration.exceptions.ValidationError,),
+       integration_utils.exceptions.ValidationError,),
       ({'hotlist_id': 'zzz'},
-       assessment_integration.exceptions.ValidationError,),
+       integration_utils.exceptions.ValidationError,),
   )
   @ddt.unpack
   def test_validate_info(self, info, expected_error):
@@ -43,9 +44,9 @@ class TestUtilityFunctions(unittest.TestCase):
     # pylint: disable=protected-access
     if expected_error:
       with self.assertRaises(expected_error):
-        assessment_integration._validate_issue_tracker_info(info)
+        integration_utils.validate_issue_tracker_info(info)
     else:
-      assessment_integration._validate_issue_tracker_info(info)
+      integration_utils.validate_issue_tracker_info(info)
 
     self.assertEqual(info, initial_info)
 
@@ -61,10 +62,10 @@ class TestUtilityFunctions(unittest.TestCase):
        None,),
       ({'component_id': 'zzz'},
        None,
-       assessment_integration.exceptions.ValidationError,),
+       integration_utils.exceptions.ValidationError,),
       ({'hotlist_id': 'zzz'},
        None,
-       assessment_integration.exceptions.ValidationError,),
+       integration_utils.exceptions.ValidationError,),
   )
   @ddt.unpack
   def test_normalize_info(self, info, expected, expected_error):
@@ -72,9 +73,9 @@ class TestUtilityFunctions(unittest.TestCase):
     # pylint: disable=protected-access
     if expected_error:
       with self.assertRaises(expected_error):
-        assessment_integration._normalize_issue_tracker_info(info)
+        integration_utils.normalize_issue_tracker_info(info)
     else:
-      assessment_integration._normalize_issue_tracker_info(info)
+      integration_utils.normalize_issue_tracker_info(info)
       self.assertEqual(info, expected)
 
   @mock.patch(ISSUE_TRACKED_NAMESPACE + '._is_issue_tracker_enabled',
