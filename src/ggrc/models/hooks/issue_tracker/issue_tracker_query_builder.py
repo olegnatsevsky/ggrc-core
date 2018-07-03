@@ -109,7 +109,15 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
     raise NotImplementedError
 
   def build_delete_query(self):
-    raise NotImplementedError
+    """Build delete issue query for issue tracker."""
+    self.add_comment(self.DISABLE_TMPL.format(model="Issue"))
+    self.set_issue_status("OBSOLETE")
+
+    # Should be called in the end of building process because
+    # some steps can adds comments inside methods.
+    self._issue_tracker_query["comment"] = self.get_joined_comments()
+
+    return self.get_query()
 
   def _handle_people_list(self, obj):
     """Handle emails.

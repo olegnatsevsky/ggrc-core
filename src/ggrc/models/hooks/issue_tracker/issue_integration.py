@@ -52,9 +52,22 @@ def create_issue_handler(obj, issue_tracker_info):
       obj, issue_tracker_info
   )
 
+
 def delete_issue_handler(obj, **kwargs):
   """Event handler for issue object deletion."""
-  logger.info("Handle issue deletion event")
+  issue_obj = all_models.IssuetrackerIssue.get_issue("Issue", obj.id)
+
+  if issue_obj:
+    if issue_obj.enabled and issue_obj.issue_id:
+      builder = issue_tracker_query_builder.IssueQueryBuilder()
+      issue_tracker_query = builder.build_delete_query()
+      try:
+        issues.Client().update_issue(issue_obj.issue_id, issue_tracker_query)
+      except integrations_errors.Error as error:
+        logger.error("Unable to update a ticket ID=%s while deleting"
+                     " issue ID=%d: %s",
+                     issue_obj.issue_id, obj.id, error)
+    db.session.delete(issue_obj)
 
 
 def update_issue_handler(obj, initial_state, **kwargs):
