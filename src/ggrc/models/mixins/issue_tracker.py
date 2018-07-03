@@ -6,7 +6,11 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 
+from ggrc.models import reflection
+from ggrc.models import issuetracker_issue
 from ggrc.models.issuetracker_issue import IssuetrackerIssue
+
+from ggrc.builder import simple_property
 
 
 class IssueTracked(object):
@@ -15,6 +19,10 @@ class IssueTracked(object):
   Defines a backref in IssueTrackerIssue model named ModelName_issue_tracked.
   """
   # pylint: disable=too-few-public-methods
+
+  _api_attrs = reflection.ApiAttributes(
+      reflection.Attribute('issue_tracker', create=False, update=False),
+  )
 
   @declared_attr
   def issuetracker_issue(cls):  # pylint: disable=no-self-argument
@@ -33,3 +41,11 @@ class IssueTracked(object):
         backref="{}_issue_tracked".format(cls.__name__),
         cascade='all, delete-orphan',
     )
+
+  @simple_property
+  def issue_tracker(cls):  # pylint: disable=no-self-argument
+    """Returns representation of issue tracker related info as a dict."""
+    issue_info = issuetracker_issue.IssuetrackerIssue.get_issue(
+        cls.type, cls.id
+    )
+    return issue_info.to_dict(include_issue=True) if issue_info else {}
