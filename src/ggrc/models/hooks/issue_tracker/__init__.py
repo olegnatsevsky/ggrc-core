@@ -37,7 +37,8 @@ def create_object_handler(sender, objects=None, **kwargs):
   for obj in objects:
     object_handlers = ISSUE_TRACKER_HANDLERS.get(sender, {})
     if CREATE_HANDLER_NAME in object_handlers:
-      object_handlers[CREATE_HANDLER_NAME](obj)
+      issue_tracker_info = kwargs.get("src", {}).get("issue_tracker", {})
+      object_handlers[CREATE_HANDLER_NAME](obj, issue_tracker_info)
 
 
 def delete_object_handler(sender, obj=None, **kwargs):
@@ -70,7 +71,7 @@ def init_common_handlers():
 
   for model, model_handlers in ISSUE_TRACKER_HANDLERS.iteritems():
     if CREATE_HANDLER_NAME in model_handlers:
-      signals.Restful.model_posted_after_commit.connect(
+      signals.Restful.collection_posted.connect(
           create_object_handler,
           sender=model
       )

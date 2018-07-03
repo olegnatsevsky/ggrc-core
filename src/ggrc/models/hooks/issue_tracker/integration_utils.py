@@ -3,6 +3,7 @@
 
 """This module contains common utils for integration functionality."""
 
+from ggrc import settings
 from ggrc.models import exceptions
 
 
@@ -40,3 +41,10 @@ def normalize_issue_tracker_info(info):
       info['hotlist_id'] = int(hotlist_id)
     except (TypeError, ValueError):
       raise exceptions.ValidationError('Hotlist ID must be a number.')
+
+
+def build_issue_tracker_url(issue_id):
+  """Build issue tracker URL by issue id."""
+  issue_tracker_tmpl = settings.ISSUE_TRACKER_BUG_URL_TMPL
+  url_tmpl = issue_tracker_tmpl if issue_tracker_tmpl else 'http://issue/%s'
+  return url_tmpl % issue_id
