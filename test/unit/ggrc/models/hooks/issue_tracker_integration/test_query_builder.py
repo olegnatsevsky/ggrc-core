@@ -4,6 +4,7 @@
 """Test Issue tracker query builder."""
 
 # pylint: disable=protected-access
+# pylint: disable=invalid-name
 
 import unittest
 
@@ -22,57 +23,40 @@ class TestBaseIssueTrackerQueryBuilder(unittest.TestCase):
     """Perform initialisation for each test cases."""
     self.builder = issue_tracker_query_builder.BaseIssueTrackerQueryBuilder()
 
-  def test_adding_comments(self):
-    """Test adding comments to issue tracker query."""
+  @ddt.data(
+      {"component_id": "not float number"},
+      {"hotlist_id": "not float number"},
+  )
+  def test_handle_issue_tracker_info_for_failure(self, issue_tracker_info):
+    """Test 'handle_issue_tracker_info' method for failure cases."""
+    with self.assertRaises(exceptions.ValidationError):
+      self.builder.handle_issue_tracker_info(issue_tracker_info)
+
+  def test_handle_issue_tracker_info(self):
+    """Test 'handle_issue_tracker_info' method."""
     # Arrange test data.
-    test_comments = ["comment1", "comment2", "comment3", ]
+    issue_tracker_info = {
+        "component_id": "123",
+        "hotlist_id": 321,
+        "title": "test_title",
+        "issue_type": "test_type",
+        "issue_priority": "test_priority",
+        "issue_severity": "test_severity",
+    }
+    expected_result = {
+        "component_id": 123,
+        "hotlist_id": [321, ],
+        "title": "test_title",
+        "type": "test_type",
+        "priority": "test_priority",
+        "severity": "test_severity",
+    }
 
     # Perform action.
-    for comment in test_comments:
-      self.builder.add_comment(comment)
+    self.builder.handle_issue_tracker_info(issue_tracker_info)
 
     # Assert results.
-    self.assertEqual(
-        self.builder.get_joined_comments(),
-        "\n".join(test_comments)
-    )
-
-  @ddt.data(
-      # Test data for failure cases.
-      ({"component_id": "not float number"}, None, exceptions.ValidationError),
-      ({"hotlist_id": "not float number"}, None, exceptions.ValidationError),
-
-      # Test data for Ok case.
-      (
-          {
-              "component_id": "123",
-              "hotlist_id": 321,
-              "title": "test_title",
-              "issue_type": "test_type",
-              "issue_priority": "test_priority",
-              "issue_severity": "test_severity",
-          },
-          {
-              "component_id": 123,
-              "hotlist_id": [321, ],
-              "title": "test_title",
-              "type": "test_type",
-              "priority": "test_priority",
-              "severity": "test_severity",
-          },
-          None
-      )
-  )
-  @ddt.unpack
-  def test_handle_issue_tracker_info(self, data, expected_result, error=None):
-    """Test 'handle_issue_tracker_info' method."""
-    if error:
-      with self.assertRaises(error):
-        self.builder.handle_issue_tracker_info(data)
-    else:
-      self.builder.handle_issue_tracker_info(data)
-      result = self.builder.get_query()
-      self.assertEquals(result, expected_result)
+    self.assertEquals(self.builder.issue_tracker_query, expected_result)
 
 
 @ddt.ddt
@@ -90,94 +74,106 @@ class TestIssueQueryBuilder(unittest.TestCase):
     mock_object = mock.MagicMock()
     mock_object.description = "<p>test_description</p>"
     mock_object.test_plan = "<p>test_plan</p>"
-    expected_result = (
-        "Following is the issue Description from GGRC: test_description\n"
+    expected_result = [
+        "Following is the issue Description from GGRC: test_description",
         "Following is the issue Remediation Plan from GGRC: test_plan"
-    )
+    ]
 
     # Perform action.
     self.builder._handle_issue_attributes(mock_object)
 
     # Assert results.
-    self.assertEquals(self.builder.get_joined_comments(), expected_result)
+    self.assertEquals(self.builder.comments, expected_result)
 
-  def test_set_issue_status(self):
-    """Test 'set_issue_status' method."""
-    # Arrange test data.
-    test_status = "test_status"
-    expected_result = {"status": test_status}
-
-    # Perform action.
-    self.builder.set_issue_status(test_status)
-
-    # Assert results.
-    self.assertEquals(self.builder.get_query(), expected_result)
-
-  @ddt.data(
-      # Test case 1.
-      (
-          {
-              "Admin": [("admin_name", "verifier_email"), ],
-              "Primary Contacts": [("assignee_name", "assignee_email"), ],
-              "Custom Role": [],
-              "modified_by": "reporter_email",
-          },
-          {
-              "verifier": "verifier_email",
-              "assignee": "assignee_email",
-              "reporter": "reporter_email",
-              "ccs": [],
-          }
-      ),
-
-      # Test case 2.
-      (
-          {
-              "Admin": [
-                  ("verifier_name", "verifier_email_2"),
-                  ("admin_name", "verifier_email_1"),
-              ],
-              "Primary Contacts": [
-                  ("primary_contact_name", "assignee_email_2"),
-                  ("assignee_name", "assignee_email_1"),
-              ],
-              "Custom Role": [
-                  ("reporter_name", "reporter_email"),
-                  ("custom_name", "custom_email"),
-                  ("admin_name", "verifier_email_1"),
-              ],
-              "modified_by": "reporter_email",
-          },
-          {
-              "verifier": "verifier_email_1",
-              "assignee": "assignee_email_1",
-              "reporter": "reporter_email",
-              "ccs": ["custom_email", "assignee_email_2", "verifier_email_2"],
-          }
-      )
-  )
-  @ddt.unpack
-  def test_handle_people_list(self, test_data, expected_result):
-    """Test '_handle_people_list' method."""
-    # Arrange test data.
+  def test_handle_people_emails_without_ccs(self):
+    """Test '_handle_people_emails' method without emails in ccs list."""
     mock_object = mock.MagicMock()
-    acls = []
-    for role, person_data in test_data.iteritems():
-      if role == "modified_by":
-        mock_object.modified_by.email = test_data["modified_by"]
-      else:
-        for person_name, person_email in person_data:
-          acl = mock.MagicMock()
-          acl.ac_role.name = role
-          acl.person.name = person_name
-          acl.person.email = person_email
+    mock_object.modified_by.email = "reporter_email"
 
-          acls.append(acl)
+    verifier = mock.MagicMock()
+    verifier.person.name = "admin_name"
+    verifier.person.email = "verifier_email"
+    verifier.ac_role.name = "Admin"
 
-    mock_object.access_control_list = acls
+    assignee = mock.MagicMock()
+    assignee.person.name = "assignee_name"
+    assignee.person.email = "assignee_email"
+    assignee.ac_role.name = "Primary Contacts"
+
+    mock_object.access_control_list = [verifier, assignee, ]
+
+    expected_result = {
+        "verifier": "verifier_email",
+        "assignee": "assignee_email",
+        "reporter": "reporter_email",
+        "ccs": [],
+    }
 
     # Perform action.
-    self.builder._handle_people_list(mock_object)
+    self.builder._handle_people_emails(mock_object)
 
     # Assert results.
-    self.assertDictEqual(self.builder.get_query(), expected_result)
+    self.assertDictEqual(self.builder.issue_tracker_query, expected_result)
+
+  def test_handle_people_emails_with_ccs(self):
+    """Test '_handle_people_emails' method with emails in ccs list."""
+    mock_object = mock.MagicMock()
+    mock_object.modified_by.email = "reporter_email"
+
+    verifier_1 = mock.MagicMock()
+    verifier_1.person.name = "admin_name"
+    verifier_1.person.email = "verifier_email_1"
+    verifier_1.ac_role.name = "Admin"
+
+    verifier_2 = mock.MagicMock()
+    verifier_2.person.name = "verifier_name"
+    verifier_2.person.email = "verifier_email_2"
+    verifier_2.ac_role.name = "Admin"
+
+    assignee_1 = mock.MagicMock()
+    assignee_1.person.name = "assignee_name"
+    assignee_1.person.email = "assignee_email_1"
+    assignee_1.ac_role.name = "Primary Contacts"
+
+    assignee_2 = mock.MagicMock()
+    assignee_2.person.name = "primary_contact_name"
+    assignee_2.person.email = "assignee_email_2"
+    assignee_2.ac_role.name = "Primary Contacts"
+
+    custom_role_1 = mock.MagicMock()
+    custom_role_1.person.name = "reporter_name"
+    custom_role_1.person.email = "reporter_email"
+    custom_role_1.ac_role.name = "Custom Role"
+
+    custom_role_2 = mock.MagicMock()
+    custom_role_2.person.name = "custom_name"
+    custom_role_2.person.email = "custom_email"
+    custom_role_2.ac_role.name = "Custom Role"
+
+    custom_role_3 = mock.MagicMock()
+    custom_role_3.person.name = "admin_name"
+    custom_role_3.person.email = "verifier_email_1"
+    custom_role_3.ac_role.name = "Custom Role"
+
+    mock_object.access_control_list = [
+        verifier_1,
+        verifier_2,
+        assignee_1,
+        assignee_2,
+        custom_role_1,
+        custom_role_2,
+        custom_role_3,
+    ]
+
+    expected_result = {
+        "verifier": "verifier_email_1",
+        "assignee": "assignee_email_1",
+        "reporter": "reporter_email",
+        "ccs": ["custom_email", "assignee_email_2", "verifier_email_2"],
+    }
+
+    # Perform action.
+    self.builder._handle_people_emails(mock_object)
+
+    # Assert results.
+    self.assertDictEqual(self.builder.issue_tracker_query, expected_result)
