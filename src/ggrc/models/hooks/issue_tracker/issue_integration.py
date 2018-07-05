@@ -4,6 +4,7 @@
 """Module contains functionality for issue with issue tracker integration."""
 
 # pylint: disable=unused-argument
+# pylint: disable=no-else-return
 
 import logging
 
@@ -70,6 +71,47 @@ def delete_issue_handler(obj, **kwargs):
     db.session.delete(issue_obj)
 
 
-def update_issue_handler(obj, initial_state, **kwargs):
+def update_issue_handler(obj, initial_state, issue_tracker_info=None):
   """Event handler for issue object renewal."""
-  logger.info("Handle issue renewal event")
+  issue_obj = all_models.IssuetrackerIssue.get_issue("Issue", obj.id)
+  if not issue_obj:
+    if not issue_tracker_info:
+      return
+    elif not issue_tracker_info["enabled"]:
+      return
+    else:
+      # Create issue in Issue tracker if smb turn on integration on existing
+      # unsynchronized issue in GGRC
+      create_issue_handler(obj, issue_tracker_info)
+      return
+
+  initial_issue_tracker_info = issue_obj.to_dict(
+      include_issue=True,
+      include_private=True
+  )
+
+  if not issue_tracker_info:
+    # Use existing issue tracker info if object is updating via import
+    issue_tracker_info = initial_issue_tracker_info
+
+  builder = issue_tracker_query_builder.IssueQueryBuilder()
+  issue_tracker_attrs, query = builder.build_update_query(
+      obj,
+      initial_state,
+      issue_tracker_info,
+      initial_issue_tracker_info
+  )
+
+  if query:
+    try:
+      issues.Client().update_issue(issue_obj.issue_id, query)
+    except integrations_errors.Error as error:
+      logger.error("Unable to update a ticket ID=%s while deleting"
+                   " issue ID=%d: %s",
+                   issue_obj.issue_id, obj.id, error)
+
+  if issue_tracker_attrs:
+    initial_issue_tracker_info.update(issue_tracker_attrs)
+    all_models.IssuetrackerIssue.create_or_update_from_dict(
+        obj, initial_issue_tracker_info
+    )

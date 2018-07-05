@@ -3,6 +3,8 @@
 
 """This module contains functionality for building Issue tracker query."""
 
+# pylint: disable=invalid-name
+
 import urlparse
 
 import html2text
@@ -26,11 +28,11 @@ class BaseIssueTrackerQueryBuilder(object):
   )
 
   DISABLE_TMPL = (
-      "Changes to this GGRC {model} will no longer be tracked within this bug."
+      "Changes to this GGRC object will no longer be tracked within this bug."
   )
 
   ENABLE_TMPL = (
-      "Changes to this GGRC {model} will be tracked within this bug."
+      "Changes to this GGRC object will be tracked within this bug."
   )
 
   COMMENT_TMPL = (
@@ -66,13 +68,55 @@ class BaseIssueTrackerQueryBuilder(object):
         "severity": issue_tracker_info.get("issue_severity", "")
     })
 
+  def handle_updating_issue_tracker_info(self, issue_tracker_info,
+                                         initial_issue_tracker_info):
+    """Handle updating issue tracker information."""
+    issue_tracker_parameters = {}
+
+    fields_to_check = ("component_id", "hotlist_id", )
+    for field in fields_to_check:
+      new_value = issue_tracker_info.get(field)
+      old_value = initial_issue_tracker_info.get(field)
+
+      if new_value != old_value:
+        issue_tracker_parameters[field] = new_value
+        self.issue_tracker_query[field] = new_value
+
+    new_severity = issue_tracker_info.get("issue_severity")
+    old_severity = initial_issue_tracker_info.get("issue_severity")
+    if new_severity != old_severity:
+      issue_tracker_parameters["issue_severity"] = new_severity
+      self.issue_tracker_query["severity"] = new_severity
+
+    new_priority = issue_tracker_info["issue_priority"]
+    old_priority = initial_issue_tracker_info["issue_priority"]
+    if new_priority != old_priority:
+      issue_tracker_parameters["issue_priority"] = new_priority
+      self.issue_tracker_query["priority"] = new_priority
+
+    if initial_issue_tracker_info["enabled"] != issue_tracker_info["enabled"]:
+      enabled = issue_tracker_info["enabled"]
+      issue_tracker_parameters["enabled"] = enabled
+      comment = self.ENABLE_TMPL if enabled else self.DISABLE_TMPL
+      self.comments.append(comment)
+
+    return issue_tracker_parameters
+
 
 class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
   """Issue tracker query builder for GGRC Issue object."""
 
   MODEL_NAME = "Issue"
   DESCRIPTION_TMPL = "Following is the issue Description from GGRC: {}"
-  REMEDIATION_PLAN = "Following is the issue Remediation Plan from GGRC: {}"
+  REMEDIATION_PLAN_TMPL = (
+      "Following is the issue Remediation Plan from GGRC: {}"
+  )
+  UPDATE_DESCRIPTION_TMPL = (
+      "Issue Description has been updated.\n{}"
+  )
+  UPDATE_REMEDIATION_PLAN_TMPL = (
+      "Issue Remediation Plan has been updated.\n{}"
+  )
 
   def build_create_query(self, obj, issue_tracker_info):
     """Build create issue query for issue tracker."""
@@ -91,8 +135,25 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
 
     return self.issue_tracker_query
 
-  def build_update_query(self):
-    raise NotImplementedError
+  def build_update_query(self, obj, initial_state, issue_tracker_info,
+                         initial_issue_tracker_info):
+    """Build update issue query for issue tracker."""
+
+    if not issue_tracker_info["enabled"] and \
+      not initial_issue_tracker_info["enabled"]:
+      return {}, {}
+
+    self._handle_updating_issue_attributes(obj, initial_state)
+
+    issue_tracker_attrs = self.handle_updating_issue_tracker_info(
+        issue_tracker_info,
+        initial_issue_tracker_info
+    )
+
+    if self.comments:
+      self.issue_tracker_query["comment"] = "\n\n".join(self.comments)
+
+    return issue_tracker_attrs, self.issue_tracker_query
 
   def build_delete_query(self):
     """Build delete issue query for issue tracker."""
@@ -155,4 +216,22 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
     test_plan = obj.test_plan
     if test_plan:
       test_plan = html2text.HTML2Text().handle(test_plan).strip("\n")
-      self.comments.append(self.REMEDIATION_PLAN.format(test_plan))
+      self.comments.append(self.REMEDIATION_PLAN_TMPL.format(test_plan))
+
+  def _handle_updating_issue_attributes(self, obj, initial_state):
+    """Handle updating issue attributes.
+
+    Adds comments to issue if Description or Remediation Plan has
+    been changed.
+    """
+    description = obj.description
+    initial_description = initial_state.description
+    if description != initial_description:
+      description = html2text.HTML2Text().handle(description).strip("\n")
+      self.comments.append(self.UPDATE_DESCRIPTION_TMPL.format(description))
+
+    test_plan = obj.test_plan
+    initial_test_plan = initial_state.test_plan
+    if test_plan != initial_test_plan:
+      test_plan = html2text.HTML2Text().handle(test_plan).strip("\n")
+      self.comments.append(self.UPDATE_REMEDIATION_PLAN_TMPL.format(test_plan))

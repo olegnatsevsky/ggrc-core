@@ -5,6 +5,8 @@
 
 # pylint: disable=unused-argument
 
+import itertools
+
 from ggrc import settings
 from ggrc.models.hooks.issue_tracker import handlers_mapping
 from ggrc.services import signals
@@ -17,9 +19,10 @@ def create_object_handler(sender, objects=None, **kwargs):
       objects: A list of model instances created from the POSTed JSON.
       sources: A list of original POSTed JSON dictionaries.
   """
-  for obj in objects:
+  sources = kwargs.get("sources", [])
+  for obj, src in itertools.izip(objects, sources):
     object_handlers = handlers_mapping.ISSUE_TRACKER_HANDLERS.get(sender, {})
-    issue_tracker_info = kwargs.get("src", {}).get("issue_tracker", {})
+    issue_tracker_info = src.get("issue_tracker", {}) if src else {}
     object_handlers[handlers_mapping.CREATE_HANDLER_NAME](obj,
                                                           issue_tracker_info)
 
@@ -41,7 +44,10 @@ def update_object_handler(sender, obj=None, initial_state=None, **kwargs):
       obj: Model instance for update.
   """
   object_handlers = handlers_mapping.ISSUE_TRACKER_HANDLERS.get(sender, {})
-  object_handlers[handlers_mapping.UPDATE_HANDLER_NAME](obj, initial_state)
+  issue_tracker = kwargs.get("src", {}).get("issue_tracker")
+  object_handlers[handlers_mapping.UPDATE_HANDLER_NAME](obj,
+                                                        initial_state,
+                                                        issue_tracker)
 
 
 def init_hook():
