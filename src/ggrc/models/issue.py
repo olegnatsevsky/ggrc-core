@@ -16,6 +16,7 @@ from ggrc.models.mixins import base
 from ggrc.models.mixins import (
     BusinessObject, LastDeprecatedTimeboxed, CustomAttributable, TestPlanned
 )
+from ggrc.models.mixins import issue_tracker
 from ggrc.models.mixins.audit_relationship import AuditRelationship
 from ggrc.models.mixins.with_action import WithAction
 from ggrc.models.object_document import PublicDocumentable
@@ -26,10 +27,22 @@ from ggrc.models.track_object_state import HasObjectState
 from ggrc.fulltext.mixin import Indexed
 
 
-class Issue(Roleable, HasObjectState, TestPlanned, CustomAttributable,
-            PublicDocumentable, Personable, LastDeprecatedTimeboxed,
-            Relatable, Commentable, AuditRelationship, WithAction,
-            base.ContextRBAC, BusinessObject, Indexed, db.Model):
+class Issue(Roleable,
+            HasObjectState,
+            TestPlanned,
+            CustomAttributable,
+            PublicDocumentable,
+            Personable,
+            LastDeprecatedTimeboxed,
+            Relatable,
+            Commentable,
+            AuditRelationship,
+            WithAction,
+            issue_tracker.IssueTracked,
+            base.ContextRBAC,
+            BusinessObject,
+            Indexed,
+            db.Model):
   """Issue Model."""
 
   __tablename__ = 'issues'
