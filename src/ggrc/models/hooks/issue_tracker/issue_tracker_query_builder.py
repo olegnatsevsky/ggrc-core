@@ -11,6 +11,7 @@ import html2text
 
 from ggrc import utils as ggrc_utils
 from ggrc.models.hooks.issue_tracker import integration_utils
+from ggrc.utils.custom_dict import MissingKeyDict
 
 
 class BaseIssueTrackerQueryBuilder(object):
@@ -41,6 +42,18 @@ class BaseIssueTrackerQueryBuilder(object):
       "GGRC {model}. Link - {link}"
   )
 
+  ISSUE_TRACKER_INFO_FIELDS_TO_CHECK = (
+      "component_id",
+      "hotlist_id",
+      "issue_severity",
+      "issue_priority",
+  )
+
+  ISSUE_TRACKER_NAME_MAPPING = MissingKeyDict({
+      "issue_severity": "severity",
+      "issue_priority": "priority"
+  })
+
   def __init__(self):
     """Basic initialization."""
     self.issue_tracker_query = {}
@@ -68,39 +81,29 @@ class BaseIssueTrackerQueryBuilder(object):
         "severity": issue_tracker_info.get("issue_severity", "")
     })
 
-  def handle_updating_issue_tracker_info(self, issue_tracker_info,
-                                         initial_issue_tracker_info):
-    """Handle updating issue tracker information."""
-    issue_tracker_parameters = {}
+  def _update_issue_tracker_info(self, new_issue_tracker_info,
+                                 current_issue_tracker_info):
+    """Update issue tracker information."""
 
-    fields_to_check = ("component_id", "hotlist_id", )
+    difference_dict = self._build_difference_dict(new_issue_tracker_info,
+                                                  current_issue_tracker_info)
+    self.issue_tracker_query.update(difference_dict)
+
+  def _build_difference_dict(self, new_data, old_data):
+    """Create dict of attributes with changed values
+
+    Rename dict keys according to Issue tracker name mapping
+    """
+
+    fields_to_check = self.ISSUE_TRACKER_INFO_FIELDS_TO_CHECK
+    name_mapping = self.ISSUE_TRACKER_NAME_MAPPING
+    res = {}
     for field in fields_to_check:
-      new_value = issue_tracker_info.get(field)
-      old_value = initial_issue_tracker_info.get(field)
-
+      new_value = new_data.get(field)
+      old_value = old_data.get(field)
       if new_value != old_value:
-        issue_tracker_parameters[field] = new_value
-        self.issue_tracker_query[field] = new_value
-
-    new_severity = issue_tracker_info.get("issue_severity")
-    old_severity = initial_issue_tracker_info.get("issue_severity")
-    if new_severity != old_severity:
-      issue_tracker_parameters["issue_severity"] = new_severity
-      self.issue_tracker_query["severity"] = new_severity
-
-    new_priority = issue_tracker_info["issue_priority"]
-    old_priority = initial_issue_tracker_info["issue_priority"]
-    if new_priority != old_priority:
-      issue_tracker_parameters["issue_priority"] = new_priority
-      self.issue_tracker_query["priority"] = new_priority
-
-    if initial_issue_tracker_info["enabled"] != issue_tracker_info["enabled"]:
-      enabled = issue_tracker_info["enabled"]
-      issue_tracker_parameters["enabled"] = enabled
-      comment = self.ENABLE_TMPL if enabled else self.DISABLE_TMPL
-      self.comments.append(comment)
-
-    return issue_tracker_parameters
+        res[name_mapping[field]] = new_value
+    return res
 
 
 class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
@@ -135,25 +138,25 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
 
     return self.issue_tracker_query
 
-  def build_update_query(self, obj, initial_state, issue_tracker_info,
-                         initial_issue_tracker_info):
+  def build_update_query(self, obj, initial_state, new_issue_tracker_info,
+                         current_issue_tracker_info):
     """Build update issue query for issue tracker."""
 
-    if not issue_tracker_info["enabled"] and \
-      not initial_issue_tracker_info["enabled"]:
-      return {}, {}
+    if (not new_issue_tracker_info["enabled"] and
+            not current_issue_tracker_info["enabled"]):
+      return {}
 
-    self._handle_updating_issue_attributes(obj, initial_state)
+    self._update_issue_comment_attributes(obj, initial_state,
+                                          new_issue_tracker_info,
+                                          current_issue_tracker_info)
 
-    issue_tracker_attrs = self.handle_updating_issue_tracker_info(
-        issue_tracker_info,
-        initial_issue_tracker_info
-    )
+    self._update_issue_tracker_info(new_issue_tracker_info,
+                                    current_issue_tracker_info)
 
     if self.comments:
       self.issue_tracker_query["comment"] = "\n\n".join(self.comments)
 
-    return issue_tracker_attrs, self.issue_tracker_query
+    return self.issue_tracker_query
 
   def build_delete_query(self):
     """Build delete issue query for issue tracker."""
@@ -218,12 +221,10 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
       test_plan = html2text.HTML2Text().handle(test_plan).strip("\n")
       self.comments.append(self.REMEDIATION_PLAN_TMPL.format(test_plan))
 
-  def _handle_updating_issue_attributes(self, obj, initial_state):
-    """Handle updating issue attributes.
-
-    Adds comments to issue if Description or Remediation Plan has
-    been changed.
-    """
+  def _update_issue_comment_attributes(self, obj, initial_state,
+                                       new_issue_tracker_info,
+                                       current_issue_tracker_info):
+    """Update issue tracker comments"""
     description = obj.description
     initial_description = initial_state.description
     if description != initial_description:
@@ -235,3 +236,10 @@ class IssueQueryBuilder(BaseIssueTrackerQueryBuilder):
     if test_plan != initial_test_plan:
       test_plan = html2text.HTML2Text().handle(test_plan).strip("\n")
       self.comments.append(self.UPDATE_REMEDIATION_PLAN_TMPL.format(test_plan))
+
+    old_enabled = current_issue_tracker_info["enabled"]
+    new_enabled = new_issue_tracker_info["enabled"]
+    if old_enabled != new_enabled:
+      enabled = new_enabled["enabled"]
+      comment = self.ENABLE_TMPL if enabled else self.DISABLE_TMPL
+      self.comments.append(comment)
