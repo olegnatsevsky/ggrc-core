@@ -67,19 +67,18 @@ class TestReviewApi(TestCase):
 
   @ddt.data(all_models.Review.STATES.UNREVIEWED,
             all_models.Review.STATES.REVIEWED)
-  def test_update_reviewable(self, state):
+  def test_update_reviewable(self, state=all_models.Review.STATES.REVIEWED):
     control = factories.ControlFactory()
-    review = factories.ReviewFactory(status=state, instance=control)
+    review = factories.ReviewFactory(status=state, reviewable=control)
     review_id = review.id
-    instance = review.instance
+    reviewable = review.reviewable
     resp = self.api.put(
-        instance,
-        {"description": "some new description {}".format(instance.description)}
+        reviewable,
+        {"description": "some new description {}".format(reviewable.description)}
     )
     self.assert200(resp)
     review = all_models.Review.query.get(review_id)
     self.assertEqual(review.status, all_models.Review.STATES.UNREVIEWED)
-    self.assertEqual("msg", review.agenda)
 
   @ddt.data(
       {

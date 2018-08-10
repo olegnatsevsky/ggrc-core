@@ -37,7 +37,7 @@ def set_review_msg(mapper, connecion, target):
   target.created_by = target.modified_by
   target.agenda = "{user_email} initiate review for {target_slug}".format(
       user_email=target.created_by.display_name,
-      target_slug=target.instance.slug,
+      target_slug=target.reviewable.slug,
   )
 
 
@@ -48,7 +48,7 @@ def create_relationship(sender, obj=None, sources=None, objects=None):
   for object in objects:
     if object:
       db.session.add(
-          all_models.Relationship(source=object.instance, destination=object)
+          all_models.Relationship(source=object.reviewable, destination=object)
       )
 
 

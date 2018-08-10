@@ -498,7 +498,7 @@ class ReviewFactory(ModelFactory):
   class Meta:
     model = all_models.Review
 
-  instance = factory.LazyAttribute(lambda _: ControlFactory())
+  reviewable = factory.LazyAttribute(lambda _: ControlFactory())
   notification_type = all_models.Review.NotificationContext.Types.EMAIL_TYPE
 
 
