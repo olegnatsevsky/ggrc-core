@@ -71,11 +71,10 @@ class _STATES(object):
     UNREVIEWED = "Unreviewed"
 
 
-class Review(
-             mixins.person_relation_factory("last_set_reviewed_by"),
+class Review(mixins.person_relation_factory("last_reviewed_by"),
              mixins.person_relation_factory("created_by"),
              mixins.auto_status_log_factory([_STATES.REVIEWED],
-                                            "last_set_reviewed_at"),
+                                            "last_reviewed_at"),
              mixins.Stateful,
              roleable.Roleable,
              issue_tracker.IssueTracked,
@@ -127,7 +126,6 @@ class Review(
       "email_message",
       reflection.Attribute("reviewable", update=False),
       "issuetracker_issue",
-      # reflection.Attribute("agenda", create=False, update=False),
       "status",
   )
 

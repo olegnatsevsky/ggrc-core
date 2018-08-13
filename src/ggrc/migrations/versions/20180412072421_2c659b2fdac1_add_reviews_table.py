@@ -31,8 +31,8 @@ def upgrade():
                   nullable=False),
         sa.Column('email_message', sa.Text(), nullable=False),
         # sa.Column('agenda', sa.Text(), nullable=False),
-        sa.Column('last_set_reviewed_by_id', sa.Integer(), nullable=True),
-        sa.Column('last_set_reviewed_at', sa.DateTime(), nullable=True),
+        sa.Column('last_reviewed_by_id', sa.Integer(), nullable=True),
+        sa.Column('last_reviewed_at', sa.DateTime(), nullable=True),
         sa.Column('status', sa.String(length=250), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -40,7 +40,7 @@ def upgrade():
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('context_id', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(['context_id'], ['contexts.id'], ),
-        sa.ForeignKeyConstraint(['last_set_reviewed_by_id'], ['people.id'], ),
+        sa.ForeignKeyConstraint(['last_reviewed_by_id'], ['people.id'], ),
         sa.ForeignKeyConstraint(['created_by_id'], ['people.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
