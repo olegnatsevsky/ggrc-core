@@ -2,15 +2,17 @@
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
 """Review model."""
-
+import datetime
 
 import sqlalchemy as sa
 
-from ggrc import db
+from ggrc import db, login
 from ggrc import builder
 from ggrc.models import mixins
 from ggrc.models import utils as model_utils
 from ggrc.models import reflection
+from sqlalchemy.orm import validates
+
 from ggrc.models.mixins import issue_tracker
 from ggrc.fulltext import mixin as ft_mixin
 from ggrc.access_control import roleable
@@ -66,15 +68,9 @@ class Reviewable(object):
     return super(Reviewable, cls).eager_query(sa.orm.joinedload("review"))
 
 
-class _STATES(object):
-    REVIEWED = "Reviewed"
-    UNREVIEWED = "Unreviewed"
-
-
 class Review(mixins.person_relation_factory("last_reviewed_by"),
              mixins.person_relation_factory("created_by"),
-             mixins.auto_status_log_factory([_STATES.REVIEWED],
-                                            "last_reviewed_at"),
+             mixins.datetime_mixin_factory("last_reviewed_at"),
              mixins.Stateful,
              roleable.Roleable,
              issue_tracker.IssueTracked,
@@ -84,16 +80,23 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
              ft_mixin.Indexed,
              db.Model):
 
+  def __init__(self, *args, **kwargs):
+    super(Review, self).__init__(*args, **kwargs)
+    self.last_reviewed_at = None
+    self.last_reviewed_by = None
+
   __tablename__ = "reviews"
 
-  class ACRoles(object):
-      REVIEWER = "Reviewer"
-      REVIEWABLE_READER = "Reviewable Reader"
-      REVIEW_EDITOR = "Review Editor"
-
-  STATES = _STATES
+  class STATES(object):
+    REVIEWED = "Reviewed"
+    UNREVIEWED = "Unreviewed"
 
   VALID_STATES = [STATES.UNREVIEWED, STATES.REVIEWED]
+
+  class ACRoles(object):
+    REVIEWER = "Reviewer"
+    REVIEWABLE_READER = "Reviewable Reader"
+    REVIEW_EDITOR = "Review Editor"
 
   class NotificationContext(object):
 
@@ -118,13 +121,13 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
       nullable=False,
   )
   email_message = db.Column(db.Text, nullable=False, default=u"")
-  # small agenda, it will highlight human readable state of object
-  # agenda = db.Column(db.Text, nullable=False, default="")
 
   _api_attrs = reflection.ApiAttributes(
       "notification_type",
       "email_message",
       reflection.Attribute("reviewable", update=False),
+      reflection.Attribute("last_reviewed_by", update=False),
+      reflection.Attribute("last_reviewed_at", update=False),
       "issuetracker_issue",
       "status",
   )
@@ -132,5 +135,15 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
   _fulltext_attrs = [
       "reviewable_id",
       "reviewable_type",
-      "agenda",
   ]
+
+  @validates("status")
+  def validate_status(self, key, value):
+    super_class = super(Review, self)
+    if hasattr(super_class, "validate_status"):
+      value = super_class.validate_status(key, value)
+    if value == Review.STATES.REVIEWED:
+      self.last_reviewed_at = datetime.datetime.now()
+      self.last_reviewed_by = login.get_current_user()
+    return value
+

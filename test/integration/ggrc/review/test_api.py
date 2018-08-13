@@ -117,6 +117,19 @@ class TestReviewApi(TestCase):
     self.assertIsNone(review)
     self.assertIsNone(relationship)
 
+  def test_last_reviewed(self):
+    """last_reviewed_by, last_reviewed_by should be set if reviewed"""
+    review = factories.ReviewFactory(status=all_models.Review.STATES.UNREVIEWED)
+    resp = self.api.put(
+      review,
+      {
+        "status": all_models.Review.STATES.REVIEWED,
+      },
+    )
+    self.assert200(resp)
+    self.assertIsNotNone(resp.json["review"]["last_reviewed_by"])
+    self.assertIsNotNone(resp.json["review"]["last_reviewed_at"])
+
   @ddt.data(all_models.Review.STATES.UNREVIEWED,
             all_models.Review.STATES.REVIEWED)
   def test_update_reviewable(self, state):
