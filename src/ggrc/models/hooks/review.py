@@ -27,18 +27,6 @@ def update_review_status_on_reviewable_update(sender, obj=None,
   if any([a.history.has_changes() for a in db.inspect(obj).attrs
           if a.key not in EXCLUDE_REVIEW_FIELDS]):
     obj.review.status = all_models.Review.STATES.UNREVIEWED
-    obj.review.agenda = "{user_email} made change in {target_slug}".format(
-        user_email=obj.modified_by.display_name,
-        target_slug=obj.slug,
-    )
-
-
-def set_review_msg(mapper, connecion, target):
-  target.created_by = target.modified_by
-  target.agenda = "{user_email} initiate review for {target_slug}".format(
-      user_email=target.created_by.display_name,
-      target_slug=target.reviewable.slug,
-  )
 
 
 def create_relationship(sender, obj=None, sources=None, objects=None):
@@ -65,18 +53,17 @@ def update_review_on_status_update(sender, obj=None, *args, **kwargs):
 
 def init_hook():
   """Init proposal signal handlers."""
-  for model in all_models.all_models:
-    if issubclass(model, review.Reviewable):
-        signals.Restful.model_put.connect(
-            update_review_status_on_reviewable_update,
-            model,
-            weak=False)
-  event.listen(all_models.Review, "before_insert", set_review_msg)
-  signals.Restful.collection_posted.connect(
-      create_relationship,
-      sender=review.Review,
-      weak=False)
-  signals.Restful.model_put.connect(
-      update_review_on_status_update,
-      sender=review.Review,
-      weak=False)
+  # for model in all_models.all_models:
+  #   if issubclass(model, review.Reviewable):
+  #       signals.Restful.model_put.connect(
+  #           update_review_status_on_reviewable_update,
+  #           model,
+  #           weak=False)
+  # signals.Restful.collection_posted.connect(
+  #     create_relationship,
+  #     sender=review.Review,
+  #     weak=False)
+  # signals.Restful.model_put.connect(
+  #     update_review_on_status_update,
+  #     sender=review.Review,
+  #     weak=False)

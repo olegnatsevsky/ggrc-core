@@ -6,21 +6,21 @@ import datetime
 
 import sqlalchemy as sa
 
-from ggrc import db, login
+from ggrc import db
 from ggrc import builder
 from ggrc.models import mixins
 from ggrc.models import utils as model_utils
 from ggrc.models import reflection
-from sqlalchemy.orm import validates
 
 from ggrc.models.mixins import issue_tracker
 from ggrc.fulltext import mixin as ft_mixin
 from ggrc.access_control import roleable
 
+from ggrc.models.mixins.before_flush_handleable import BeforeFlushHandleable
 from ggrc.models.relationship import Relatable
 
 
-class Reviewable(object):
+class Reviewable(BeforeFlushHandleable):
   """Mixin to setup object as reviewable."""
 
   # REST properties
@@ -65,13 +65,32 @@ class Reviewable(object):
 
   @classmethod
   def eager_query(cls):
-    return super(Reviewable, cls).eager_query(sa.orm.joinedload("review"))
+    return super(Reviewable, cls).eager_query().options(
+      sa.orm.joinedload("review")
+    )
+
+  def log_json(self):
+    """Serialize to JSON"""
+    out_json = super(Reviewable, self).log_json()
+    out_json["review_status"] = self.review_status
+    return out_json
+
+  ATTRS_TO_IGNORE = {'review','updated_at'}
+
+  def handle_before_flush(self):
+    """Override with custom handling"""
+    from ggrc.models import all_models
+    if self.review and self.review.status != all_models.Review.STATES.UNREVIEWED:
+      changed = {a.key for a in db.inspect(self).attrs if a.history.has_changes()}
+      if changed - self.ATTRS_TO_IGNORE:
+        self.review.status = all_models.Review.STATES.UNREVIEWED
 
 
 class Review(mixins.person_relation_factory("last_reviewed_by"),
              mixins.person_relation_factory("created_by"),
              mixins.datetime_mixin_factory("last_reviewed_at"),
              mixins.Stateful,
+             BeforeFlushHandleable,
              roleable.Roleable,
              issue_tracker.IssueTracked,
              Relatable,
@@ -79,11 +98,6 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
              mixins.Base,
              ft_mixin.Indexed,
              db.Model):
-
-  def __init__(self, *args, **kwargs):
-    super(Review, self).__init__(*args, **kwargs)
-    self.last_reviewed_at = None
-    self.last_reviewed_by = None
 
   __tablename__ = "reviews"
 
@@ -126,8 +140,8 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
       "notification_type",
       "email_message",
       reflection.Attribute("reviewable", update=False),
-      reflection.Attribute("last_reviewed_by", update=False),
-      reflection.Attribute("last_reviewed_at", update=False),
+      reflection.Attribute("last_reviewed_by", create=False, update=False),
+      reflection.Attribute("last_reviewed_at", create=False, update=False),
       "issuetracker_issue",
       "status",
   )
@@ -137,13 +151,25 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
       "reviewable_type",
   ]
 
-  @validates("status")
-  def validate_status(self, key, value):
-    super_class = super(Review, self)
-    if hasattr(super_class, "validate_status"):
-      value = super_class.validate_status(key, value)
-    if value == Review.STATES.REVIEWED:
-      self.last_reviewed_at = datetime.datetime.now()
-      self.last_reviewed_by = login.get_current_user()
-    return value
+  def handle_before_flush(self):
+    """Override with custom handling"""
+    self._create_relationship()
+    self._update_reviewed_by()
 
+  def _create_relationship(self):
+    from ggrc.models import all_models
+    if not self.id: #to detect new object only
+      db.session.add(
+        all_models.Relationship(source=self.reviewable, destination=self)
+      )
+
+  def _update_reviewed_by(self):
+    from ggrc.models import all_models
+    if not db.inspect(self).attrs["status"].history.has_changes():
+      return
+
+    self.reviewable.updated_at = datetime.datetime.now() #to log revision
+
+    if self.status == all_models.Review.STATES.REVIEWED:
+      self.last_reviewed_by = self.modified_by
+      self.last_reviewed_at = datetime.datetime.now()

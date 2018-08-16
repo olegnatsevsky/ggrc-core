@@ -13,6 +13,8 @@ from ggrc.models import all_models
 
 from integration.ggrc import TestCase
 from integration.ggrc.models import factories
+
+from ggrc.utils import QueryCounter
 from integration.ggrc.api_helper import Api
 
 
@@ -104,18 +106,18 @@ class TestReviewApi(TestCase):
 
   def test_delete_review(self):
     """Test delete review via API"""
-    control = factories.ControlFactory()
-    review = factories.ReviewFactory(reviewable=control)
-    relationship = factories.RelationshipFactory(source=control,
-                                                 destination=review)
-    review_id = review.id
-    relationship_id = relationship.id
+    with factories.single_commit():
+      control = factories.ControlFactory()
+      control_id = control.id
+      review = factories.ReviewFactory(reviewable=control)
+      review_id = review.id
     resp = self.api.delete(review)
     self.assert200(resp)
     review = all_models.Review.query.get(review_id)
-    relationship = all_models.Relationship.query.get(relationship_id)
+    control = all_models.Control.query.get(control_id)
+
     self.assertIsNone(review)
-    self.assertIsNone(relationship)
+    self.assertEquals(0, len(control.related_objects(_types=["Review"])))
 
   def test_last_reviewed(self):
     """last_reviewed_by, last_reviewed_by should be set if reviewed"""
@@ -129,6 +131,63 @@ class TestReviewApi(TestCase):
     self.assert200(resp)
     self.assertIsNotNone(resp.json["review"]["last_reviewed_by"])
     self.assertIsNotNone(resp.json["review"]["last_reviewed_at"])
+
+  def test_reviewable_revisions(self):
+    """Check that proper revisions are created"""
+    with factories.single_commit():
+      control = factories.ControlFactory()
+      control_id = control.id
+      review = factories.ReviewFactory(
+        reviewable=control,
+        status=all_models.Review.STATES.UNREVIEWED
+      )
+    reviewable = review.reviewable
+
+    control_revisions = all_models.Revision.query.filter_by(
+      resource_id=control_id,
+      resource_type=control.type
+    ).order_by(
+      all_models.Revision.created_at,
+    ).all()
+    self.assertEquals(1, len(control_revisions))
+    self.assertEquals(all_models.Review.STATES.UNREVIEWED,
+                      control_revisions[0].content["review_status"])
+
+    resp = self.api.put(
+      review,
+      {
+          "status": all_models.Review.STATES.REVIEWED,
+      },
+    )
+    self.assert200(resp)
+
+    control_revisions = all_models.Revision.query.filter_by(
+      resource_id=control_id,
+      resource_type=control.type
+    ).order_by(
+        all_models.Revision.created_at,
+    ).all()
+    self.assertEquals(2, len(control_revisions))
+    self.assertEquals(all_models.Review.STATES.REVIEWED,
+                      control_revisions[1].content["review_status"])
+
+    resp = self.api.put(
+      reviewable,
+      {
+        "description": "some new description"
+      }
+    )
+    self.assert200(resp)
+
+    control_revisions = all_models.Revision.query.filter_by(
+      resource_id=control_id,
+      resource_type=control.type
+    ).order_by(
+      all_models.Revision.created_at,
+    ).all()
+    self.assertEquals(3, len(control_revisions))
+    self.assertEquals(all_models.Review.STATES.UNREVIEWED,
+                      control_revisions[2].content["review_status"])
 
   @ddt.data(all_models.Review.STATES.UNREVIEWED,
             all_models.Review.STATES.REVIEWED)
@@ -145,7 +204,7 @@ class TestReviewApi(TestCase):
         reviewable,
         {
             "description":
-            "some new description {}".format(reviewable.description)
+            "some new description"
         }
     )
     self.assert200(resp)
