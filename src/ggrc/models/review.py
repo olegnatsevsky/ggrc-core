@@ -75,7 +75,7 @@ class Reviewable(BeforeFlushHandleable):
     out_json["review_status"] = self.review_status
     return out_json
 
-  ATTRS_TO_IGNORE = {'review','updated_at'}
+  ATTRS_TO_IGNORE = {"review", "updated_at", "modified_by_id", "slug"}
 
   def handle_before_flush(self):
     """Override with custom handling"""
@@ -158,7 +158,7 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
 
   def _create_relationship(self):
     from ggrc.models import all_models
-    if not self.id: #to detect new object only
+    if self in db.session.new:
       db.session.add(
         all_models.Relationship(source=self.reviewable, destination=self)
       )
@@ -168,7 +168,7 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
     if not db.inspect(self).attrs["status"].history.has_changes():
       return
 
-    self.reviewable.updated_at = datetime.datetime.now() #to log revision
+    self.reviewable.updated_at = datetime.datetime.now()
 
     if self.status == all_models.Review.STATES.REVIEWED:
       self.last_reviewed_by = self.modified_by

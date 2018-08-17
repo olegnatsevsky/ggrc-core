@@ -1,11 +1,8 @@
 # Copyright (C) 2018 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
-"""Base TestCase for proposal api."""
+"""Base TestCase for review api."""
 
-import contextlib
-import itertools
-import datetime
 
 import ddt
 
@@ -14,13 +11,12 @@ from ggrc.models import all_models
 from integration.ggrc import TestCase
 from integration.ggrc.models import factories
 
-from ggrc.utils import QueryCounter
 from integration.ggrc.api_helper import Api
 
 
 @ddt.ddt
 class TestReviewApi(TestCase):
-  """Base TestCase class proposal apip tests."""
+  """Base TestCase class review api tests."""
 
   def setUp(self):
     super(TestReviewApi, self).setUp()
@@ -188,25 +184,3 @@ class TestReviewApi(TestCase):
     self.assertEquals(3, len(control_revisions))
     self.assertEquals(all_models.Review.STATES.UNREVIEWED,
                       control_revisions[2].content["review_status"])
-
-  @ddt.data(all_models.Review.STATES.UNREVIEWED,
-            all_models.Review.STATES.REVIEWED)
-  def test_update_reviewable(self, state):
-    """Test change of review description reset state to unreviewed"""
-    #TODO move this test to auto status update
-    with factories.single_commit():
-      control = factories.ControlFactory()
-      review = factories.ReviewFactory(status=state, reviewable=control)
-      review_id = review.id
-      reviewable = review.reviewable
-
-    resp = self.api.put(
-        reviewable,
-        {
-            "description":
-            "some new description"
-        }
-    )
-    self.assert200(resp)
-    review = all_models.Review.query.get(review_id)
-    self.assertEqual(review.status, all_models.Review.STATES.UNREVIEWED)
