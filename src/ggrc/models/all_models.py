@@ -73,6 +73,8 @@ from ggrc.models.person_profile import PersonProfile
 from ggrc.models.metric import Metric
 from ggrc.models.product_group import ProductGroup
 from ggrc.models.technology_environment import TechnologyEnvironment
+from ggrc.models.review import Review
+
 
 all_models = [  # pylint: disable=invalid-name
     # data platform models
@@ -145,6 +147,7 @@ all_models = [  # pylint: disable=invalid-name
     ImportExport,
     TechnologyEnvironment,
     ProductGroup,
+    Review,
 ]
 
 __all__ = [m.__name__ for m in all_models]

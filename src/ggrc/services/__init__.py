@@ -18,6 +18,7 @@ def contributed_services():
   from ggrc.services.resources.person import PersonResource
   from ggrc.services.resources import related_assessments
   from ggrc.access_control.role import AccessControlRole
+  from ggrc.models import review
 
   return [
       service('background_tasks', models.BackgroundTask),
@@ -74,6 +75,7 @@ def contributed_services():
               related_assessments.RelatedAssessmentsResource),
       service('technology_environments', models.TechnologyEnvironment),
       service('product_groups', models.ProductGroup),
+      service('reviews', review.Review),
   ]
 
 
