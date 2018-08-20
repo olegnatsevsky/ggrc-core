@@ -498,6 +498,15 @@ class ProposalFactory(ModelFactory):
   content = None
 
 
+class ReviewFactory(ModelFactory):
+
+  class Meta:
+    model = all_models.Review
+
+  reviewable = factory.LazyAttribute(lambda _: ControlFactory())
+  notification_type = all_models.Review.NotificationTypes.EMAIL_TYPE
+
+
 class RiskAssessmentFactory(TitledFactory):
 
   class Meta:
