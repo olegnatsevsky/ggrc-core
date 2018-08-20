@@ -457,8 +457,6 @@ class LazyStubRepresentation(object):
                                self.condition_val)
     if len(matches) == 1:
       return _render_stub_from_match(matches[0], type_columns[self.type])
-    else:
-      return None
 
 
 def walk_representation(obj):  # noqa
@@ -566,7 +564,7 @@ class Builder(AttributeInfo):
     return None
 
   def publish_association_proxy(
-          self, obj, attr_name, class_attr, inclusions, include,
+          self, obj, class_attr, inclusions, include,
           inclusion_filter):
     # `associationproxy` uses another table as a join table, and context
     # filtering must be done on the join table, or information leakage will
@@ -582,35 +580,32 @@ class Builder(AttributeInfo):
           for join_object in join_objects]
       return self.publish_link_collection(
           target_objects, inclusions, include, inclusion_filter)
-    else:
-      if isinstance(class_attr.remote_attr, (property,
-                                             PolymorphicRelationship)):
-        target_name = class_attr.value_attr + '_id'
-        target_type = class_attr.value_attr + '_type'
-        return [
-            LazyStubRepresentation(
-                getattr(o, target_type), getattr(o, target_name))
-            for o in join_objects]
-      else:
-        target_mapper = class_attr.remote_attr.property.mapper
-        # Handle inheritance -- we must check the object itself for the type
-        if len(list(target_mapper.self_and_descendants)) > 1:
-          target_attr = class_attr.remote_attr.property.key
-          return [
-              self.generate_link_object_for(
-                  getattr(o, target_attr),
-                  inclusions,
-                  include,
-                  inclusion_filter)
-              for o in join_objects]
-        else:
-          target_name = list(
-              class_attr.remote_attr.property.local_columns)[0].key
-          target_type = class_attr.remote_attr.property.mapper.class_.__name__
-          return [
-              LazyStubRepresentation(
-                  target_type, getattr(o, target_name))
-              for o in join_objects]
+    if isinstance(class_attr.remote_attr, (property,
+                                           PolymorphicRelationship)):
+      target_name = class_attr.value_attr + '_id'
+      target_type = class_attr.value_attr + '_type'
+      return [
+          LazyStubRepresentation(
+              getattr(o, target_type), getattr(o, target_name))
+          for o in join_objects]
+    target_mapper = class_attr.remote_attr.property.mapper
+    # Handle inheritance -- we must check the object itself for the type
+    if len(list(target_mapper.self_and_descendants)) > 1:
+      target_attr = class_attr.remote_attr.property.key
+      return [
+          self.generate_link_object_for(
+              getattr(o, target_attr),
+              inclusions,
+              include,
+              inclusion_filter)
+          for o in join_objects]
+    target_name = list(
+        class_attr.remote_attr.property.local_columns)[0].key
+    target_type = class_attr.remote_attr.property.mapper.class_.__name__
+    return [
+        LazyStubRepresentation(
+            target_type, getattr(o, target_name))
+        for o in join_objects]
 
   def publish_relationship(
           self, obj, attr_name, class_attr, inclusions, include,
@@ -623,19 +618,15 @@ class Builder(AttributeInfo):
     elif include or class_attr.property.backref:
       return self.publish_link(
           obj, attr_name, inclusions, include, inclusion_filter)
+    if class_attr.property.mapper.class_.__mapper__.polymorphic_on is not None:
+      target = getattr(obj, attr_name)
+      target_type = target.__class__.__name__
     else:
-      if class_attr.property.mapper.class_.__mapper__.polymorphic_on \
-              is not None:
-        target = getattr(obj, attr_name)
-        target_type = target.__class__.__name__
-      else:
-        target_type = class_attr.property.mapper.class_.__name__
-      target_name = list(class_attr.property.local_columns)[0].key
-      attr_value = getattr(obj, target_name)
-      if attr_value is not None:
-        return LazyStubRepresentation(target_type, attr_value)
-      else:
-        return None
+      target_type = class_attr.property.mapper.class_.__name__
+    target_name = list(class_attr.property.local_columns)[0].key
+    attr_value = getattr(obj, target_name)
+    if attr_value is not None:
+      return LazyStubRepresentation(target_type, attr_value)
 
   def _process_custom_publish(self, obj, attr_name):
     """Processes _custom_publish logic and returns value if any or None."""
@@ -669,7 +660,7 @@ class Builder(AttributeInfo):
           result = published_attr
       else:
         result = self.publish_association_proxy(
-            obj, attr_name, class_attr, inclusions, include, inclusion_filter)
+            obj, class_attr, inclusions, include, inclusion_filter)
     elif (isinstance(class_attr, InstrumentedAttribute) and
           isinstance(class_attr.property, RelationshipProperty)):
       result = self.publish_relationship(
