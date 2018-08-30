@@ -7,7 +7,7 @@ from sqlalchemy import orm
 from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.fulltext.mixin import Indexed
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models import reflection
 from ggrc.models.comment import Commentable
 from ggrc.models.deferred import deferred
@@ -29,6 +29,7 @@ class Clause(Roleable,
              mixins.base.ContextRBAC,
              mixins.BusinessObject,
              mixins.Folderable,
+             review.Reviewable,
              Indexed,
              db.Model):
 

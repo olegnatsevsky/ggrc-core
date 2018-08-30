@@ -9,7 +9,7 @@ from ggrc.fulltext.mixin import Indexed
 from ggrc.models.comment import Commentable
 from ggrc.models.directive import Directive
 from ggrc.models.deferred import deferred
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models import reflection
@@ -31,6 +31,7 @@ class Requirement(Roleable,
                   mixins.base.ContextRBAC,
                   mixins.BusinessObject,
                   mixins.Folderable,
+                  review.Reviewable,
                   Indexed,
                   db.Model):
   """Requirement model."""

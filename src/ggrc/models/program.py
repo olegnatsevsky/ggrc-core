@@ -11,6 +11,7 @@ from ggrc.models.deferred import deferred
 from ggrc.models import object_document
 from ggrc.models.object_person import Personable
 from ggrc.models import reflection
+from ggrc.models import review
 from ggrc.models.relationship import Relatable
 from ggrc.models.track_object_state import HasObjectState
 
@@ -26,6 +27,7 @@ class Program(HasObjectState,
               base.ContextRBAC,
               mixins.BusinessObject,
               mixins.Folderable,
+              review.Reviewable,
               Indexed,
               db.Model):
   __tablename__ = 'programs'

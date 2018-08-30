@@ -6,7 +6,7 @@
 from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.fulltext.mixin import Indexed
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models.comment import Commentable
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
@@ -26,6 +26,7 @@ class Threat(Roleable,
              mixins.base.ContextRBAC,
              mixins.BusinessObject,
              mixins.Folderable,
+             review.Reviewable,
              Indexed,
              db.Model):
   __tablename__ = 'threats'

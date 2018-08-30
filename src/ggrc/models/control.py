@@ -15,7 +15,7 @@ from ggrc.access_control.roleable import Roleable
 from ggrc.models.categorization import Categorizable
 from ggrc.models.category import CategoryBase
 from ggrc.models.mixins import base
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models.mixins.with_last_assessment_date import WithLastAssessmentDate
 from ggrc.models.deferred import deferred
 from ggrc.models.object_person import Personable
@@ -147,7 +147,6 @@ class AssertionCategorized(Categorizable):
 
 
 class Control(WithLastAssessmentDate,
-              HasObjectState,
               Roleable,
               Relatable,
               mixins.CustomAttributable,
@@ -163,6 +162,7 @@ class Control(WithLastAssessmentDate,
               mixins.BusinessObject,
               Indexed,
               mixins.Folderable,
+              review.Reviewable,
               proposal.Proposalable,
               db.Model):
   """Control model definition."""

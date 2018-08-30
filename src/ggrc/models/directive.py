@@ -7,7 +7,7 @@ from sqlalchemy.orm import validates
 from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.fulltext.mixin import Indexed
-from ggrc.models import reflection
+from ggrc.models import reflection, review
 from ggrc.models.comment import Commentable
 from ggrc.models.deferred import deferred
 from ggrc.models import mixins
@@ -155,6 +155,7 @@ class Policy(Roleable,
              Personable,
              PublicDocumentable,
              Directive,
+             review.Reviewable,
              Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Policy'
@@ -183,6 +184,7 @@ class Regulation(Roleable,
                  Personable,
                  PublicDocumentable,
                  Directive,
+                 review.Reviewable,
                  Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Regulation'
@@ -209,6 +211,7 @@ class Standard(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
+               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Standard'
@@ -235,6 +238,7 @@ class Contract(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
+               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Contract'

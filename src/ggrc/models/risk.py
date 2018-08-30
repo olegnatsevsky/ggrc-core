@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.fulltext.mixin import Indexed
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models import proposal
 from ggrc.models.comment import Commentable
 from ggrc.models.deferred import deferred
@@ -32,6 +32,7 @@ class Risk(Roleable,
            proposal.Proposalable,
            mixins.Folderable,
            Indexed,
+           review.Reviewable,
            db.Model):
   """Basic Risk model."""
   __tablename__ = 'risks'

@@ -7,7 +7,7 @@ from ggrc import db
 from ggrc.access_control.roleable import Roleable
 from ggrc.fulltext.mixin import Indexed
 from ggrc.models.comment import Commentable
-from ggrc.models import mixins
+from ggrc.models import mixins, review
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.track_object_state import HasObjectState
@@ -29,6 +29,7 @@ class Objective(mixins.with_last_assessment_date.WithLastAssessmentDate,
                 mixins.base.ContextRBAC,
                 mixins.BusinessObject,
                 mixins.Folderable,
+                review.Reviewable,
                 Indexed,
                 db.Model):
   """Class representing Objective."""
