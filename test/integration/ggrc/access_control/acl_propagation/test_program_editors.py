@@ -122,6 +122,12 @@ class TestProgramEditorsPropagation(base.TestACLPropagation):
               "read_comments": True,
               "add_comment": True
           },
+          "MappedReview Program": {
+              "create_review": True,
+              "read_review": True,
+              "update_review": True,
+              "delete_review": False,
+          },
       },
       "Reader": {
           "Program": {
@@ -229,6 +235,12 @@ class TestProgramEditorsPropagation(base.TestACLPropagation):
               "read_comments": True,
               "add_comment": True
           },
+          "MappedReview Program": {
+              "create": True,
+              "read": True,
+              "update": True,
+              "delete": False,
+          },
       },
       "Editor": {
           "Program": {
@@ -335,6 +347,12 @@ class TestProgramEditorsPropagation(base.TestACLPropagation):
               "delete": False,
               "read_comments": True,
               "add_comment": True
+          },
+          "Review Program": {
+              "create_review": True,
+              "read_review": True,
+              "update_review": True,
+              "delete_review": False,
           },
       },
   }

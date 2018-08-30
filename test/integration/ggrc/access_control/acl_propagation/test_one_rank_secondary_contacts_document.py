@@ -48,7 +48,13 @@ class TestSecondaryContactsDocumentPropagation(base.TestACLPropagation):
               "delete": False,
               "read_comments": True,
               "add_comment": True
-          }
+          },
+          "MappedReview Risk": {
+              "create_review": True,
+              "read_review": True,
+              "update_review": True,
+              "delete_review": False,
+          },
       },
       "Reader": {
           "Document Program": {
@@ -74,7 +80,13 @@ class TestSecondaryContactsDocumentPropagation(base.TestACLPropagation):
               "delete": False,
               "read_comments": True,
               "add_comment": True
-          }
+          },
+          "MappedReview Objective": {
+              "create_review": True,
+              "read_review": True,
+              "update_review": True,
+              "delete_review": False,
+          },
       },
   }
 

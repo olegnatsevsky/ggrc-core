@@ -4,7 +4,7 @@
 """RBAC Factories for ggrc models."""
 
 from integration.ggrc.access_control.rbac_factories import (audit, assessment,
-                                                            document,
+                                                            document, review,
                                                             assessment_template,  # noqa: E501
                                                             snapshot, issue,
                                                             program, workflow,
@@ -27,6 +27,7 @@ TEST_FACTORIES_MAPPING = {
     "Evidence": evidence.EvidenceRBACFactory,
     "Document": document.DocumentReferenceUrlRBACFactory,
     "Program": program.ProgramRBACFactory,
+    "MappedReview": review.MappedReviewRBACFactory,
     "Workflow": workflow.WorkflowRBACFactory,
     "TaskGroup": task_group.TaskGroupRBACFactory,
     "TaskGroupTask": task_group_task.TaskGroupTaskRBACFactory,

@@ -75,6 +75,11 @@ class UniversalRBACFactory(base.BaseRBACFactory):
       factories.RelationshipFactory(source=parent, destination=comment)
     return comment.id
 
+  def read_parent(self):
+    """Can Read parent info."""
+    res = self.api.get(self.parent, self.parent_id)
+    return res
+
   def create_and_map_document(self):
     """Create and map document object to parent."""
     admin_acr_id = all_models.AccessControlRole.query.filter_by(
