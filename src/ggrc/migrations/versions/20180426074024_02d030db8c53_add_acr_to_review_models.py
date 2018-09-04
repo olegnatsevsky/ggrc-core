@@ -23,8 +23,8 @@ def upgrade():
   op.execute("""
        INSERT INTO access_control_roles
           (name, object_type, `read`, `update`, `delete`,
-           non_editable, internal, created_at, updated_at)
-       VALUES ('Reviewer', 'Review', 1, 1, 0, 1, 0, NOW(), NOW())
+           mandatory, non_editable, internal, created_at, updated_at)
+       VALUES ('Reviewer', 'Review', 1, 1, 0, 1, 1, 0, NOW(), NOW())
   """)
 
 
