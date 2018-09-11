@@ -146,6 +146,7 @@ class AssertionCategorized(Categorizable):
 
 
 class Control(WithLastAssessmentDate,
+              review.Reviewable,
               Roleable,
               Relatable,
               mixins.CustomAttributable,
@@ -161,7 +162,6 @@ class Control(WithLastAssessmentDate,
               mixins.BusinessObject,
               Indexed,
               mixins.Folderable,
-              review.Reviewable,
               proposal.Proposalable,
               db.Model):
   """Control model definition."""

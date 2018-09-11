@@ -3,8 +3,7 @@
 
 """Views for email notifications."""
 
-from ggrc.notifications import common
-from ggrc.utils import proposal
+from ggrc.notifications import common, fast_digest
 
 from ggrc.login import login_required
 
@@ -28,6 +27,13 @@ def init_notification_views(app):
       view_func=login_required(common.show_daily_digest_notifications))
 
   app.add_url_rule(
-      "/_notifications/show_proposal_digest",
-      "show_proposal_digest",
-      view_func=login_required(proposal.present_notifications))
+      "/_notifications/show_fast_digest",
+      "show_fast_digest",
+      view_func=login_required(fast_digest.present_notifications))
+
+  #TODO remove
+  app.add_url_rule(
+      "/_notifications/tmp",
+      "tmp",
+      view_func=login_required(common.send_daily_digest_notifications))
+

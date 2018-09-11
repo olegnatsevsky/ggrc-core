@@ -97,6 +97,7 @@ class Reviewable(rest_handable.WithPutHandable,
 
       if changed - self.ATTRS_TO_IGNORE:
         self.review.status = all_models.Review.STATES.UNREVIEWED
+        self._add_notification("review_status_unreviewed")
 
   def _update_status_on_mapping(self, counterparty):
     """Update review status on mapping to reviewable"""
@@ -105,9 +106,21 @@ class Reviewable(rest_handable.WithPutHandable,
     if self.review_status != all_models.Review.STATES.UNREVIEWED:
       if counterparty.type in Types.all:
         self.review.status = all_models.Review.STATES.UNREVIEWED
+        self._add_notification("review_status_unreviewed")
 
   def handle_put(self):
     self._update_status_on_attr()
+
+  def _add_notification(self, notif_type_name):
+    from ggrc.models import all_models
+    notif_type = all_models.NotificationType.query.filter_by(
+        name=notif_type_name).one()
+    db.session.add(all_models.Notification(
+        object=self.review,
+        send_on=datetime.datetime.utcnow(),
+        notification_type=notif_type,
+        runner=all_models.Notification.RUNNER_FAST
+    ))
 
   def handle_relationship_post(self, counterparty):
     self._update_status_on_mapping(counterparty)
@@ -118,6 +131,7 @@ class Reviewable(rest_handable.WithPutHandable,
   def handle_proposal_applied(self):
     from ggrc.models import all_models
     self.review.status = all_models.Review.STATES.UNREVIEWED
+    self._add_notification("review_status_unreviewed")
 
 
 class Review(mixins.person_relation_factory("last_reviewed_by"),
@@ -193,9 +207,22 @@ class Review(mixins.person_relation_factory("last_reviewed_by"),
       "reviewable_type",
   ]
 
+  def _add_notification(self, notif_type_name):
+    from ggrc.models import all_models
+    notif_type = all_models.NotificationType.query.filter_by(
+      name=notif_type_name).one()
+    db.session.flush()
+    db.session.add(all_models.Notification(
+      object=self,
+      send_on=datetime.datetime.utcnow(),
+      notification_type=notif_type,
+      runner=all_models.Notification.RUNNER_FAST
+    ))
+
   def handle_post(self):
     self._create_relationship()
     self._update_new_reviewed_by()
+    self._add_notification("review_request_created")
 
   def handle_put(self):
     self._update_reviewed_by()

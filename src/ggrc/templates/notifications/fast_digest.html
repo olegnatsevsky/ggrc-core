@@ -1,0 +1,102 @@
+{#
+Copyright (C) 2018 Google Inc.
+Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+#}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+{% import 'notifications/style.html' as style %}
+
+<html xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
+<head>
+
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<title>Google GRC Email: Proposal Digest</title>
+
+</head>
+
+<body {{ style.body_style() }}>
+  <br>
+  <div {{ style.proposal_container() }} >
+  {% for proposal in proposals %}
+    <div style="padding: 30px 20px;">
+      <h1 {{ style.proposal_main_title() }} >
+      {{ proposal.proposed_by_name }} proposed changes to {{ proposal.instance.type|lower }}: {{ proposal.instance.slug }}
+      </h1>
+      <p {{ style.comment_content() }}>
+        {{ proposal.agenda }}
+      </p>
+      <table {{ style.proposal_table_full() }}>
+        <thead>
+          <tr>
+              <th {{ style.proposal_th() }}>ATTRIBUTE</th>
+              <th colspan=2 {{ style.proposal_th() }}>PROPOSED VALUE</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for field, value in proposal.values_dict.items() %}
+        <tr>
+            <td {{ style.proposal_td() }}>{{ field }}</td>
+            <td {{ style.proposal_td_value() }}colspan=2>{{ value }}</td>
+        </tr>
+        {% endfor %}
+        {% for field, values in proposal.values_list_dict.items() %}
+          <tr>
+            <td {{ style.proposal_td() }}>{{ field }}</td>
+              {% for action, elements in values.items() %}
+                {% for element in elements %}
+                  {% if loop.first %}
+                    <td {{ style.proposal_action_cell() }}>
+                       <span {{ style.proposal_action_cell() }}>
+                         {{ action|capitalize }}:
+                       </span>
+                    </td>
+                    <td {{ style.proposal_td() }}>
+                    <ul {{ style.list_wrap() }}>
+                  {% endif %}
+
+                  <li {{ style.proposal_list_item_no_bullet() }}>{{ element }}{% if not loop.last %},{% endif %}</li>
+
+                  {% if loop.last %}
+                    </ul>
+                    </td>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p {{ style.header_color() }}>
+          Go to GGRC got approve or decline this proposal
+      </p>
+      <a href="{{proposal.object_url}}" {{ style.proposal_btn() }}>Open</a>
+      {% if not loop.last %}
+        <br>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div style="border-bottom: 2px solid #e0e0e0;"></div>
+
+    <div style="padding: 30px 20px;">
+      <h1 {{ style.proposal_main_title() }} >
+        You review was requested for the following objects
+      </h1>
+      <ul style="list-style-type:none;padding-left:10px;margin:30px 0px;">
+        {% for review in reviews %}
+        <li style="color: #545454;margin-bottom: 15px;">
+          {{review.reviewable.type}} <a style="text-decoration: none;color: #0288D1;" href="{{review.object_url}}">{{review.reviewable.title}}</a>
+          <div style="color: #999999;font-size: 14px;">{{review.email_message}} </div>
+        </li>
+        {% endfor %}
+      </ul>
+
+    </div>
+
+  </div>
+  <span {{ style.proposal_footer() }}> Google GRC </span>
+</body>
+</html>

@@ -67,12 +67,6 @@ class Proposal(mixins.person_relation_factory("applied_by"),
 
   __tablename__ = 'proposals'
 
-  # pylint: disable=too-few-public-methods
-  class NotificationContext(object):
-    DIGEST_TITLE = "Proposal Digest"
-    DIGEST_TMPL = settings.JINJA2.get_template(
-        "notifications/proposal_digest.html")
-
   class STATES(object):
     """All states for proposals."""
     PROPOSED = "proposed"

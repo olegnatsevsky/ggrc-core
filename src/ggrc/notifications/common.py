@@ -215,6 +215,7 @@ def get_daily_notifications():
       and corresponding data for those notifications.
   """
   notifications = db.session.query(Notification).filter(
+      (Notification.runner == Notification.RUNNER_DAILY) &
       (Notification.send_on <= datetime.today()) &
       ((Notification.sent_at.is_(None)) | (Notification.repeating == true()))
   ).all()
