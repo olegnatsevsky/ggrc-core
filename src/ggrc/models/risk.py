@@ -15,11 +15,10 @@ from ggrc.models.deferred import deferred
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Risk(Roleable,
-           HasObjectState,
+           review.Reviewable,
            mixins.CustomAttributable,
            Relatable,
            Personable,
@@ -32,7 +31,6 @@ class Risk(Roleable,
            proposal.Proposalable,
            mixins.Folderable,
            Indexed,
-           review.Reviewable,
            db.Model):
   """Basic Risk model."""
   __tablename__ = 'risks'

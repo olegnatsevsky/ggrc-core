@@ -1,5 +1,6 @@
 # Copyright (C) 2018 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+"""Module for Directive, Contract, Policy, Regulation, Standard model."""
 
 from sqlalchemy import orm
 from sqlalchemy.orm import validates
@@ -14,7 +15,6 @@ from ggrc.models import mixins
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 from ggrc.models.utils import validate_option
 
 
@@ -25,7 +25,7 @@ from ggrc.models.utils import validate_option
 # to be run in the context of each particular subclass.
 # (of course, if there is a nice way of overriding/customizing declared
 # attributes in subclasses, we might want to use that approach)
-class Directive(HasObjectState,
+class Directive(review.Reviewable,
                 mixins.LastDeprecatedTimeboxed,
                 Commentable,
                 mixins.TestPlanned,
@@ -33,6 +33,8 @@ class Directive(HasObjectState,
                 mixins.BusinessObject,
                 mixins.Folderable,
                 db.Model):
+  """Directive model"""
+
   __tablename__ = 'directives'
 
   version = deferred(db.Column(db.String), 'Directive')
@@ -155,7 +157,6 @@ class Policy(Roleable,
              Personable,
              PublicDocumentable,
              Directive,
-             review.Reviewable,
              Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Policy'
@@ -184,7 +185,6 @@ class Regulation(Roleable,
                  Personable,
                  PublicDocumentable,
                  Directive,
-                 review.Reviewable,
                  Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Regulation'
@@ -211,7 +211,6 @@ class Standard(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
-               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Standard'
@@ -238,7 +237,6 @@ class Contract(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
-               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Contract'

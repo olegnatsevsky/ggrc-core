@@ -11,11 +11,10 @@ from ggrc.models.comment import Commentable
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Threat(Roleable,
-             HasObjectState,
+             review.Reviewable,
              mixins.CustomAttributable,
              Personable,
              Relatable,
@@ -26,7 +25,6 @@ class Threat(Roleable,
              mixins.base.ContextRBAC,
              mixins.BusinessObject,
              mixins.Folderable,
-             review.Reviewable,
              Indexed,
              db.Model):
   __tablename__ = 'threats'

@@ -15,11 +15,10 @@ from ggrc.models.object_person import Personable
 from ggrc.models import reflection
 from ggrc.models.relationship import Relatable
 from ggrc.models.relationship import Relationship
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Requirement(Roleable,
-                  HasObjectState,
+                  review.Reviewable,
                   mixins.CustomAttributable,
                   mixins.WithStartDate,
                   mixins.WithLastDeprecatedDate,
@@ -31,7 +30,6 @@ class Requirement(Roleable,
                   mixins.base.ContextRBAC,
                   mixins.BusinessObject,
                   mixins.Folderable,
-                  review.Reviewable,
                   Indexed,
                   db.Model):
   """Requirement model."""

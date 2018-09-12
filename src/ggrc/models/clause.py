@@ -14,11 +14,10 @@ from ggrc.models.deferred import deferred
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Clause(Roleable,
-             HasObjectState,
+             review.Reviewable,
              Personable,
              Relatable,
              Commentable,
@@ -29,9 +28,9 @@ class Clause(Roleable,
              mixins.base.ContextRBAC,
              mixins.BusinessObject,
              mixins.Folderable,
-             review.Reviewable,
              Indexed,
              db.Model):
+  """Clause model"""
 
   __tablename__ = 'clauses'
   _table_plural = 'clauses'

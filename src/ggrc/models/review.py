@@ -75,6 +75,8 @@ class Reviewable(rest_handable.WithPutHandable,
     """Serialize to JSON"""
     out_json = super(Reviewable, self).log_json()
     out_json["review_status"] = self.review_status
+    out_json["review"] = self.review
+    out_json["review_issue_link"] = self.review_issue_link
     return out_json
 
   ATTRS_TO_IGNORE = {"review", "updated_at", "modified_by_id",
