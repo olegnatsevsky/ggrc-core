@@ -87,7 +87,7 @@ class TestSnapshotBlockConverter(TestCase):
         ('end_date', 'Last Deprecated Date'),
         ('archived', 'Archived'),
         ('status', 'State'),
-        ('os_state', 'Review State'),
+        ('review_status', 'Review State'),
         ('assertions', 'Assertions'),
         ('categories', 'Categories'),
         ('fraud_related', 'Fraud Related'),
