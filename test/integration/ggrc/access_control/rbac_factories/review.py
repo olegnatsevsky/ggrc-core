@@ -11,6 +11,7 @@ from integration.ggrc.models.factories import get_model_factory
 
 
 class MappedReviewRBACFactory(universal_factory.UniversalRBACFactory):
+  """MappedReview contains methods to check review related actions"""
   def __init__(self, user_id, acr, parent=None, role_at_review=False):
     self.parent = None
     self.parent_id = None
