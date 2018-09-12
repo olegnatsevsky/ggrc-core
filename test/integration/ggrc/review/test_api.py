@@ -2,8 +2,6 @@
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
 """Base TestCase for proposal api."""
-import unittest
-
 import ddt
 
 from ggrc.models import all_models
@@ -61,7 +59,6 @@ class TestReviewApi(TestCase):
     self.assertIn("reviews", resp.json["reviews_collection"])
     self.assertEquals(2, len(resp.json["reviews_collection"]["reviews"]))
 
-  @unittest.skip("Skipped until control not Reviewable")
   def test_create_review(self):
     """Create review via API, check that single relationship is created"""
     control = factories.ControlFactory()
@@ -137,7 +134,6 @@ class TestReviewApi(TestCase):
     self.assertIsNotNone(review.last_reviewed_by)
     self.assertIsNotNone(review.last_reviewed_at)
 
-  @unittest.skip("Skipped until control not Reviewable")
   def test_reviewable_revisions(self):
     """Check that proper revisions are created"""
     with factories.single_commit():
