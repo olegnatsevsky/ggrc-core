@@ -14,7 +14,6 @@ from ggrc.models import mixins
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 from ggrc.models.utils import validate_option
 
 
@@ -25,13 +24,13 @@ from ggrc.models.utils import validate_option
 # to be run in the context of each particular subclass.
 # (of course, if there is a nice way of overriding/customizing declared
 # attributes in subclasses, we might want to use that approach)
-class Directive(HasObjectState,
-                mixins.LastDeprecatedTimeboxed,
+class Directive(mixins.LastDeprecatedTimeboxed,
                 Commentable,
                 mixins.TestPlanned,
                 mixins.base.ContextRBAC,
                 mixins.BusinessObject,
                 mixins.Folderable,
+                review.Reviewable,
                 db.Model):
   __tablename__ = 'directives'
 
@@ -155,7 +154,6 @@ class Policy(Roleable,
              Personable,
              PublicDocumentable,
              Directive,
-             review.Reviewable,
              Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Policy'
@@ -184,7 +182,6 @@ class Regulation(Roleable,
                  Personable,
                  PublicDocumentable,
                  Directive,
-                 review.Reviewable,
                  Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Regulation'
@@ -211,7 +208,6 @@ class Standard(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
-               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Standard'
@@ -238,7 +234,6 @@ class Contract(Roleable,
                Personable,
                PublicDocumentable,
                Directive,
-               review.Reviewable,
                Indexed):
   __mapper_args__ = {
       'polymorphic_identity': 'Contract'

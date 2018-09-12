@@ -15,11 +15,9 @@ from ggrc.models.deferred import deferred
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Risk(Roleable,
-           HasObjectState,
            mixins.CustomAttributable,
            Relatable,
            Personable,

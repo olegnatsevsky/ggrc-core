@@ -20,7 +20,6 @@ from ggrc.models.mixins.with_last_assessment_date import WithLastAssessmentDate
 from ggrc.models.deferred import deferred
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 from ggrc.models.utils import validate_option
 from ggrc.fulltext.mixin import Indexed
 from ggrc.fulltext import attributes

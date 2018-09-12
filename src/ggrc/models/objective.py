@@ -10,13 +10,11 @@ from ggrc.models.comment import Commentable
 from ggrc.models import mixins, review
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
-from ggrc.models.track_object_state import HasObjectState
 from ggrc.models.relationship import Relatable
 
 
 class Objective(mixins.with_last_assessment_date.WithLastAssessmentDate,
                 Roleable,
-                HasObjectState,
                 mixins.CustomAttributable,
                 mixins.WithStartDate,
                 mixins.WithLastDeprecatedDate,
