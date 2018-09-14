@@ -111,7 +111,6 @@ class AttributeInfo(object):
       "verified_date",
       "status",
       "labels",
-      "os_state",
       "review_status",
       "assertions",
       "categories",

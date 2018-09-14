@@ -13,7 +13,6 @@ from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
 from ggrc.models.utils import validate_option
-from ggrc.models import track_object_state
 from ggrc.models import reflection
 
 
@@ -25,8 +24,7 @@ from ggrc.models import reflection
 # subclass.
 # (of course, if there is a nice way of overriding/customizing declared
 # attributes in subclasses, we might want to use that approach)
-class SystemOrProcess(track_object_state.HasObjectState,
-                      ScopedCommentable,
+class SystemOrProcess(ScopedCommentable,
                       mixins.TestPlanned,
                       mixins.LastDeprecatedTimeboxed,
                       mixins.base.ContextRBAC,

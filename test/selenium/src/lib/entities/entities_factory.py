@@ -331,8 +331,7 @@ class ProgramsFactory(EntitiesFactory):
     'is_add_rest_attrs' then add attributes for REST."""
     program_obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED))
+        status=unicode(object_states.DRAFT))
     if is_add_rest_attrs:
       program_obj.update_attrs(
           recipients=",".join((
@@ -357,8 +356,7 @@ class ControlsFactory(EntitiesFactory):
     obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
         assertions=self._generate_assertions(assertions),
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED), **attrs)
+        status=unicode(object_states.DRAFT), **attrs)
     if is_add_rest_attrs:
       obj.update_attrs(recipients=",".join((
           unicode(roles.ADMIN), unicode(roles.PRIMARY_CONTACTS),
@@ -394,8 +392,7 @@ class ObjectivesFactory(EntitiesFactory):
     'is_add_rest_attrs' then add attributes for REST."""
     objective_obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED))
+        status=unicode(object_states.DRAFT))
     if is_add_rest_attrs:
       objective_obj.update_attrs(
           recipients=",".join((
@@ -419,8 +416,7 @@ class RisksFactory(EntitiesFactory):
     obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
         description=self.generate_string("description"),
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED))
+        status=unicode(object_states.DRAFT))
     if is_add_rest_attrs:
       obj.update_attrs(
           recipients=",".join((
@@ -443,8 +439,7 @@ class OrgGroupsFactory(EntitiesFactory):
     'is_add_rest_attrs' then add attributes for REST."""
     obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED))
+        status=unicode(object_states.DRAFT))
     if is_add_rest_attrs:
       obj.update_attrs(
           recipients=",".join((
@@ -679,8 +674,7 @@ class IssuesFactory(EntitiesFactory):
     'is_add_rest_attrs' then add attributes for REST."""
     issue_obj = self.obj_inst().update_attrs(
         title=self.obj_title, slug=self.obj_slug,
-        status=unicode(object_states.DRAFT),
-        os_state=unicode(element.ReviewStates.UNREVIEWED))
+        status=unicode(object_states.DRAFT))
     if is_add_rest_attrs:
       issue_obj.update_attrs(
           recipients=",".join((

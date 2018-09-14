@@ -13,7 +13,6 @@ from ggrc.models import comment
 from ggrc.models import mixins
 from ggrc.models import object_person
 from ggrc.models import relationship
-from ggrc.models import track_object_state
 from ggrc.models.mixins import assignable
 
 from unit.ggrc.models import test_mixins_base
@@ -31,7 +30,6 @@ class TestAssessmentMixins(test_mixins_base.TestMixinsBase):
         mixins.CustomAttributable,
         db.Model,
         mixins.with_evidence.WithEvidence,
-        track_object_state.HasObjectState,
         mixins.TestPlanned,
         mixins.Timeboxed,
         object_person.Personable,
@@ -52,7 +50,6 @@ class TestAssessmentMixins(test_mixins_base.TestMixinsBase):
         ('evidences_url', property),                                     # WithEvidence   # noqa
         ('evidences_file', property),                                    # WithEvidence   # noqa
         ('object_people', attributes.InstrumentedAttribute),             # Personable     # noqa
-        ('os_state', attributes.InstrumentedAttribute),                  # HasObjectState # noqa
         ('related_sources', attributes.InstrumentedAttribute),           # Relatable      # noqa
         ('related_destinations', attributes.InstrumentedAttribute),      # Relatable      # noqa
         ('slug', attributes.InstrumentedAttribute),                      # Slugged        # noqa

@@ -38,12 +38,11 @@ from ggrc.models.deferred import deferred
 from ggrc.models.object_person import Personable
 from ggrc.models import reflection
 from ggrc.models.relationship import Relatable
-from ggrc.models.track_object_state import HasObjectState
 from ggrc.fulltext.mixin import Indexed
 
 
 class Assessment(Assignable, statusable.Statusable, AuditRelationship,
-                 AutoStatusChangeable, HasObjectState, TestPlanned,
+                 AutoStatusChangeable, TestPlanned,
                  CustomAttributable, WithEvidence, Commentable,
                  Personable, reminderable.Reminderable, Relatable,
                  LastDeprecatedTimeboxed, WithSimilarityScore, FinishedDate,

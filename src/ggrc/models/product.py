@@ -17,11 +17,9 @@ from ggrc.models.option import Option
 from ggrc.models import reflection
 from ggrc.models.relationship import Relatable
 from ggrc.models.utils import validate_option
-from ggrc.models.track_object_state import HasObjectState
 
 
 class Product(Roleable,
-              HasObjectState,
               mixins.CustomAttributable,
               Personable,
               Relatable,

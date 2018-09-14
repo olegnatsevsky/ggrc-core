@@ -95,7 +95,7 @@ _DEFAULT_COLUMN_HANDLERS_DICT = {
     "network_zone": handlers.OptionColumnHandler,
     "notes": handlers.TextColumnHandler,
     "operationally": handlers.ConclusionColumnHandler,
-    "os_state": handlers.ExportOnlyColumnHandler,
+    "review_status": handlers.ExportOnlyColumnHandler,
     "program": handlers.ProgramColumnHandler,
     "ra_counsel": handlers.UserColumnHandler,
     "ra_manager": handlers.UserColumnHandler,

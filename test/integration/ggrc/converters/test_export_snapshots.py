@@ -99,7 +99,7 @@ class TestExportSnapshots(TestCase):
             "Frequency": control.verify_frequency.display_name,
             "Kind/Nature": control.kind.display_name,
             "Notes": control.notes,
-            "Review State": control.os_state,
+            "Review State": control.review_status,
             "Significance": u"key" if control.key_control else u"non-key",
             "State": control.status,
             "Last Deprecated Date": u"",

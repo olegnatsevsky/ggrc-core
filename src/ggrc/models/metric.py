@@ -11,14 +11,12 @@ from ggrc.models import mixins
 from ggrc.models.object_document import PublicDocumentable
 from ggrc.models.object_person import Personable
 from ggrc.models.relationship import Relatable
-from ggrc.models import track_object_state
 
 
 class Metric(Personable,
              Roleable,
              Relatable,
              PublicDocumentable,
-             track_object_state.HasObjectState,
              ScopedCommentable,
              mixins.TestPlanned,
              mixins.LastDeprecatedTimeboxed,

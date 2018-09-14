@@ -619,7 +619,7 @@ class Entity(Representation):
   def __init__(self, **attrs):
     self.set_attrs(
         "type", "slug", "id", "title", "href", "url", "admins",
-        "primary_contacts", "secondary_contacts", "status", "os_state",
+        "primary_contacts", "secondary_contacts", "status",
         "comments", "custom_attribute_definitions", "custom_attribute_values",
         "custom_attributes", "created_at", "updated_at", "modified_by",
         "object_review_txt", "description", **attrs)
@@ -657,7 +657,7 @@ class PersonEntity(Entity):
     super(PersonEntity, self).__init__()
     self.delete_attrs(
         "slug", "title", "admins", "primary_contacts", "secondary_contacts",
-        "status", "os_state", "comments")
+        "status", "comments")
     self.set_attrs(
         "name", "id", "type", "email", "company", "system_wide_role", **attrs)
 
@@ -743,8 +743,7 @@ class AuditEntity(Entity):
   def __init__(self, **attrs):
     super(AuditEntity, self).__init__()
     self.delete_attrs(
-        "admins", "primary_contacts", "secondary_contacts", "os_state",
-        "comments")
+        "admins", "primary_contacts", "secondary_contacts", "comments")
     self.set_attrs(
         "audit_captains", "auditors", "program", **attrs)
 
@@ -755,8 +754,7 @@ class AssessmentTemplateEntity(Entity):
   def __init__(self, **attrs):
     super(AssessmentTemplateEntity, self).__init__()
     self.delete_attrs(
-        "admins", "primary_contacts", "secondary_contacts", "os_state",
-        "comments")
+        "admins", "primary_contacts", "secondary_contacts", "comments")
     self.set_attrs(
         "assignees", "verifiers", "template_object_type", "audit", **attrs)
 
@@ -766,7 +764,7 @@ class AssessmentEntity(Entity):
 
   def __init__(self, **attrs):
     super(AssessmentEntity, self).__init__()
-    self.delete_attrs("admins", "os_state")
+    self.delete_attrs("admins")
     self.set_attrs(
         "creators", "assignees", "verifiers", "assessment_type", "verified",
         "mapped_objects", "audit", "template", "object", "evidence_urls",

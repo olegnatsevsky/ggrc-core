@@ -1,6 +1,7 @@
 # Copyright (C) 2018 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 
+"""Program model."""
 from ggrc import db
 from ggrc.fulltext.mixin import Indexed
 from ggrc.access_control.roleable import Roleable
@@ -28,6 +29,7 @@ class Program(review.Reviewable,
               mixins.Folderable,
               Indexed,
               db.Model):
+  """Representation for Program model."""
   __tablename__ = 'programs'
 
   KINDS = ['Directive']
