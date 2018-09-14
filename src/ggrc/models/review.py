@@ -119,7 +119,8 @@ class Reviewable(rest_handable.WithPutHandable,
 
   def handle_proposal_applied(self):
     from ggrc.models import all_models
-    self.review.status = all_models.Review.STATES.UNREVIEWED
+    if self.review:
+      self.review.status = all_models.Review.STATES.UNREVIEWED
 
 
 class Review(mixins.person_relation_factory("last_reviewed_by"),
