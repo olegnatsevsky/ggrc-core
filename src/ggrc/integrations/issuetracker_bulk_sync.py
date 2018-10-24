@@ -427,7 +427,7 @@ class IssueTrackerBulkChildCreator(IssueTrackerBulkCreator):
                   parent_type, child_type
               )
           )
-
+        handler.create_assessment_issuetracker_issues(parent_type, parent_id)
         for obj in handler.load_issuetracked_objects(parent_type, parent_id):
           issuetracked_info.append(IssuetrackedObjInfo(obj))
 

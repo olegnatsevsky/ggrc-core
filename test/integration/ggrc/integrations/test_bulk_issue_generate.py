@@ -424,6 +424,55 @@ class TestBulkIssuesChildGenerate(TestBulkIssuesSync):
     )
     self.assertEqual(query.count(), 0)
 
+  def test_related_assessments(self):
+    """Assessment with empty issuetracker_issue should be synced"""
+    with factories.single_commit():
+      audit = factories.AuditFactory()
+      factories.IssueTrackerIssueFactory(
+          issue_tracked_obj=audit,
+          issue_id=None,
+          component_id=12345,
+          hotlist_id=54321,
+          issue_priority="P2",
+          issue_severity="S2",
+      )
+      assess1 = factories.AssessmentFactory(audit=audit)
+      assess1_id = assess1.id
+      assess2 = factories.AssessmentFactory(audit=audit)
+      assess2_id = assess2.id
+      factories.IssueTrackerIssueFactory(
+        issue_tracked_obj=assess2,
+        issue_id=None,
+        component_id=9999,
+        hotlist_id=7777,
+        issue_priority="P1",
+        issue_severity="S1",
+      )
+
+    self.assertIsNone(assess1.issuetracker_issue)
+    response = self.generate_children_issues_for(
+        audit.type, audit.id, assess1.type
+    )
+    self.assert200(response)
+    self.assertEqual(response.json.get("errors"), [])
+    assess1 = all_models.Assessment.query.get(assess1_id)
+    self.assertIsNotNone(
+        assess1.issuetracker_issue,
+        "issuetracker_issue was not created for assessment {}".format(
+            assess1.id
+        )
+    )
+    self.assertEqual("12345", assess1.issuetracker_issue.component_id)
+    self.assertEqual("54321", assess1.issuetracker_issue.hotlist_id)
+    self.assertEqual("P2", assess1.issuetracker_issue.issue_priority)
+    self.assertEqual("S2", assess1.issuetracker_issue.issue_severity)
+    assess2 = all_models.Assessment.query.get(assess2_id)
+    self.assertEqual("9999", assess2.issuetracker_issue.component_id)
+    self.assertEqual("7777", assess2.issuetracker_issue.hotlist_id)
+    self.assertEqual("P1", assess2.issuetracker_issue.issue_priority)
+    self.assertEqual("S1", assess2.issuetracker_issue.issue_severity)
+
+
   def test_bg_operation_status(self):
     """Test background operation status endpoint."""
     audit_id, _ = self.setup_assessments(3)
