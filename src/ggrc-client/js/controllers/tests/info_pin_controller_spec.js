@@ -133,7 +133,7 @@ describe('CMS.Controllers.InfoPin', function () {
     });
   });
 
-  describe('showInstance() method', () => {
+  describe('changeMaximizedState() method', () => {
     let infoPane;
 
     beforeEach(() => {
@@ -142,7 +142,7 @@ describe('CMS.Controllers.InfoPin', function () {
     });
 
     it('sets maximized state for info pane', () => {
-      ctrlInst.showInstance(true);
+      ctrlInst.changeMaximizedState(true);
 
       expect(infoPane.hasClass(pinContentHiddenClass)).toBe(false);
       expect(infoPane.hasClass(pinContentMinimizedClass)).toBe(false);
@@ -150,7 +150,7 @@ describe('CMS.Controllers.InfoPin', function () {
     });
 
     it('sets minimized state for info pane', () => {
-      ctrlInst.showInstance(false);
+      ctrlInst.changeMaximizedState(false);
 
       expect(infoPane.hasClass(pinContentHiddenClass)).toBe(false);
       expect(infoPane.hasClass(pinContentMinimizedClass)).toBe(true);
@@ -160,8 +160,8 @@ describe('CMS.Controllers.InfoPin', function () {
     it('changes info pane state', () => {
       ctrlInst.element.addClass(pinContentHiddenClass);
 
-      ctrlInst.showInstance(true);
-      ctrlInst.showInstance(false);
+      ctrlInst.changeMaximizedState(true);
+      ctrlInst.changeMaximizedState(false);
 
       expect(ctrlInst.element.hasClass(pinContentHiddenClass)).toBe(false);
       expect(ctrlInst.element.hasClass(pinContentMinimizedClass)).toBe(true);

@@ -7,7 +7,7 @@ from ggrc.models import all_models
 from integration.ggrc import TestCase
 from integration.ggrc import generator
 from integration.ggrc.models import factories
-from integration.ggrc.review import build_reviewer_acl
+from integration.ggrc.review import generate_review_object
 
 
 class TestImportReviewable(TestCase):
@@ -23,20 +23,7 @@ class TestImportReviewable(TestCase):
     """Disallow user to change review state"""
     control = factories.ControlFactory(title="Test control")
 
-    resp, _ = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.UNREVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, _ = generate_review_object(control)
     control_id = control.id
     self.assertEqual(201, resp.status_code)
     import_data = OrderedDict(
@@ -61,20 +48,8 @@ class TestImportReviewable(TestCase):
     """
     control = factories.ControlFactory(title="Test control")
 
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     control_id = control.id
     self.assertEqual(201, resp.status_code)
     import_data = OrderedDict(
@@ -108,20 +83,8 @@ class TestImportReviewable(TestCase):
     product = factories.ProductFactory()
     product_slug = product.slug
 
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     control_id = control.id
     self.assertEqual(201, resp.status_code)
     import_data = OrderedDict(
@@ -150,20 +113,8 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(
         title="Test control"
     )
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -189,20 +140,8 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(
         title="Test control"
     )
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -228,20 +167,8 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(title="Test control")
     issue = factories.IssueFactory()
     issue_slug = issue.slug
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -266,20 +193,9 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(
         title="Test control"
     )
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
+
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -304,20 +220,8 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(
         title="Test control"
     )
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -346,20 +250,8 @@ class TestImportReviewable(TestCase):
     control = factories.ControlFactory(
         title="Test control"
     )
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "notification_type":
-            all_models.Review.NotificationTypes.EMAIL_TYPE,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     del review
     control_id = control.id
     self.assertEqual(201, resp.status_code)
@@ -385,4 +277,26 @@ class TestImportReviewable(TestCase):
     self.assertEqual(
         all_models.Review.STATES.UNREVIEWED,
         control.review_status
+    )
+
+  def test_change_control_folder(self):
+    """Updating folder via import should not change review status."""
+    control = factories.ControlFactory(title="Control")
+    factories.ReviewFactory(
+        reviewable=control,
+        status=all_models.Review.STATES.REVIEWED,
+    )
+    import_data = OrderedDict(
+        [
+            ("object_type", "Control"),
+            ("Code*", control.slug),
+            ("Folder", factories.random_str())
+        ]
+    )
+    response = self.import_data(import_data)
+    self._check_csv_response(response, {})
+    control = all_models.Control.query.get(control.id)
+    self.assertEqual(
+        all_models.Review.STATES.REVIEWED,
+        control.review_status,
     )

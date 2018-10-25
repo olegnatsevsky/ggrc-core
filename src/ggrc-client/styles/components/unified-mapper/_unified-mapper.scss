@@ -6,7 +6,7 @@
 $list-item-padding: 15px;
 $item-status-width: 8px;
 $icon-width: 32px;
-$view-object-buttons-width: 55px;
+$search-only-width: 55px;
 $related-assessment-button-width: 95px;
 $object-selection-item-width: 102px;
 $object-selection-item-with-related-assessments-width: 16px;
@@ -173,20 +173,6 @@ mapper-results {
       .status-label {
         margin: 0;
       }
-    }
-
-    view-object-buttons,
-    .related-assessments-button {
-      display: flex;
-
-      .btn {
-        position: relative;
-        top: -1px;
-      }
-    }
-
-    view-object-buttons {
-      width: $view-object-buttons-width;
     }
 
     .related-assessments-button {
@@ -404,7 +390,7 @@ mapper-results-items-header {
       @include cell-styles();
       font-size: 11px;
       text-transform: uppercase;
-      
+
       &_sortable {
         cursor: pointer;
       }
@@ -419,10 +405,10 @@ mapper-results-items-header {
   margin-right: $object-selection-item-width;
 
   &.search-only {
-    margin-right: $view-object-buttons-width;
+    margin-right: $search-only-width;
 
     &.has-related-assessments {
-      margin-right: $view-object-buttons-width +
+      margin-right: $search-only-width +
                     $related-assessment-button-width;
     }
   }

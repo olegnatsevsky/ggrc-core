@@ -152,6 +152,19 @@ a {
 .btn {
   @include btn-size(12px);
 
+  &-outline {
+    background: $white;
+    font-weight: normal;
+    border: 1px solid $widgetBorder;
+    color: $black;
+    border-radius: 2px;
+
+    &:hover,
+    &:focus,
+    &:active {
+        border-color: $widgetBorder;
+    }
+  }
   &.btn-small {
     @include btn-size(12px, 18px, 4px 14px);
   }

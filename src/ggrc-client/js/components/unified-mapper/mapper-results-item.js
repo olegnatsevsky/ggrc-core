@@ -6,7 +6,6 @@
 import './mapper-results-item-status';
 import './mapper-results-item-details';
 import './mapper-results-item-attrs';
-import '../view-object-buttons/view-object-buttons';
 import '../object-selection/object-selection-item';
 import template from './templates/mapper-results-item.mustache';
 import Snapshot from '../../models/service-models/snapshot';

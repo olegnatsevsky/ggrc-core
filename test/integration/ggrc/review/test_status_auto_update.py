@@ -11,7 +11,7 @@ from integration.ggrc import TestCase, generator
 from integration.ggrc.models import factories
 
 from integration.ggrc.api_helper import Api
-from integration.ggrc.review import build_reviewer_acl
+from integration.ggrc.review import generate_review_object
 
 
 def build_related_object_data(role, title):
@@ -464,19 +464,7 @@ class TestReviewStatusUpdate(TestCase):
   def test_unmap_snapshotable(self):
     """Unmap snapshotable should change review status"""
     control = factories.ControlFactory()
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "status": all_models.Review.STATES.UNREVIEWED,
-            "access_control_list": build_reviewer_acl(),
-            "notification_type": all_models.Review.NotificationTypes.EMAIL_TYPE
-        },
-    )
+    resp, review = generate_review_object(control)
     review_id = review.id
 
     _, rel = self.generator.generate_relationship(
@@ -509,19 +497,8 @@ class TestReviewStatusUpdate(TestCase):
   def test_map_nonsnapshotable(self, nonsnapshotable):
     """Map '{}' shouldn't change review status"""
     control = factories.ControlFactory()
-    _, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-            "notification_type": all_models.Review.NotificationTypes.EMAIL_TYPE
-        },
-    )
+    _, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     review_id = review.id
 
     review = all_models.Review.query.get(review_id)
@@ -540,19 +517,8 @@ class TestReviewStatusUpdate(TestCase):
   def test_unmap_nonsnapshotable(self):
     """Unmap nonsnapshotable shouldn't change review status"""
     control = factories.ControlFactory()
-    resp, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "status": all_models.Review.STATES.REVIEWED,
-            "access_control_list": build_reviewer_acl(),
-            "notification_type": all_models.Review.NotificationTypes.EMAIL_TYPE
-        },
-    )
+    resp, review = generate_review_object(
+        control, state=all_models.Review.STATES.REVIEWED)
     review_id = review.id
     _, rel = self.generator.generate_relationship(
         source=control,
@@ -576,19 +542,7 @@ class TestReviewStatusUpdate(TestCase):
   def test_proposal_apply(self):
     """Reviewable object changed via proposal -> review.state-> UNREVIEWED"""
     control = factories.ControlFactory()
-    _, review = self.generator.generate_object(
-        all_models.Review,
-        {
-            "reviewable": {
-                "type": control.type,
-                "id": control.id,
-            },
-            "context": None,
-            "status": all_models.Review.STATES.UNREVIEWED,
-            "access_control_list": build_reviewer_acl(),
-            "notification_type": all_models.Review.NotificationTypes.EMAIL_TYPE
-        },
-    )
+    _, review = generate_review_object(control)
 
     review_id = review.id
 
@@ -604,3 +558,14 @@ class TestReviewStatusUpdate(TestCase):
 
     review = all_models.Review.query.get(review_id)
     self.assertEqual(review.status, all_models.Review.STATES.UNREVIEWED)
+
+  def test_review_status_update(self):
+    """Test updating folder preserves review status"""
+    control = factories.ControlFactory()
+    factories.ReviewFactory(
+        reviewable=control,
+        status=all_models.Review.STATES.REVIEWED,
+    )
+    self.api.put(control, {"folder": factories.random_str()})
+    control = all_models.Control.query.get(control.id)
+    self.assertEqual(control.review.status, all_models.Review.STATES.REVIEWED)

@@ -110,7 +110,7 @@ class Reviewable(rest_handable.WithPutHandable,
     return out_json
 
   ATTRS_TO_IGNORE = {"review", "updated_at", "modified_by_id",
-                     "slug", "_access_control_list"}
+                     "slug", "_access_control_list", "folder"}
 
   def _update_status_on_attr(self):
     """Update review status when reviewable attrs are changed"""
