@@ -31,8 +31,7 @@ class TestImportMappings(TestCase):
     title1 = title_from_camelcase(name1)
 
     with factories.single_commit():
-      with mock.patch('ggrc.models.relationship.is_external_app_user',
-                      return_value=True):
+      with mock.patch('ggrc.login.is_external_app_user', return_value=True):
         obj1 = factories.get_model_factory(name1)()
         obj2 = factories.get_model_factory(name2)()
         factories.RelationshipFactory(source=obj1, destination=obj2,

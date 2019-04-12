@@ -774,7 +774,7 @@ class TestAdvancedQueryAPI(WithQueryApi, TestCase):
       for relevant_obj in relevant_objects:
         if base_type is all_models.Control and isinstance(relevant_obj,
                                                           all_models.Market):
-          with mock.patch('ggrc.models.relationship.is_external_app_user',
+          with mock.patch('ggrc.login.is_external_app_user',
                           return_value=True):
             factories.RelationshipFactory(source=base_obj,
                                           destination=relevant_obj,

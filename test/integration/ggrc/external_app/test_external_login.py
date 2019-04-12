@@ -19,6 +19,8 @@ from integration.ggrc.models import factories
 @mock.patch('ggrc.settings.ALLOWED_QUERYAPI_APP_IDS', new='ggrcq-id')
 @mock.patch('ggrc.settings.AUTHORIZED_DOMAIN', new='example.com')
 @mock.patch('ggrc.settings.INTEGRATION_SERVICE_URL', new='endpoint')
+@mock.patch('ggrc.settings.EXTERNAL_APP_USER',
+            new='External App <external_app@example.com>')
 class TestExternalPermissions(TestCase):
   """Tests for external permissions and modified by."""
   _external_app_user = ''
@@ -27,7 +29,6 @@ class TestExternalPermissions(TestCase):
     """Set up request mock and mock dependencies."""
     super(TestExternalPermissions, self).setUp()
     self._external_app_user = settings.EXTERNAL_APP_USER
-    settings.EXTERNAL_APP_USER = 'External App <external_app@example.com>'
     self.clear_data()
     self.headers = {
         "Content-Type": "application/json",

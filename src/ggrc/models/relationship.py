@@ -11,7 +11,8 @@ from sqlalchemy import or_, and_
 from sqlalchemy.ext.declarative import declared_attr
 
 from ggrc import db
-from ggrc.login import is_external_app_user
+from ggrc import login
+
 from ggrc.models.mixins import base
 from ggrc.models.mixins import Base
 from ggrc.models import reflection
@@ -33,7 +34,7 @@ class Relationship(base.ContextRBAC, Base, db.Model):
       nullable=True,
   )
   parent = db.relationship(
-      lambda: Relationship,
+      "Relationship",
       remote_side=lambda: Relationship.id
   )
   automapping_id = db.Column(
@@ -49,6 +50,7 @@ class Relationship(base.ContextRBAC, Base, db.Model):
       return self.destination
     if object_type == self.destination_type:
       return self.source
+    return None
 
   @property
   def source_attr(self):
@@ -114,7 +116,7 @@ class Relationship(base.ContextRBAC, Base, db.Model):
     )
 
   @staticmethod
-  def _extra_table_args(cls):
+  def _extra_table_args(model):
     return (
         db.UniqueConstraint(
             'source_id', 'source_type', 'destination_id', 'destination_type'),
@@ -194,13 +196,19 @@ class Relationship(base.ContextRBAC, Base, db.Model):
   @classmethod
   def validate_delete(cls, mapper, connection, target):
     """Validates is delete of Relationship is allowed."""
+    from ggrc.login.common import is_request_from_sync_service
     cls.validate_relation_by_type(target.source_type,
                                   target.destination_type)
+    if (login.is_external_app_user() and not
+            is_request_from_sync_service() and not
+            target.is_external):
+      raise ValidationError(
+          'External application can delete only external relationships.')
 
   @classmethod
   def validate_relation_by_type(cls, source_type, destination_type):
     """Checks if a mapping is allowed between given types."""
-    if is_external_app_user():
+    if login.is_external_app_user():
       # external users can map and unmap scoping objects
       return
 

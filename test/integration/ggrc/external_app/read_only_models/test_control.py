@@ -13,11 +13,12 @@ import mock
 from sqlalchemy.ext import associationproxy
 from sqlalchemy.orm import collections
 
-from ggrc import db, settings
+from ggrc import db
 from ggrc.models import all_models
 from ggrc.models.mixins import synchronizable
 from ggrc.utils import user_generator
 from integration.ggrc import TestCase, generator
+from integration.ggrc.external_app.external_api_helper import ExternalApiClient
 from integration.ggrc.models import factories
 from integration.ggrc_workflows.models import factories as wf_factories
 from integration.ggrc import api_helper
@@ -61,123 +62,6 @@ class TestControl(TestCase):
     control = db.session.query(all_models.Control).get(control.id)
     self.assertIsNotNone(control.title)
 
-
-# pylint: disable=too-many-public-methods
-@ddt.ddt
-class TestSyncServiceControl(TestCase):
-  """Tests for control model using sync service."""
-
-  def setUp(self):
-    """setUp, nothing else to add."""
-    super(TestSyncServiceControl, self).setUp()
-    self.api = api_helper.Api()
-    self.generator = generator.ObjectGenerator()
-
-    self.app_user_email = "external_app@example.com"
-    self.ext_user_email = "external@example.com"
-    self.ext_owner_email = "owner@example.com"
-    self.ext_compliance_email = "compliance@example.com"
-
-    settings.EXTERNAL_APP_USER = self.app_user_email
-
-    custom_headers = {
-        'X-GGRC-user': '{"email": "%s"}' % self.app_user_email,
-        'X-external-user': '{"email": "%s"}' % self.ext_user_email
-    }
-
-    self.api.headers.update(custom_headers)
-    self.api.client.get("/login", headers=self.api.headers)
-
-  @staticmethod
-  def prepare_control_request_body():
-    """Create payload for control creation."""
-    return {
-        "id": 123,
-        "title": "new_control",
-        "context": None,
-        "created_at": datetime(2018, 1, 1),
-        "updated_at": datetime(2018, 1, 2),
-        "slug": "CONTROL-01",
-        "external_id": factories.SynchronizableExternalId.next(),
-        "external_slug": factories.random_str(),
-        "kind": "test kind",
-        "means": "test means",
-        "verify_frequency": "test frequency",
-        "assertions": '["test assertion"]',
-        "categories": '["test category"]',
-        "review_status": all_models.Review.STATES.UNREVIEWED,
-        "review_status_display_name": "some status",
-        "due_date": datetime(2018, 1, 3),
-        "created_by": {
-            "email": "creator@example.com",
-            "name": "External Creator",
-        },
-        "last_submitted_at": datetime(2018, 1, 4),
-        "last_submitted_by": {
-            "email": "owner@example.com",
-            "name": "External Owner",
-        },
-        "last_verified_at": datetime(2018, 1, 5),
-        "last_verified_by": {
-            "email": "compliance@example.com",
-            "name": "External Compliance",
-        }
-    }
-
-  def normilize_field(self, field):
-    """Convert field from date/db.Model/query to string value."""
-    # pylint: disable=protected-access
-    normilized_field = field
-
-    if isinstance(normilized_field, datetime):
-      normilized_field = self.normilize_field(normilized_field.date())
-    elif isinstance(normilized_field, date):
-      normilized_field = str(normilized_field)
-    elif isinstance(normilized_field, db.Model):
-      normilized_field = {
-          "type": normilized_field.type,
-          "id": normilized_field.id
-      }
-    elif isinstance(normilized_field, dict) and "email" in normilized_field:
-      user = user_generator.find_user_by_email(normilized_field["email"])
-      normilized_field = self.normilize_field(user)
-    elif isinstance(normilized_field, dict):
-      normilized_field.pop("context_id", None)
-      normilized_field.pop("href", None)
-    elif isinstance(normilized_field, list):
-      normilized_field = [self.normilize_field(i) for i in normilized_field]
-    elif isinstance(
-        normilized_field,
-        (associationproxy._AssociationList, collections.InstrumentedList)
-    ):
-      normilized_field = [
-          {"type": i.type, "id": i.id} for i in normilized_field
-      ]
-    return normilized_field
-
-  def assert_response_fields(self, response_json, expected_body):
-    """Check if data in response is the same with expected."""
-    for field, value in expected_body.items():
-      response_field = self.normilize_field(response_json[field])
-      expected_value = self.normilize_field(value)
-
-      self.assertEqual(
-          response_field,
-          expected_value,
-          "Fields '{}' are not equal".format(field)
-      )
-
-  def assert_object_fields(self, object_, expected_body):
-    """Check if object field values are the same with expected."""
-    for field, value in expected_body.items():
-      obj_value = self.normilize_field(getattr(object_, field))
-      expected_value = self.normilize_field(value)
-      self.assertEqual(
-          obj_value,
-          expected_value,
-          "Fields '{}' are not equal".format(field)
-      )
-
   def test_control_read(self):
     """Test correctness of control field values on read operation."""
     control_body = {
@@ -192,16 +76,124 @@ class TestSyncServiceControl(TestCase):
     response = self.api.get(all_models.Control, control.id)
     self.assert200(response)
 
-    self.assert_response_fields(response.json.get("control"), control_body)
-    control = all_models.Control.query.get(control.id)
-    self.assert_object_fields(control, control_body)
+
+# pylint: disable=too-many-public-methods
+@ddt.ddt
+class TestSyncServiceControl(TestCase):
+  # pylint: disable=invalid-name
+
+  """Tests for control model using sync service."""
+
+  def setUp(self):
+    """setUp, nothing else to add."""
+    super(TestSyncServiceControl, self).setUp()
+    self.ext_api = ExternalApiClient()
+    self.generator = generator.ObjectGenerator()
+    self.app_user_email = "external_app@example.com"
+    self.ext_user_email = "external@example.com"
+    self.ext_owner_email = "owner@example.com"
+    self.ext_compliance_email = "compliance@example.com"
+
+    self.ext_api.user_headers = {
+        'X-external-user': '{"email": "%s"}' % self.ext_user_email
+    }
+
+  @staticmethod
+  def prepare_control_request_body():
+    """Create payload for control creation."""
+    return {
+        "id": 123,
+        "title": "new_control",
+        "context": None,
+        "created_at": "2018-01-01",
+        "updated_at": "2018-02-01",
+        "slug": "CONTROL-01",
+        "external_id": factories.SynchronizableExternalId.next(),
+        "external_slug": factories.random_str(),
+        "kind": "test kind",
+        "means": "test means",
+        "verify_frequency": "test frequency",
+        "assertions": '["test assertion"]',
+        "categories": '["test category"]',
+        "review_status": all_models.Review.STATES.UNREVIEWED,
+        "review_status_display_name": "some status",
+        "due_date": "2018-03-01",
+        "created_by": {
+            "email": "creator@example.com",
+            "name": "External Creator",
+        },
+        "last_submitted_at": "2018-04-01",
+        "last_submitted_by": {
+            "email": "owner@example.com",
+            "name": "External Owner",
+        },
+        "last_verified_at": "2018-05-01",
+        "last_verified_by": {
+            "email": "compliance@example.com",
+            "name": "External Compliance",
+        }
+    }
+
+  def normalize_field(self, field):
+    """Convert field from date/db.Model/query to string value."""
+    # pylint: disable=protected-access
+    normalized_field = field
+
+    if isinstance(normalized_field, datetime):
+      normalized_field = self.normalize_field(normalized_field.date())
+    elif isinstance(normalized_field, date):
+      normalized_field = str(normalized_field)
+    elif isinstance(normalized_field, db.Model):
+      normalized_field = {
+          "type": normalized_field.type,
+          "id": normalized_field.id
+      }
+    elif isinstance(normalized_field, dict) and "email" in normalized_field:
+      user = user_generator.find_user_by_email(normalized_field["email"])
+      normalized_field = self.normalize_field(user)
+    elif isinstance(normalized_field, dict):
+      normalized_field.pop("context_id", None)
+      normalized_field.pop("href", None)
+    elif isinstance(normalized_field, list):
+      normalized_field = [self.normalize_field(i) for i in normalized_field]
+    elif isinstance(
+        normalized_field,
+        (associationproxy._AssociationList, collections.InstrumentedList)
+    ):
+      normalized_field = [
+          {"type": i.type, "id": i.id} for i in normalized_field
+      ]
+    return normalized_field
+
+  def assert_response_fields(self, response_json, expected_body):
+    """Check if data in response is the same with expected."""
+    for field, value in expected_body.items():
+      response_field = self.normalize_field(response_json[field])
+      expected_value = self.normalize_field(value)
+
+      self.assertEqual(
+          response_field,
+          expected_value,
+          "Fields '{}' are not equal".format(field)
+      )
+
+  def assert_object_fields(self, object_, expected_body):
+    """Check if object field values are the same with expected."""
+    for field, value in expected_body.items():
+      obj_value = self.normalize_field(getattr(object_, field))
+      expected_value = self.normalize_field(value)
+      self.assertEqual(
+          obj_value,
+          expected_value,
+          "Fields '{}' are not equal".format(field)
+      )
 
   @mock.patch("ggrc.settings.INTEGRATION_SERVICE_URL", "mock")
   def test_control_create(self):
     """Test control creation using sync service."""
     control_body = self.prepare_control_request_body()
 
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": control_body
     })
 
@@ -256,13 +248,8 @@ class TestSyncServiceControl(TestCase):
     """Test control update using sync service."""
     external_user = factories.PersonFactory(email=self.ext_user_email)
     control = factories.ControlFactory(modified_by=external_user)
-    response = self.api.get(control, control.id)
 
-    api_link = response.json["control"].pop("selfLink")
-    response.json["control"].pop("viewLink")
-
-    control_body = response.json["control"]
-    control_body.update({
+    control_body = {
         "title": "updated_title",
         "created_at": "2018-01-04",
         "updated_at": "2018-01-05",
@@ -271,11 +258,11 @@ class TestSyncServiceControl(TestCase):
         "verify_frequency": "test frequency",
         "assertions": '["test assertions"]',
         "categories": '["test categories"]',
-    })
-    response = self.api.client.put(
-        api_link,
-        data=json.dumps(response.json),
-        headers=self.api.headers,
+    }
+    response = self.ext_api.put(
+        control,
+        control.id,
+        data=control_body
     )
 
     expected_assertions = control_body.pop("assertions")
@@ -311,7 +298,7 @@ class TestSyncServiceControl(TestCase):
   @ddt.unpack
   def test_control_rich_text_validate(self, initial_value, expected_value):
     """Test rich text validation for control."""
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "id": 11111,
             "title": "Some title",
@@ -333,7 +320,7 @@ class TestSyncServiceControl(TestCase):
         title="CA",
     )
 
-    response = self.api.post(all_models.CustomAttributeValue, {
+    response = self.ext_api.post(all_models.CustomAttributeValue, data={
         "custom_attribute_value": {
             "custom_attribute_id": cad.id,
             "attributable_type": "control",
@@ -350,7 +337,7 @@ class TestSyncServiceControl(TestCase):
 
   def test_create_with_assertions(self):
     """Check control creation with assertions pass"""
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "title": "Control title",
             "context": None,
@@ -376,9 +363,12 @@ class TestSyncServiceControl(TestCase):
     self.assertEqual(control.test_plan, "This is a test text")
 
   def test_set_end_date(self):
-    """End_date can't to be updated."""
+    """External app can update end_date attribute"""
     control = factories.ControlFactory()
-    self.api.put(control, {"end_date": "2015-10-10"})
+    resp = self.ext_api.put(
+        control, control.id, data={"end_date": "2015-10-10"}
+    )
+    self.assertStatus(resp, 200)
     control = db.session.query(all_models.Control).get(control.id)
     self.assertIsNone(control.end_date)
 
@@ -386,13 +376,14 @@ class TestSyncServiceControl(TestCase):
     """Deprecated status setup end_date."""
     control = factories.ControlFactory()
     self.assertIsNone(control.end_date)
-    self.api.put(control, {"status": all_models.Control.DEPRECATED})
+    self.ext_api.put(control, control.id,
+                     data={"status": all_models.Control.DEPRECATED})
     control = db.session.query(all_models.Control).get(control.id)
     self.assertIsNotNone(control.end_date)
 
   def test_create_comments(self):
     """Test external comments creation for control."""
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "id": 123,
             "title": "Control title",
@@ -406,7 +397,7 @@ class TestSyncServiceControl(TestCase):
     })
     self.assertEqual(response.status_code, 201)
 
-    response = self.api.post(all_models.ExternalComment, {
+    response = self.ext_api.post(all_models.ExternalComment, data={
         "external_comment": {
             "id": 1,
             "external_id": 1,
@@ -419,7 +410,7 @@ class TestSyncServiceControl(TestCase):
     comments = db.session.query(all_models.ExternalComment.description).all()
     self.assertEqual(comments, [("test comment",)])
 
-    response = self.api.post(all_models.Relationship, {
+    response = self.ext_api.post(all_models.Relationship, data={
         "relationship": {
             "source": {"id": 123, "type": "Control"},
             "destination": {"id": 1, "type": "ExternalComment"},
@@ -456,10 +447,9 @@ class TestSyncServiceControl(TestCase):
         "object_name":"ExternalComment",
         "order_by": [{"name": "created_at", "desc": "true"}]
     }]
-    response = self.api.send_request(
-        self.api.client.post,
+    response = self.ext_api.post(
+        url="/query",
         data=request_data,
-        api_link="/query"
     )
     self.assert200(response)
     response_data = response.json[0]["ExternalComment"]
@@ -490,10 +480,9 @@ class TestSyncServiceControl(TestCase):
         "object_name":"ExternalComment",
         "order_by": [{"name": order_by_attr, "desc": "true"}]
     }]
-    response = self.api.send_request(
-        self.api.client.post,
+    response = self.ext_api.post(
         data=request_data,
-        api_link="/query"
+        url="/query"
     )
     self.assert200(response)
     response_data = response.json[0]["ExternalComment"]
@@ -510,17 +499,16 @@ class TestSyncServiceControl(TestCase):
 
     request = self.prepare_control_request_body()
     del request['external_id']
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
 
     self.assert400(response)
 
-  # pylint: disable=invalid-name
   def test_create_with_empty_external_id(self):
     """Check control creation with empty external_id"""
 
     request = self.prepare_control_request_body()
     request['external_id'] = None
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
 
     self.assert400(response)
 
@@ -528,19 +516,25 @@ class TestSyncServiceControl(TestCase):
     """Check control creation with non-unique external_id"""
 
     request1 = self.prepare_control_request_body()
-    response1 = self.api.post(all_models.Control, {'control': request1})
+    response1 = self.ext_api.post(
+        all_models.Control, data={'control': request1}
+    )
     prev_external_id = response1.json['control']['external_id']
 
     request2 = self.prepare_control_request_body()
     request2['external_id'] = prev_external_id
-    response2 = self.api.post(all_models.Control, {'control': request2})
+    response2 = self.ext_api.post(
+        all_models.Control, data={'control': request2}
+    )
 
     self.assert400(response2)
 
   def test_update_external_id_to_null(self):
     """Test external_id is not set to None"""
     control = factories.ControlFactory()
-    response = self.api.put(control, {"external_id": None})
+    response = self.ext_api.put(
+        control, control.id, data={"external_id": None}
+    )
     self.assert400(response)
     self.assertEqual(response.json["message"],
                      "External ID for the object is not specified")
@@ -552,34 +546,34 @@ class TestSyncServiceControl(TestCase):
     """Test external_id is updated"""
     control = factories.ControlFactory()
     new_value = factories.SynchronizableExternalId.next()
-    self.api.put(control, {"external_id": new_value})
+    self.ext_api.put(control, control.id, data={"external_id": new_value})
 
     control = db.session.query(all_models.Control).get(control.id)
     self.assertEquals(control.external_id, new_value)
 
-  # pylint: disable=invalid-name
   def test_create_without_review_status(self):
     """Check control creation without review_status"""
 
     request = self.prepare_control_request_body()
     del request['review_status']
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
     self.assert400(response)
 
-  # pylint: disable=invalid-name
   def test_create_with_empty_review_status(self):
     """Check control creation with empty review_status"""
 
     request = self.prepare_control_request_body()
     request['review_status'] = None
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
 
     self.assert400(response)
 
   def test_update_review_status_to_null(self):
     """Test review_status is not set to None"""
     control = factories.ControlFactory()
-    response = self.api.put(control, {"review_status": None})
+    response = self.ext_api.put(
+        control, control.id, data={"review_status": None}
+    )
     self.assert400(response)
     self.assertEqual(response.json["message"],
                      "review_status for the object is not specified")
@@ -591,35 +585,35 @@ class TestSyncServiceControl(TestCase):
     """Test review_status is updated"""
     control = factories.ControlFactory()
     new_value = all_models.Review.STATES.REVIEWED
-    self.api.put(control, {"review_status": new_value})
+    self.ext_api.put(control, control.id, data={"review_status": new_value})
 
     control = db.session.query(all_models.Control).get(control.id)
     self.assertEquals(control.review_status, new_value)
 
-  # pylint: disable=invalid-name
   def test_create_without_review_status_display_name(self):
     """Check control creation without review_status_display_name"""
 
     request = self.prepare_control_request_body()
     del request['review_status_display_name']
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
     print response.json
     self.assert400(response)
 
-  # pylint: disable=invalid-name
   def test_create_with_empty_review_status_display_name(self):
     """Check control creation with empty review_status_display_name"""
 
     request = self.prepare_control_request_body()
     request['review_status_display_name'] = None
-    response = self.api.post(all_models.Control, request)
+    response = self.ext_api.post(all_models.Control, data=request)
 
     self.assert400(response)
 
   def test_update_review_status_display_name_to_null(self):
     """Test review_status_display_name is not set to None"""
     control = factories.ControlFactory()
-    response = self.api.put(control, {"review_status_display_name": None})
+    response = self.ext_api.put(
+        control, control.id, data={"review_status_display_name": None}
+    )
     self.assert400(response)
     self.assertEqual(response.json["message"],
                      "review_status_display_name for the object "
@@ -632,7 +626,9 @@ class TestSyncServiceControl(TestCase):
     """Test review_status_display_name is updated"""
     control = factories.ControlFactory()
     new_value = "value12345"
-    self.api.put(control, {"review_status_display_name": new_value})
+    self.ext_api.put(
+        control, control.id, data={"review_status_display_name": new_value}
+    )
 
     control = db.session.query(all_models.Control).get(control.id)
     self.assertEquals(control.review_status_display_name, new_value)
@@ -661,10 +657,9 @@ class TestSyncServiceControl(TestCase):
         'object_name': 'Control',
         'type': 'values',
     }]
-    response = self.api.send_request(
-        self.api.client.post,
+    response = self.ext_api.post(
         data=request_data,
-        api_link="/query"
+        url="/query"
     )
     self.assert200(response)
     response_data = response.json[0]["Control"]
@@ -702,10 +697,9 @@ class TestSyncServiceControl(TestCase):
             },
         },
     }]
-    response = self.api.send_request(
-        self.api.client.post,
+    response = self.ext_api.post(
         data=request_data,
-        api_link="/query"
+        url="/query"
     )
     self.assert200(response)
     response_data = response.json[0]["Control"]
@@ -736,8 +730,8 @@ class TestSyncServiceControl(TestCase):
     """Test if content of new revision is correct for Control '{0}' field."""
     control = factories.ControlFactory(**{field: value})
 
-    response = self.api.client.get(
-        "/api/revisions"
+    response = self.ext_api.get(
+        url="/api/revisions"
         "?resource_type={}&resource_id={}".format(control.type, control.id)
     )
     self.assert200(response)
@@ -763,8 +757,8 @@ class TestSyncServiceControl(TestCase):
     control_revision.content = revision_content
     db.session.commit()
 
-    response = self.api.client.get(
-        "/api/revisions"
+    response = self.ext_api.get(
+        url="/api/revisions"
         "?resource_type={}&resource_id={}".format(control.type, control.id)
     )
     self.assert200(response)
@@ -819,8 +813,8 @@ class TestSyncServiceControl(TestCase):
     control_revision.content = revision_content
     db.session.commit()
 
-    response = self.api.client.get(
-        "/api/revisions"
+    response = self.ext_api.get(
+        url="/api/revisions"
         "?resource_type={}&resource_id={}".format(control.type, control.id)
     )
     self.assert200(response)
@@ -872,7 +866,7 @@ class TestSyncServiceControl(TestCase):
   )
   def test_invalid_acl_format(self, access_control_list):
     """Test creation of new object with acl in invalid format."""
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "id": 123,
             "external_id": factories.SynchronizableExternalId.next(),
@@ -895,18 +889,19 @@ class TestSyncServiceControl(TestCase):
     """Test updating of Control mapped to TaskGroup."""
     with factories.single_commit():
       control = factories.ControlFactory()
+      control_id = control.id
       task_group = wf_factories.TaskGroupFactory()
       factories.RelationshipFactory(
           source=task_group,
           destination=control
       )
 
-    response = self.api.put(control, {
+    response = self.ext_api.put(control, control_id, data={
         "title": "new title",
         "task_groups": [],
     })
     self.assert200(response)
-    control = all_models.Control.query.get(control.id)
+    control = all_models.Control.query.get(control_id)
     self.assertEqual(control.title, "new title")
     tg_ids = [id_[0] for id_ in db.session.query(all_models.TaskGroup.id)]
     self.assertEqual(len(tg_ids), 1)
@@ -936,21 +931,21 @@ class TestSyncServiceControl(TestCase):
   def test_control_with_duplicated_title(self):
     """Test control with duplicated title."""
     control_1 = self.generate_minimal_control_body()
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": control_1
     })
     self.assertEqual(response.status_code, 201)
 
     control_2 = self.generate_minimal_control_body()
     control_2["title"] = control_1["title"]
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": control_2
     })
     self.assertEqual(response.status_code, 201)
 
   def test_external_comment_acl(self):
     """Test automatic assigning current user to ExternalComment Admin."""
-    response = self.api.post(all_models.ExternalComment, {
+    response = self.ext_api.post(all_models.ExternalComment, data={
         "external_comment": {
             "id": 1,
             "external_id": 1,
@@ -1013,7 +1008,7 @@ class TestSyncServiceControl(TestCase):
     """Test creation of control with non empty acl."""
     self.setup_people(access_control_list)
 
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "id": 123,
             "title": "new_control",
@@ -1046,7 +1041,7 @@ class TestSyncServiceControl(TestCase):
             },
         ]
     }
-    response = self.api.post(all_models.Control, {
+    response = self.ext_api.post(all_models.Control, data={
         "control": {
             "id": 123,
             "title": "new_control",
@@ -1092,7 +1087,7 @@ class TestSyncServiceControl(TestCase):
     }
     self.setup_people(access_control_list)
 
-    response = self.api.put(control, {
+    response = self.ext_api.put(control, control.id, data={
         "access_control_list": access_control_list,
     })
     self.assert200(response)
@@ -1128,7 +1123,7 @@ class TestSyncServiceControl(TestCase):
             },
         ]
     }
-    response = self.api.put(control, {
+    response = self.ext_api.put(control, control.id, data={
         "access_control_list": access_control_list,
     })
     self.assert200(response)
@@ -1159,7 +1154,7 @@ class TestSyncServiceControl(TestCase):
         ]
     }
 
-    response = self.api.put(control, {
+    response = self.ext_api.put(control, control.id, data={
         "access_control_list": access_control_list,
     })
     self.assert400(response)

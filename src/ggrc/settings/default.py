@@ -200,10 +200,14 @@ else:
   DASHBOARD_INTEGRATION = None
 
 # App2app QueryAPI endpoints
+SYNC_SERVICE_APP_ID = os.environ.get('SYNC_SERVICE_APP_ID', '')
+
 ALLOWED_QUERYAPI_APP_IDS = os.environ.get(
     "ALLOWED_QUERYAPI_APP_IDS",
     "",
 ).split()
+if SYNC_SERVICE_APP_ID:
+  ALLOWED_QUERYAPI_APP_IDS.append(SYNC_SERVICE_APP_ID)
 
 # Flag to enable or disable What's New pop-up
 ENABLE_RELEASE_NOTES = True

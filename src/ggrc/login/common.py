@@ -90,7 +90,7 @@ def get_external_app_user(request):
   app_user = find_or_create_ext_app_user()
 
   if app_user.id is None:
-    db.session.flush()
+    db.session.commit()
 
   external_user_email = parse_user_email(
       request, "X-external-user", mandatory=False
@@ -117,3 +117,9 @@ def create_external_user(app_user, external_user_email):
     db.session.commit()
 
   return external_user
+
+
+def is_request_from_sync_service():
+  """Check if request come from sync_service"""
+  inbound_app_id = flask.request.headers.get("X-Appengine-Inbound-Appid")
+  return inbound_app_id == settings.SYNC_SERVICE_APP_ID

@@ -636,7 +636,7 @@ class TestSnapshoting(SnapshotterBaseTestCase):
     total_reg_count = 5
     unmapped_reg_count = 2
     with factories.single_commit():
-      with mock.patch('ggrc.models.relationship.is_external_app_user',
+      with mock.patch('ggrc.login.is_external_app_user',
                       return_value=True):
         program = factories.ProgramFactory()
         control = factories.ControlFactory()
@@ -657,7 +657,7 @@ class TestSnapshoting(SnapshotterBaseTestCase):
     ).all()
     removed_reg_rels = []
     keep_reg_rels = []
-    with mock.patch('ggrc.models.relationship.is_external_app_user',
+    with mock.patch('ggrc.login.is_external_app_user',
                     return_value=True):
       for num, rel in enumerate(rels):
         if num < unmapped_reg_count:

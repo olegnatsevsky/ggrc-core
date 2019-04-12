@@ -13,7 +13,6 @@ from sqlalchemy import orm
 
 from ggrc import db, settings, login
 from ggrc.integrations import client
-from ggrc.login import get_current_user_id
 from ggrc.models.person import Person
 from ggrc.rbac import SystemWideRoles
 from ggrc.utils import errors
@@ -160,7 +159,7 @@ def find_or_create_user_by_email(email, name, modifier=None):
     _, app_email = parseaddr(settings.EXTERNAL_APP_USER)
 
     if not modifier and email != app_email:
-      modifier = get_current_user_id()
+      modifier = login.get_current_user_id()
     user = create_user(email, name=name, modified_by_id=modifier)
   if is_authorized_domain(email) and \
      user.system_wide_role == SystemWideRoles.NO_ACCESS:
@@ -305,7 +304,7 @@ def find_users(emails):
   for email, name in new_users:
     user = create_user(email,
                        name=name,
-                       modified_by_id=get_current_user_id())
+                       modified_by_id=login.get_current_user_id())
     users.append(user)
 
   # bulk create people
@@ -344,14 +343,6 @@ def is_external_app_user_email(email):
   return external_app_user_email == email
 
 
-def is_external_app_user(request):
-  """Checks if user in header is external_app"""
-  email = parse_user_email(request, "X-ggrc-user", mandatory=False)
-  if email:
-    return is_external_app_user_email(email)
-  return False
-
-
 def get_username_from_header():
   """Extract username from header
 
@@ -375,4 +366,4 @@ def is_request_from_external_app():
   inbound_appid = request.headers.get("X-Appengine-Inbound-Appid")
   return (
       inbound_appid and inbound_appid in settings.ALLOWED_QUERYAPI_APP_IDS
-  ) and is_external_app_user(request)
+  ) and login.is_external_app_user()

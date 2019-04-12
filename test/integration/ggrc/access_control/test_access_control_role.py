@@ -11,6 +11,7 @@ from ggrc.converters import errors
 from ggrc.models import all_models
 from integration.ggrc import TestCase
 from integration.ggrc.api_helper import Api
+from integration.ggrc.external_app.external_api_helper import ExternalApiClient
 from integration.ggrc.models.factories import random_str
 from integration.ggrc.models import factories
 from integration.ggrc.generator import ObjectGenerator
@@ -30,6 +31,7 @@ class TestAccessControlRole(TestCase):
     self.clear_data()
     super(TestAccessControlRole, self).setUp()
     self.api = Api()
+    self.ext_api = ExternalApiClient()
     self.object_generator = ObjectGenerator()
     self.people = {}
     for name in ["Creator", "Reader", "Editor"]:
@@ -156,13 +158,6 @@ class TestAccessControlRole(TestCase):
         "role {} deleted.".format(ac_role.name)
 
   @ddt.data("Control")
-  def test_create_from_ggrcq(self, object_type):
-    """Test that create action only for GGRCQ."""
-    with self.api.as_external():
-      response = self._post_role(object_type=object_type)
-      self.assertEqual(response.status_code, 201)
-
-  @ddt.data("Control")
   def test_create_from_ggrc(self, object_type):
     """Test create action not allowed for GGRC."""
     response = self._post_role(object_type=object_type)
@@ -174,10 +169,10 @@ class TestAccessControlRole(TestCase):
     with factories.single_commit():
       acr_id = factories.AccessControlRoleFactory(object_type=object_type).id
 
-    with self.api.as_external():
-      acr = all_models.AccessControlRole.query.get(acr_id)
-      response = self.api.put(acr, {"name": "new acr"})
-      self.assertEqual(response.status_code, 200)
+    acr = all_models.AccessControlRole.query.get(acr_id)
+    response = self.ext_api.put(
+        acr, acr_id, data={"name": "new acr"}, load_precondition_headers=True)
+    self.assertEqual(response.status_code, 200)
 
   @ddt.data("Control")
   def test_modify_from_ggrc(self, object_type):
@@ -194,10 +189,9 @@ class TestAccessControlRole(TestCase):
     with factories.single_commit():
       acr_id = factories.AccessControlRoleFactory(object_type=object_type).id
 
-    with self.api.as_external():
-      acr = all_models.AccessControlRole.query.get(acr_id)
-      response = self.api.delete(acr)
-      self.assertEqual(response.status_code, 200)
+    acr = all_models.AccessControlRole.query.get(acr_id)
+    response = self.ext_api.delete(acr, acr_id)
+    self.assertEqual(response.status_code, 200)
 
   @ddt.data("Control")
   def test_delete_from_ggrc(self, object_type):

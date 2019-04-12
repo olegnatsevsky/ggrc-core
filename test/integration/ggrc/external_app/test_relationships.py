@@ -1,33 +1,80 @@
 # Copyright (C) 2019 Google Inc.
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
-"""Tests for extra views."""
+
+"""Module contains tests related to Relationships manipulation from ext_app"""
 
 import json
 
 import ddt
+import mock
 import sqlalchemy as sa
 
-from ggrc.models.relationship import Relationship
+from ggrc.models import all_models, Relationship
 from integration.ggrc import TestCase
+from integration.ggrc.external_app.external_api_helper import ExternalApiClient
 from integration.ggrc.models import factories
 
 
 @ddt.ddt
-class TestUnmapObjects(TestCase):
-  """Test for "unmap_objects" view."""
+class RelationshipsTest(TestCase):
+  """Relationships related tests"""
 
+  # pylint: disable=invalid-name
   ENDPOINT_URL = "/api/relationships/unmap"
 
   def setUp(self):
-    super(TestUnmapObjects, self).setUp()
-    headers = {"X-GGRC-User": "{\"email\":\"external_app@example.com\"}"}
-    self.client.get("/login", headers=headers)
+    """setUp, nothing else to add."""
+    super(RelationshipsTest, self).setUp()
+    self.ext_api = ExternalApiClient()
+
+  def test_delete_normal_relationship(self):
+    """External app can't delete normal relationships"""
+
+    with factories.single_commit():
+      issue = factories.IssueFactory()
+      objective = factories.ObjectiveFactory()
+
+      relationship = factories.RelationshipFactory(
+          source=issue, destination=objective, is_external=False
+      )
+      relationship_id = relationship.id
+
+    resp = self.ext_api.delete("relationship", relationship_id)
+    self.assertStatus(resp, 400)
+
+  @mock.patch("ggrc.settings.SYNC_SERVICE_APP_ID", new="sync_service")
+  def test_delete_normal_relationship_sync_service(self):
+    """Sync service should be able to delete normal relationships"""
+
+    with factories.single_commit():
+      first_object = factories.ProjectFactory()
+      first_type = first_object.type
+      first_id = first_object.id
+      second_object = factories.ProgramFactory()
+      second_type = second_object.type
+      second_id = second_object.id
+
+      relationship = factories.RelationshipFactory(
+          source=first_object, destination=second_object, is_external=False
+      )
+      rel_id = relationship.id
+
+    body = {
+        "first_object_id": first_id,
+        "first_object_type": first_type,
+        "second_object_id": second_id,
+        "second_object_type": second_type,
+    }
+    custom_headers = {"X-Appengine-Inbound-Appid": "sync_service"}
+
+    self.ext_api.user_headers = custom_headers
+    response = self.ext_api.post(url=self.ENDPOINT_URL, data=body)
+    self.assert200(response)
+    self.assertIsNone(all_models.Relationship.query.get(rel_id))
 
   def test_internal_user_request(self):
     """Test internal user has not access to endpoint."""
-    self.client.get("/logout")
     self.client.get("/login")
-
     body = {
         "first_object_id": 1,
         "first_object_type": "Control",
@@ -57,9 +104,7 @@ class TestUnmapObjects(TestCase):
     }
     del body[field]
 
-    response = self.client.post(self.ENDPOINT_URL,
-                                content_type="application/json",
-                                data=json.dumps(body))
+    response = self.ext_api.post(url=self.ENDPOINT_URL, data=body)
 
     self.assertEqual(400, response.status_code)
 
@@ -81,12 +126,10 @@ class TestUnmapObjects(TestCase):
         "first_object_type": "Control",
         "second_object_id": 1,
         "second_object_type": "Product",
+        field: None
     }
-    body[field] = None
 
-    response = self.client.post(self.ENDPOINT_URL,
-                                content_type="application/json",
-                                data=json.dumps(body))
+    response = self.ext_api.post(url=self.ENDPOINT_URL, data=body)
 
     self.assertEqual(400, response.status_code)
 
@@ -121,9 +164,7 @@ class TestUnmapObjects(TestCase):
         "second_object_type": second_type,
     }
 
-    response = self.client.post(self.ENDPOINT_URL,
-                                content_type="application/json",
-                                data=json.dumps(body))
+    response = self.ext_api.post(url=self.ENDPOINT_URL, data=body)
 
     self.assertEqual(200, response.status_code)
 

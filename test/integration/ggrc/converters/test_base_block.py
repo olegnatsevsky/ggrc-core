@@ -47,7 +47,7 @@ class TestBaseBlock(TestCase):
               source=regulations[j] if i % 2 == 0 else requirements[i],
               destination=regulations[j] if i % 2 == 1 else requirements[i],
           )
-          with mock.patch('ggrc.models.relationship.is_external_app_user',
+          with mock.patch('ggrc.login.is_external_app_user',
                           return_value=True):
             factories.RelationshipFactory(
                 source=regulations[j] if i % 2 == 0 else controls[i],
@@ -96,7 +96,7 @@ class TestBaseBlock(TestCase):
             source=regulation if i % 2 == 0 else requirements[i],
             destination=regulation if i % 2 == 1 else requirements[i],
         ))
-        with mock.patch('ggrc.models.relationship.is_external_app_user',
+        with mock.patch('ggrc.login.is_external_app_user',
                         return_value=True):
           relationships.append(factories.RelationshipFactory(
               source=regulation if i % 2 == 0 else controls[i],
