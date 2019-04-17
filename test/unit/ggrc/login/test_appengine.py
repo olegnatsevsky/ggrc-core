@@ -78,7 +78,7 @@ class TestAppengineLogin(unittest.TestCase):
     with self.assertRaises(exceptions.BadRequest):
       login_appengine.request_loader(self.request)
 
-  @ddt.data("X-ggrc-user", "X-external-user")
+  @ddt.data("X-ggrc-user")
   def test_request_loader_user_invalid_json(self, header):
     """HTTP400 if user header contains invalid json."""
     self.request.headers[header] = "not a valid json"
@@ -86,7 +86,7 @@ class TestAppengineLogin(unittest.TestCase):
     with self.assertRaises(exceptions.BadRequest):
       login_appengine.request_loader(self.request)
 
-  @ddt.data("X-ggrc-user", "X-external-user")
+  @ddt.data("X-ggrc-user")
   def test_request_loader_user_incomplete_json(self, header):
     """HTTP400 if user header contains json with no email."""
     self.request.headers[header] = "{}"
@@ -94,7 +94,7 @@ class TestAppengineLogin(unittest.TestCase):
     with self.assertRaises(exceptions.BadRequest):
       login_appengine.request_loader(self.request)
 
-  @ddt.data("X-ggrc-user", "X-external-user")
+  @ddt.data("X-ggrc-user")
   def test_request_loader_user_non_dict_json(self, header):
     """HTTP400 if user header contains json with not a dict."""
     for value in ("[]", "12"):

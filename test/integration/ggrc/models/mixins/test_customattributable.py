@@ -393,69 +393,6 @@ class TestCustomAttributableMixin(TestCase):
                        'Invalid attribute type: Assessment expected Person')
 
 
-@ddt.ddt
-class TestCreateRevisionAfterDeleteCAD(TestCase):
-  """Test cases for creating new revision after delete CAD"""
-  def setUp(self):
-    super(TestCreateRevisionAfterDeleteCAD, self).setUp()
-    self.api_helper = api_helper.Api()
-    self.api_helper.login_as_external()
-
-  @ddt.data(True, False)
-  def test_latest_revision_delete_cad(self, is_add_cav):
-    """Test creating new revision after deleting CAD.
-
-    In case of deleting CAD, snapshot attribute is_latest_revision
-    must be False
-    """
-    with factories.single_commit():
-      control = factories.ControlFactory()
-      program = factories.ProgramFactory()
-      factories.RelationshipFactory(
-          source=program,
-          destination=control,
-      )
-
-      audit = factories.AuditFactory()
-
-      factories.RelationshipFactory(
-          source=audit,
-          destination=control
-      )
-      cad = factories.CustomAttributeDefinitionFactory(
-          title="test_name",
-          definition_type="control",
-          attribute_type="Text",
-      )
-
-      if is_add_cav:
-        factories.CustomAttributeValueFactory(
-            custom_attribute=cad,
-            attributable=control,
-            attribute_value="test",
-        )
-
-      last_revision = models.Revision.query.filter(
-          models.Revision.resource_id == control.id,
-          models.Revision.resource_type == control.type,
-      ).order_by(models.Revision.id.desc()).first()
-
-      snapshot = factories.SnapshotFactory(
-          parent=audit,
-          child_id=control.id,
-          child_type=control.type,
-          revision=last_revision,
-      )
-
-    self.assertTrue(snapshot.is_latest_revision)
-
-    self.api_helper.delete(cad)
-
-    snapshot = models.Snapshot.query.filter().first()
-
-    self.assertEqual(snapshot.is_latest_revision, False)
-
-
 class TestCADUpdate(TestCase):
   """Test cases for updating model inherited custom attributable mixin."""
   def setUp(self):

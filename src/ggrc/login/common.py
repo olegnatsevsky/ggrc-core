@@ -15,7 +15,7 @@ from ggrc.models import all_models
 from ggrc.utils.log_event import log_event
 from ggrc.utils.user_generator import (
     find_or_create_ext_app_user, is_external_app_user_email,
-    parse_user_email, find_user
+    parse_user_email
 )
 
 
@@ -75,7 +75,7 @@ def get_ggrc_user(request, mandatory):
 
   if is_external_app_user_email(email):
     # External Application User should be created if doesn't exist.
-    user = get_external_app_user(request)
+    user = get_external_app_user()
   else:
     user = all_models.Person.query.filter_by(email=email).first()
 
@@ -85,38 +85,14 @@ def get_ggrc_user(request, mandatory):
   return user
 
 
-def get_external_app_user(request):
+def get_external_app_user():
   """Find or create external app user from email in "X-GGRC-user" header."""
   app_user = find_or_create_ext_app_user()
 
   if app_user.id is None:
     db.session.commit()
 
-  external_user_email = parse_user_email(
-      request, "X-external-user", mandatory=False
-  )
-
-  if external_user_email:
-    # Create external app user provided in X-external-user header.
-    try:
-      create_external_user(app_user, external_user_email)
-    except exceptions.BadRequest as exp:
-      logger.error("Creation of external user has failed. %s", exp.message)
-      raise
-
   return app_user
-
-
-def create_external_user(app_user, external_user_email):
-  """Create external user."""
-  external_user = find_user(external_user_email, modifier=app_user.id)
-
-  if external_user and external_user.id is None:
-    db.session.flush()
-    log_event(db.session, external_user, app_user.id)
-    db.session.commit()
-
-  return external_user
 
 
 def is_request_from_sync_service():

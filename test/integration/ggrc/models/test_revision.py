@@ -12,6 +12,7 @@ import ggrc.models
 from ggrc.models import all_models
 import integration.ggrc.generator
 from integration.ggrc import TestCase
+from integration.ggrc.external_app import external_api_helper
 
 from integration.ggrc.models import factories
 from integration.ggrc import api_helper
@@ -48,6 +49,7 @@ class TestRevisions(query_helper.WithQueryApi, TestCase):
     """Sets up objects common to all tests."""
     cls.gen = integration.ggrc.generator.ObjectGenerator()
     cls.api_helper = api_helper.Api()
+    cls.ext_api = external_api_helper.ExternalApiClient()
 
   def setUp(self):
     super(TestRevisions, self).setUp()
@@ -169,8 +171,7 @@ class TestRevisions(query_helper.WithQueryApi, TestCase):
           ggrc.models.Revision.resource_type == control.type,
       ).order_by(ggrc.models.Revision.id.desc()).first().id
 
-    with self.api_helper.as_external():
-      self.api_helper.delete(cad, cad_id)
+    self.ext_api.delete(cad, cad_id)
 
     control = ggrc.models.Control.query.first()
 
@@ -202,12 +203,6 @@ class TestRevisions(query_helper.WithQueryApi, TestCase):
             attributable=control,
             attribute_value="test")
 
-    user = self.gen.generate_person(
-        data={"name": "test_admin", "email": "external_app@example.com"},
-        user_role="Administrator")[1]
-    self.api_helper.set_user(user)
-    self.client.get("/login")
-
     control_revisions = ggrc.models.Revision.query.filter(
         ggrc.models.Revision.resource_id == control_id,
         ggrc.models.Revision.resource_type == "Control",
@@ -216,7 +211,7 @@ class TestRevisions(query_helper.WithQueryApi, TestCase):
 
     cad = ggrc.models.CustomAttributeDefinition.query.filter_by(
         title="test_cad").first()
-    resp_delete = self.api_helper.delete(cad)
+    resp_delete = self.ext_api.delete(cad, cad.id)
     self.assert200(resp_delete)
     cad = ggrc.models.CustomAttributeDefinition.query.filter_by(
         title="test_cad").first()
@@ -239,7 +234,7 @@ class TestRevisions(query_helper.WithQueryApi, TestCase):
     self.assertSetEqual(difference_revision_id, {last_revision.id})
 
     expected_id = ggrc.models.Person.query.filter_by(
-        name="test_admin").first().id
+        email="external_app@example.com").first().id
 
     self.assertEquals(last_revision.content["modified_by_id"], expected_id)
     self.assertEquals(last_revision.content["modified_by"]["id"], expected_id)
