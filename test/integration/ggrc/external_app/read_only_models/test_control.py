@@ -1167,3 +1167,24 @@ class TestSyncServiceControl(TestCase):
         control,
         {"Admin": [{"name": "user1", "email": "user1@example.com"}]}
     )
+
+  @mock.patch("ggrc.settings.INTEGRATION_SERVICE_URL", new="mock")
+  def test_cad_create(self):
+    self.ext_api.user_headers = {
+        'X-external-user': json.dumps(
+            {'email': "test_test@test.com", 'user': "Vasya"}
+        )
+    }
+    response = self.ext_api.post(all_models.CustomAttributeDefinition, data={
+        "custom_attribute_definition": {
+            "attribute_type": "Rich Text",
+            "title": "Rich Text Attribute",
+            "definition_type": "control",
+            "context": {"id": None},
+        }
+    })
+    self.assertStatus(response, 201)
+    cad = all_models.CustomAttributeDefinition.query.filter_by(
+        title="Rich Text Attribute"
+    ).one()
+    self.assertIsNotNone(cad)

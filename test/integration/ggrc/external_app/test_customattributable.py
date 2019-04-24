@@ -17,7 +17,6 @@ class TestCreateRevisionAfterDeleteCAD(TestCase):
   def setUp(self):
     super(TestCreateRevisionAfterDeleteCAD, self).setUp()
     self.ext_api = ExternalApiClient()
-
   @ddt.data(True, False)
   def test_latest_revision_delete_cad(self, is_add_cav):
     """Test creating new revision after deleting CAD.
