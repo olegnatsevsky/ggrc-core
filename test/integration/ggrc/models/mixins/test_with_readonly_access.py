@@ -15,6 +15,7 @@ from ggrc.converters import errors
 from ggrc.models import get_model, all_models, mixins
 from integration.ggrc import TestCase
 from integration.ggrc import api_helper
+from integration.ggrc.external_app import external_api_helper
 from integration.ggrc.generator import ObjectGenerator
 from integration.ggrc import factories
 from integration.ggrc_basic_permissions.models \
@@ -172,14 +173,12 @@ class TestWithReadOnlyAccessAPI(TestCase):
     self.assert403(resp)
 
   @ddt.data(
-      ('System', True, False, 200, True),
-      ('System', True, True, 405, False),
-      ('System', False, False, 200, True),
-      ('System', False, True, 405, False),
+      ('System', False, 200, True),
+      ('System', True, 405, False),
   )
   @ddt.unpack
-  def test_delete(self, obj_type, is_external, readonly, exp_code,
-                  exp_deleted):
+  def test_delete_normal_user(self, obj_type,
+                              readonly, exp_code, exp_deleted):
     """Test {0} DELETE if readonly={1}"""
 
     factory = factories.get_model_factory(obj_type)
@@ -187,13 +186,35 @@ class TestWithReadOnlyAccessAPI(TestCase):
       obj = factory(title='a', readonly=readonly)
       obj_id = obj.id
 
-    if is_external:
-      self.object_generator.api.login_as_external()
-    else:
-      self.object_generator.api.login_as_normal()
+    self.object_generator.api.login_as_normal()
 
     obj = get_model(obj_type).query.get(obj_id)
     resp = self.object_generator.api.delete(obj)
+
+    self.assertStatus(resp, exp_code)
+    obj = get_model(obj_type).query.get(obj_id)
+    if exp_deleted:
+      self.assertIsNone(obj)
+    else:
+      self.assertIsNotNone(obj)
+
+  @ddt.data(
+      ('System', False, 200, True),
+      ('System', True, 405, False),
+  )
+  @ddt.unpack
+  def test_delete_external_user(self, obj_type,
+                                readonly, exp_code, exp_deleted):
+    """Test {0} DELETE if readonly={1}"""
+
+    ext_api = external_api_helper.ExternalApiClient()
+    factory = factories.get_model_factory(obj_type)
+    with factories.single_commit():
+      obj = factory(title='a', readonly=readonly)
+      obj_id = obj.id
+
+    obj = get_model(obj_type).query.get(obj_id)
+    resp = ext_api.delete(obj, obj_id)
 
     self.assertStatus(resp, exp_code)
     obj = get_model(obj_type).query.get(obj_id)

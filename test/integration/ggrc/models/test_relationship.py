@@ -4,19 +4,15 @@
 """Module for integration tests for Relationship."""
 
 import json
-import unittest
 
 import ddt
 
 from ggrc.models import all_models
 from ggrc.models.exceptions import ValidationError
 
-from integration.ggrc import TestCase, READONLY_MAPPING_PAIRS
+from integration.ggrc import TestCase
 from integration.ggrc import api_helper
 from integration.ggrc.models import factories
-from integration.ggrc.generator import ObjectGenerator
-from integration.ggrc_basic_permissions.models \
-    import factories as rbac_factories
 
 
 @ddt.ddt
